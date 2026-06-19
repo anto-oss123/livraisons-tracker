@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Livraisons">
+<title>Livraisons Tracker</title>
+<link id="pwa-manifest" rel="manifest">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f172a;--bg2:#1e293b;--bg3:#334155;
+  --accent:#38bdf8;--accent2:#0ea5e9;
+  --text:#f1f5f9;--text2:#94a3b8;
+  --ok:#22c55e;--warn:#f59e0b;--err:#ef4444;
+  --r:12px;
+  --st:env(safe-area-inset-top,0px);
+  --sb:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;padding-top:var(--st)}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--bg3);flex-shrink:0}
+header h1{font-size:18px;font-weight:700;color:var(--accent)}
+.hdr-actions{display:flex;gap:8px}
+.icon-btn{width:40px;height:40px;border:none;border-radius:10px;background:var(--bg3);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.icon-btn:active{background:var(--accent)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinning{animation:spin 1s linear infinite;display:inline-block}
+
+/* MAIN */
+main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(68px + var(--sb))}
+.tab-panel{display:none;padding:16px;min-height:100%}
+.tab-panel.active{display:block}
+
+/* BOTTOM NAV */
+#bnav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--bg3);display:flex;padding-bottom:var(--sb);z-index:100}
+.nbtn{flex:1;border:none;background:none;color:var(--text2);padding:8px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:56px}
+.nbtn.active{color:var(--accent)}
+.nbtn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2}
+.nbtn span{font-size:10px}
+
+/* CARDS */
+.card{background:var(--bg2);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.card-value{font-size:26px;font-weight:700}
+.card-sub{font-size:12px;color:var(--text2);margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.scard{background:var(--bg2);border-radius:var(--r);padding:14px}
+.slabel{font-size:11px;color:var(--text2);margin-bottom:3px}
+.sval{font-size:20px;font-weight:700}
+.sval.g{color:var(--ok)}.sval.b{color:var(--accent)}.sval.y{color:var(--warn)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;min-height:48px;transition:opacity .15s}
+.btn:active{opacity:.75}
+.btn-p{background:var(--accent);color:#0f172a}
+.btn-s{background:var(--bg3);color:var(--text)}
+.btn-d{background:var(--err);color:#fff}
+.btn-ok{background:var(--ok);color:#0f172a}
+.btn-w{width:100%}
+.btn-sm{padding:8px 12px;font-size:13px;min-height:36px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* FORMS */
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:13px;color:var(--text2);margin-bottom:5px}
+.fi,.fs,.fta{width:100%;background:var(--bg3);border:1.5px solid transparent;border-radius:10px;color:var(--text);font-size:16px;padding:11px 13px;outline:none;-webkit-appearance:none;appearance:none}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--accent)}
+.fs{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2394a3b8' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* LIST ITEMS */
+.li{background:var(--bg2);border-radius:var(--r);padding:13px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px}
+.li-icon{width:38px;height:38px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-top:1px}
+.li-body{flex:1;min-width:0}
+.li-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li-sub{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4}
+.li-right{flex-shrink:0;text-align:right}
+.li-amt{font-size:15px;font-weight:700;color:var(--ok)}
+.li-acts{display:flex;gap:5px;margin-top:6px;justify-content:flex-end}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.bdg-b{background:rgba(56,189,248,.15);color:var(--accent)}
+.bdg-g{background:rgba(34,197,94,.15);color:var(--ok)}
+.bdg-y{background:rgba(245,158,11,.15);color:var(--warn)}
+.bdg-r{background:rgba(239,68,68,.15);color:var(--err)}
+
+/* ALERTS */
+.alert{border-radius:var(--r);padding:11px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:9px}
+.alert-w{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3)}
+.alert-i{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3)}
+.alert-g{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3)}
+.alert em{font-size:17px;flex-shrink:0;margin-top:1px}
+.alert p{font-size:13px;line-height:1.5}
+
+/* MODALS */
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+.moverlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding:20px 16px calc(20px + var(--sb));transform:translateY(100%);transition:transform .3s ease}
+.moverlay.open .modal{transform:translateY(0)}
+.mhandle{width:38px;height:4px;background:var(--bg3);border-radius:2px;margin:0 auto 18px}
+.mtitle{font-size:17px;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+.mclose{background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;padding:0;line-height:1}
+
+/* SECTION TITLES */
+.stitle{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px}
+.stitle:first-child{margin-top:0}
+
+/* SUBTABS */
+.subtabs{display:flex;background:var(--bg2);border-radius:var(--r);padding:4px;margin-bottom:14px;gap:3px}
+.stab{flex:1;padding:9px;border:none;border-radius:8px;background:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.stab.active{background:var(--bg3);color:var(--text)}
+
+/* PROGRESS */
+.pbar{height:7px;background:var(--bg3);border-radius:4px;overflow:hidden;margin:6px 0}
+.pfill{height:100%;background:var(--accent);border-radius:4px;transition:width .5s ease}
+
+/* TABLE */
+.dtable{width:100%;border-collapse:collapse}
+.dtable th{text-align:left;font-size:11px;color:var(--text2);text-transform:uppercase;padding:7px 0;border-bottom:1px solid var(--bg3)}
+.dtable td{padding:9px 0;font-size:13px;border-bottom:1px solid var(--bg3);vertical-align:middle}
+.dtable tr:last-child td{border-bottom:none}
+
+/* GPS WIDGET */
+.gps-widget{background:linear-gradient(135deg,#0ea5e9,#6366f1);border-radius:var(--r);padding:14px;margin-bottom:12px;color:#fff}
+@keyframes gpspulse{0%,100%{opacity:1}50%{opacity:.35}}
+.gps-dot{width:9px;height:9px;border-radius:50%;background:var(--text2);flex-shrink:0}
+.gps-dot.on{background:var(--ok);animation:gpspulse 1.4s ease infinite}
+
+/* FILTER CHIPS */
+.chips{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{border:none;padding:8px 15px;border-radius:20px;background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;white-space:nowrap;min-height:36px}
+.chip.active{background:var(--accent);color:#0f172a;font-weight:600}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--text2)}
+.empty-ico{font-size:44px;margin-bottom:10px}
+.empty p{font-size:13px;line-height:1.6}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(68px + var(--sb) + 14px);right:16px;width:54px;height:54px;border-radius:50%;background:var(--accent);color:#0f172a;border:none;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(56,189,248,.45);z-index:50;transition:transform .15s}
+.fab:active{transform:scale(.93)}
+
+/* AI REPORT */
+.ai-report{background:var(--bg2);border-radius:var(--r);padding:15px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word}
+
+/* DIVIDER */
+.div{height:1px;background:var(--bg3);margin:14px 0}
+
+/* TOAST */
+#toast{position:fixed;bottom:calc(76px + var(--sb));left:50%;transform:translateX(-50%) translateY(12px);background:var(--bg3);color:var(--text);padding:10px 20px;border-radius:24px;font-size:14px;z-index:300;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+
+/* TOP NAV (desktop) */
+#tnav{display:none}
+@media(min-width:768px){
+  main{padding-bottom:20px;max-width:780px;margin:0 auto}
+  #bnav{display:none}
+  #tnav{display:flex;background:var(--bg2);border-bottom:1px solid var(--bg3)}
+  #tnav-inner{display:flex;max-width:780px;margin:0 auto;width:100%;padding:0 16px}
+  .tnbtn{padding:12px 18px;border:none;background:none;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+  .tnbtn.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .fab{bottom:28px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header>
+  <h1>🚚 Livraisons</h1>
+  <div class="hdr-actions">
+    <button class="icon-btn" id="sync-btn" onclick="doSync()" title="Synchroniser GitHub">⟳</button>
+    <button class="icon-btn" onclick="openSettings()" title="Paramètres">⚙️</button>
+  </div>
+</header>
+
+<div id="tnav"><div id="tnav-inner">
+  <button class="tnbtn active" data-tab="dashboard" onclick="goTab('dashboard')">Tableau de bord</button>
+  <button class="tnbtn" data-tab="livraisons" onclick="goTab('livraisons')">Livraisons</button>
+  <button class="tnbtn" data-tab="depenses" onclick="goTab('depenses')">Dépenses</button>
+  <button class="tnbtn" data-tab="fiscal" onclick="goTab('fiscal')">Fiscal</button>
+  <button class="tnbtn" data-tab="ia" onclick="goTab('ia')">IA</button>
+</div></div>
+
+<main>
+  <div id="tab-dashboard" class="tab-panel active"></div>
+  <div id="tab-livraisons" class="tab-panel"></div>
+  <div id="tab-depenses" class="tab-panel"></div>
+  <div id="tab-fiscal" class="tab-panel"></div>
+  <div id="tab-ia" class="tab-panel"></div>
+</main>
+
+<nav id="bnav">
+  <button class="nbtn active" data-tab="dashboard" onclick="goTab('dashboard')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+    <span>Accueil</span>
+  </button>
+  <button class="nbtn" data-tab="livraisons" onclick="goTab('livraisons')">
+    <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    <span>Livraisons</span>
+  </button>
+  <button class="nbtn" data-tab="depenses" onclick="goTab('depenses')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/><path d="M9 16h6"/></svg>
+    <span>Dépenses</span>
+  </button>
+  <button class="nbtn" data-tab="fiscal" onclick="goTab('fiscal')">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+    <span>Fiscal</span>
+  </button>
+  <button class="nbtn" data-tab="ia" onclick="goTab('ia')">
+    <svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 0 8 4 4 0 0 1 0-8"/><path d="M4 20v-2a8 8 0 0 1 16 0v2"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+    <span>IA</span>
+  </button>
+</nav>
+
+<div id="toast"></div>
+
+<!-- MODAL LIVRAISON -->
+<div class="moverlay" id="m-liv" onclick="bgClose(event,'m-liv')">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle"><span id="liv-modal-title">Nouvelle livraison</span><button class="mclose" onclick="closeM('m-liv')">✕</button></div>
+  <form id="liv-form" onsubmit="saveLiv(event)">
+    <input type="hidden" id="liv-id">
+    <div class="fg"><label class="fl">Plateforme</label><select class="fs" id="liv-plat"></select></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Revenu ($)</label><input type="number" class="fi" id="liv-rev" step="0.01" min="0" placeholder="0.00" required></div>
+      <div class="fg"><label class="fl">Pourboire ($)</label><input type="number" class="fi" id="liv-tip" step="0.01" min="0" placeholder="0.00"></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Distance (km) <span id="gps-hint" style="color:var(--accent);font-size:11px"></span></label>
+      <input type="number" class="fi" id="liv-km" step="0.1" min="0" placeholder="0.0">
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Début</label><input type="datetime-local" class="fi" id="liv-debut" required></div>
+      <div class="fg"><label class="fl">Fin</label><input type="datetime-local" class="fi" id="liv-fin"></div>
+    </div>
+    <div class="fg"><label class="fl">Notes</label><input type="text" class="fi" id="liv-notes" placeholder="Optionnel…"></div>
+    <button type="submit" class="btn btn-p btn-w">Enregistrer</button>
+  </form>
+</div></div>
+
+<!-- MODAL DÉPENSE -->
+<div class="moverlay" id="m-dep" onclick="bgClose(event,'m-dep')">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle"><span id="dep-modal-title">Nouvelle dépense</span><button class="mclose" onclick="closeM('m-dep')">✕</button></div>
+  <form id="dep-form" onsubmit="saveDep(event)">
+    <input type="hidden" id="dep-id">
+    <div class="fg"><label class="fl">Catégorie</label>
+      <select class="fs" id="dep-cat" onchange="toggleEV()">
+        <option value="Recharge VE">🔋 Recharge VE</option>
+        <option value="Téléphone">📱 Téléphone</option>
+        <option value="Équipement">🛠️ Équipement</option>
+        <option value="Autre">📦 Autre</option>
+      </select>
+    </div>
+    <div id="ev-fields">
+      <div class="frow">
+        <div class="fg"><label class="fl">kWh rechargés</label><input type="number" class="fi" id="dep-kwh" step="0.1" min="0" placeholder="0.0" oninput="recalcKwh()"></div>
+        <div class="fg"><label class="fl">Coût/kWh ($)</label><input type="number" class="fi" id="dep-kwh-rate" step="0.0001" readonly style="opacity:.6"></div>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Montant ($)</label><input type="number" class="fi" id="dep-amt" step="0.01" min="0" placeholder="0.00" required oninput="recalcKwh()"></div>
+      <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="dep-date" required></div>
+    </div>
+    <div class="fg"><label class="fl">Description</label><input type="text" class="fi" id="dep-desc" placeholder="Ex: Circuit électrique Brossard…"></div>
+    <div class="fg"><label class="fl">Note de reçu</label><textarea class="fta" id="dep-recu" rows="2" placeholder="No de reçu, remarques…"></textarea></div>
+    <button type="submit" class="btn btn-p btn-w">Enregistrer</button>
+  </form>
+</div></div>
+
+<!-- MODAL PARAMÈTRES -->
+<div class="moverlay" id="m-settings" onclick="bgClose(event,'m-settings')">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle"><span>Paramètres</span><button class="mclose" onclick="closeM('m-settings')">✕</button></div>
+
+  <div class="stitle">Plateformes actives</div>
+  <div id="plat-list"></div>
+  <div class="frow" style="margin-top:8px">
+    <input type="text" class="fi" id="new-plat" placeholder="Nouvelle plateforme…">
+    <button type="button" class="btn btn-s" onclick="addPlat()">Ajouter</button>
+  </div>
+  <div class="fg" style="margin-top:10px"><label class="fl">Plateforme par défaut</label><select class="fs" id="default-plat"></select></div>
+
+  <div class="div"></div>
+  <div class="stitle">Clé API Gemini</div>
+  <div class="fg"><input type="password" class="fi" id="s-gemini" placeholder="AIzaSy…" autocomplete="off"></div>
+
+  <div class="stitle">Sync GitHub</div>
+  <div class="fg"><label class="fl">Token PAT</label><input type="password" class="fi" id="s-gh-token" placeholder="ghp_…" autocomplete="off"></div>
+  <div class="fg"><label class="fl">Dépôt (user/repo)</label><input type="text" class="fi" id="s-gh-repo" placeholder="username/mon-repo"></div>
+
+  <div class="stitle">Fiscal</div>
+  <div class="frow">
+    <div class="fg"><label class="fl">Année fiscale</label><input type="number" class="fi" id="s-year" min="2020" max="2035"></div>
+    <div class="fg"><label class="fl">Coût moyen kWh ($)</label><input type="number" class="fi" id="s-kwh" step="0.001" min="0"></div>
+  </div>
+
+  <div class="div"></div>
+  <div style="display:flex;gap:10px">
+    <button type="button" class="btn btn-p" style="flex:1" onclick="applySettings()">Sauvegarder</button>
+    <button type="button" class="btn btn-s" onclick="closeM('m-settings')">Annuler</button>
+  </div>
+  <div class="div"></div>
+  <button type="button" class="btn btn-d btn-w btn-sm" onclick="clearAll()">⚠️ Effacer toutes les données</button>
+</div></div>
+
+</div><!-- #app -->
+<script>
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+const FED_BRACKETS = [{max:57375,rate:.15},{max:114750,rate:.205},{max:158519,rate:.26},{max:220000,rate:.29},{max:Infinity,rate:.33}];
+const QC_BRACKETS  = [{max:51780,rate:.14},{max:103545,rate:.19},{max:126000,rate:.24},{max:Infinity,rate:.2575}];
+const KM_R1 = 0.70, KM_R2 = 0.64, KM_THRESH = 5000;
+const TPS = 0.05, TVQ = 0.09975, TPS_SEUIL = 30000;
+const CAT_ICONS = {'Recharge VE':'🔋','Téléphone':'📱','Équipement':'🛠️','Autre':'📦'};
+const PLAT_ICONS = {'Instacart':'🛒','DoorDash':'🔴','Uber Eats':'🟢','SkipTheDishes':'🟡','Cornershop':'🟣'};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let S = {
+  tab: 'dashboard',
+  fsub: 'revenus',
+  deliveries: [],
+  expenses: [],
+  cfg: {
+    platforms: ['Instacart','DoorDash','Uber Eats'],
+    defaultPlat: 'Instacart',
+    geminiKey: '',
+    ghToken: '',
+    ghRepo: '',
+    year: new Date().getFullYear(),
+    kwhCost: 0.085
+  },
+  gps: {on:false, watchId:null, km:0, last:null},
+  dFilt: {plat:'', date:''},
+  eFilt: '',
+  aiReport: '',
+  aiLoading: false,
+  syncing: false
+};
+
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem('lt_v2') || '{}');
+    if (d.deliveries) S.deliveries = d.deliveries;
+    if (d.expenses)   S.expenses   = d.expenses;
+    if (d.cfg)        S.cfg        = {...S.cfg, ...d.cfg};
+    if (d.aiReport)   S.aiReport   = d.aiReport;
+  } catch(e) {}
+}
+
+function save(sync=true) {
+  localStorage.setItem('lt_v2', JSON.stringify({
+    deliveries: S.deliveries, expenses: S.expenses,
+    cfg: S.cfg, aiReport: S.aiReport
+  }));
+  if (sync && S.cfg.ghToken && S.cfg.ghRepo) syncGH();
+}
+
+// ─── GITHUB SYNC ─────────────────────────────────────────────────────────────
+async function syncGH() {
+  if (S.syncing) return;
+  S.syncing = true;
+  const btn = document.getElementById('sync-btn');
+  btn.innerHTML = '<span class="spinning">⟳</span>';
+  const [owner,repo] = S.cfg.ghRepo.split('/');
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/data.json`;
+  const hdrs = {'Authorization':'token '+S.cfg.ghToken,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'};
+  try {
+    let sha = null;
+    const g = await fetch(url,{headers:hdrs});
+    if (g.ok) sha = (await g.json()).sha;
+    const payload = {deliveries:S.deliveries, expenses:S.expenses, lastSync:new Date().toISOString()};
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload,null,2))));
+    const r = await fetch(url,{method:'PUT',headers:hdrs,body:JSON.stringify({
+      message:`Sync ${new Date().toLocaleDateString('fr-CA')}`, content, ...(sha?{sha}:{})
+    })});
+    toast(r.ok ? '✅ Synchronisé avec GitHub' : '❌ Erreur sync GitHub');
+  } catch(e) { toast('❌ Réseau: '+e.message); }
+  S.syncing = false;
+  btn.textContent = '⟳';
+}
+
+function doSync() {
+  if (!S.cfg.ghToken || !S.cfg.ghRepo) { toast('⚙️ Configure le token GitHub dans les paramètres'); return; }
+  syncGH();
+}
+
+// ─── GPS ─────────────────────────────────────────────────────────────────────
+function haversine(a,b,c,d) {
+  const R=6371, dL=(c-a)*Math.PI/180, dO=(d-b)*Math.PI/180;
+  const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dO/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+function startGPS() {
+  if (!navigator.geolocation) { toast('⚠️ GPS non disponible'); return; }
+  S.gps = {on:true, watchId:null, km:0, last:null};
+  S.gps.watchId = navigator.geolocation.watchPosition(pos=>{
+    const {latitude:la,longitude:lo} = pos.coords;
+    if (S.gps.last) {
+      const d = haversine(S.gps.last.la,S.gps.last.lo,la,lo);
+      if (d>0.01) S.gps.km += d;
+    }
+    S.gps.last = {la,lo};
+    renderGPSWidget();
+  }, e=>toast('⚠️ GPS: '+e.message), {enableHighAccuracy:true,maximumAge:5000,timeout:15000});
+  renderGPSWidget();
+  toast('📍 Session GPS démarrée');
+}
+
+function stopGPS() {
+  if (S.gps.watchId) navigator.geolocation.clearWatch(S.gps.watchId);
+  S.gps.on = false;
+  const km = S.gps.km.toFixed(1);
+  toast(`🏁 Session GPS terminée — ${km} km`);
+  renderGPSWidget();
+}
+
+function renderGPSWidget() {
+  const el = document.getElementById('gps-widget');
+  if (!el) return;
+  if (S.gps.on) {
+    el.innerHTML = `<div class="gps-widget"><div style="display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:11px;opacity:.8;margin-bottom:3px">📍 Session GPS active</div>
+      <div style="font-size:26px;font-weight:700">${S.gps.km.toFixed(2)} km</div></div>
+      <button class="btn btn-sm" style="background:#fff;color:#0ea5e9;min-height:40px" onclick="stopGPS()">Arrêter</button>
+    </div></div>`;
+  } else {
+    el.innerHTML = `<div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-s" style="flex:1" onclick="startGPS()">📍 Démarrer session GPS</button>
+      ${S.gps.km>0?`<button class="btn btn-sm btn-s" onclick="useGPSkm()">Utiliser ${S.gps.km.toFixed(1)} km</button>`:''}
+    </div>`;
+  }
+}
+
+function useGPSkm() {
+  openLivModal();
+  setTimeout(()=>{ const f=document.getElementById('liv-km'); if(f) f.value=S.gps.km.toFixed(1); },80);
+}
+
+// ─── TAXES ───────────────────────────────────────────────────────────────────
+function calcBracket(inc, brackets) {
+  let tax=0, prev=0;
+  for (const b of brackets) {
+    if (inc<=prev) break;
+    tax += (Math.min(inc,b.max)-prev)*b.rate;
+    prev = b.max;
+  }
+  return tax;
+}
+
+function calcFiscal() {
+  const yr = S.cfg.year;
+  const divs = S.deliveries.filter(d=>new Date(d.debut).getFullYear()===yr);
+  const exps = S.expenses.filter(e=>new Date(e.date).getFullYear()===yr);
+  const gross = divs.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
+  const km    = divs.reduce((s,d)=>s+(d.km||0),0);
+  const kmDed = km<=KM_THRESH ? km*KM_R1 : KM_THRESH*KM_R1+(km-KM_THRESH)*KM_R2;
+  const expDed = exps.reduce((s,e)=>s+(e.amt||0),0);
+  const totDed = kmDed+expDed;
+  const net = Math.max(0,gross-totDed);
+  // Federal
+  const fedTax = calcBracket(net,FED_BRACKETS);
+  const fedCredit = 15705*.15;
+  const fedOwed = Math.max(0,fedTax-fedCredit);
+  // Quebec
+  const qcTax = calcBracket(net,QC_BRACKETS);
+  const qcCredit = 17183*.14;
+  const qcOwed = Math.max(0,qcTax-qcCredit);
+  // RRQ self-employed (11.9% between $3500-$73200)
+  const rrq = Math.min(Math.max(0,Math.min(net,73200)-3500)*0.119, 8316.05);
+  const total = fedOwed+qcOwed+rrq;
+  const rate = gross>0 ? total/gross : 0;
+  return {gross,km,kmDed,expDed,totDed,net,fedOwed,qcOwed,rrq,total,rate,divs,exps,
+    needsTPS:gross>=TPS_SEUIL, tps:gross*TPS, tvq:gross*TVQ};
+}
+
+// ─── FORMAT ──────────────────────────────────────────────────────────────────
+const $f = n=>new Intl.NumberFormat('fr-CA',{style:'currency',currency:'CAD'}).format(n||0);
+const fdate = s=>new Date(s).toLocaleDateString('fr-CA',{day:'numeric',month:'short'});
+const fdtm  = s=>new Date(s).toLocaleString('fr-CA',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+function fdur(a,b) {
+  if (!a||!b) return '';
+  const ms=new Date(b)-new Date(a), h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000);
+  return h>0?`${h}h${String(m).padStart(2,'0')}`:`${m}min`;
+}
+const uid = ()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const platIcon = p=>PLAT_ICONS[p]||'🚚';
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+function goTab(tab) {
+  S.tab = tab;
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelectorAll('.nbtn,[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  renderTab(tab);
+}
+
+function renderTab(t) {
+  ({dashboard:renderDash, livraisons:renderLiv, depenses:renderDep, fiscal:renderFisc, ia:renderIA})[t]?.();
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+function renderDash() {
+  const now = new Date();
+  const todStr = now.toDateString();
+  const wkStart = new Date(now); wkStart.setDate(now.getDate()-now.getDay()); wkStart.setHours(0,0,0,0);
+  const moStart = new Date(now.getFullYear(),now.getMonth(),1);
+  const sum = arr=>arr.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
+  const tod = S.deliveries.filter(d=>new Date(d.debut).toDateString()===todStr);
+  const wk  = S.deliveries.filter(d=>new Date(d.debut)>=wkStart);
+  const mo  = S.deliveries.filter(d=>new Date(d.debut)>=moStart);
+  const allKm = S.deliveries.reduce((s,d)=>s+(d.km||0),0);
+  // Best hour
+  const hmap = {};
+  S.deliveries.forEach(d=>{ const h=new Date(d.debut).getHours(); if(!hmap[h])hmap[h]={r:0,n:0}; hmap[h].r+=(d.rev||0)+(d.tip||0); hmap[h].n++; });
+  let bestH=null, bestAvg=0;
+  for(const [h,v] of Object.entries(hmap)){ const a=v.r/v.n; if(a>bestAvg){bestAvg=a;bestH=+h;} }
+  const fisc = calcFiscal();
+  const recent = [...S.deliveries].sort((a,b)=>new Date(b.debut)-new Date(a.debut)).slice(0,5);
+  const alerts = [];
+  if (fisc.needsTPS) alerts.push({type:'w',ico:'⚠️',msg:`Tu as dépassé ${$f(30000)} en revenus — inscription TPS/TVQ obligatoire!`});
+  else if (fisc.gross>24000) alerts.push({type:'w',ico:'⚡',msg:`À ${$f(30000-fisc.gross)} du seuil TPS/TVQ (${$f(fisc.gross)}/${$f(30000)})`});
+  if (fisc.rate>0) alerts.push({type:'i',ico:'💡',msg:`Mets ~${Math.ceil(Math.max(fisc.rate,.25)*100)}% de côté pour l'impôt (~${$f(fisc.gross*Math.max(fisc.rate,.25))} cette année)`});
+
+  document.getElementById('tab-dashboard').innerHTML = `
+    <div class="grid3">
+      <div class="scard"><div class="slabel">Aujourd'hui</div><div class="sval g">${$f(sum(tod))}</div><div style="font-size:11px;color:var(--text2)">${tod.length} liv.</div></div>
+      <div class="scard"><div class="slabel">Cette semaine</div><div class="sval b">${$f(sum(wk))}</div><div style="font-size:11px;color:var(--text2)">${wk.length} liv.</div></div>
+      <div class="scard"><div class="slabel">Ce mois</div><div class="sval">${$f(sum(mo))}</div><div style="font-size:11px;color:var(--text2)">${mo.length} liv.</div></div>
+    </div>
+    <div class="grid2">
+      <div class="scard"><div class="slabel">Kilométrage total</div><div class="sval">${allKm.toFixed(0)}<span style="font-size:14px"> km</span></div></div>
+      <div class="scard"><div class="slabel">Meilleure heure</div><div class="sval y">${bestH!==null?`${bestH}h00`:'—'}</div><div style="font-size:11px;color:var(--text2)">${bestH!==null?`~${$f(bestAvg)}/liv`:'Besoin de données'}</div></div>
+    </div>
+    ${alerts.map(a=>`<div class="alert alert-${a.type}"><em>${a.ico}</em><p>${a.msg}</p></div>`).join('')}
+    <div class="stitle">Dernières livraisons</div>
+    ${recent.length===0?`<div class="empty"><div class="empty-ico">🚚</div><p>Aucune livraison encore.<br>Va dans l'onglet Livraisons pour commencer!</p></div>`:recent.map(d=>liCard(d,false)).join('')}
+  `;
+}
+
+// ─── LIVRAISONS ──────────────────────────────────────────────────────────────
+function renderLiv() {
+  const plats = ['Toutes',...S.cfg.platforms];
+  let filt = [...S.deliveries].sort((a,b)=>new Date(b.debut)-new Date(a.debut));
+  if (S.dFilt.plat && S.dFilt.plat!=='Toutes') filt=filt.filter(d=>d.plat===S.dFilt.plat);
+  if (S.dFilt.date) { const ds=new Date(S.dFilt.date).toDateString(); filt=filt.filter(d=>new Date(d.debut).toDateString()===ds); }
+  document.getElementById('tab-livraisons').innerHTML = `
+    <div id="gps-widget"></div>
+    <div class="chips">${plats.map(p=>`<button class="chip ${(S.dFilt.plat||'Toutes')===p?'active':''}" onclick="setDF('plat','${p}')">${p}</button>`).join('')}</div>
+    <div class="fg"><input type="date" class="fi" value="${S.dFilt.date}" onchange="setDF('date',this.value)" placeholder="Filtrer par date"></div>
+    ${filt.length===0?`<div class="empty"><div class="empty-ico">📦</div><p>Aucune livraison.<br>Appuie sur + pour en ajouter une.</p></div>`:filt.map(d=>liCard(d,true)).join('')}
+    <button class="fab" onclick="openLivModal()">+</button>
+  `;
+  renderGPSWidget();
+}
+
+function liCard(d, acts=false) {
+  const tot=(d.rev||0)+(d.tip||0);
+  const dur=fdur(d.debut,d.fin);
+  const hrs=d.fin&&d.debut?(new Date(d.fin)-new Date(d.debut))/3600000:0;
+  const hr=hrs>0?tot/hrs:0;
+  return `<div class="li">
+    <div class="li-icon">${platIcon(d.plat)}</div>
+    <div class="li-body">
+      <div class="li-title">${d.plat}</div>
+      <div class="li-sub">${fdtm(d.debut)}${dur?` · ${dur}`:''}${d.km?` · ${d.km} km`:''}${hr>0?` · ${$f(hr)}/h`:''}</div>
+      ${d.notes?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${d.notes}</div>`:''}
+    </div>
+    <div class="li-right">
+      <div class="li-amt">${$f(tot)}</div>
+      ${d.tip?`<div style="font-size:11px;color:var(--text2)">+${$f(d.tip)} tip</div>`:''}
+      ${acts?`<div class="li-acts"><button class="btn btn-sm btn-s" onclick="editLiv('${d.id}')">✏️</button><button class="btn btn-sm btn-d" onclick="delLiv('${d.id}')">🗑️</button></div>`:''}
+    </div>
+  </div>`;
+}
+
+function setDF(k,v) { S.dFilt[k]=v; renderLiv(); }
+
+function openLivModal(id=null) {
+  const now = new Date();
+  const loc = new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  const sel = document.getElementById('liv-plat');
+  sel.innerHTML = S.cfg.platforms.map(p=>`<option value="${p}">${platIcon(p)} ${p}</option>`).join('');
+  if (id) {
+    const d = S.deliveries.find(x=>x.id===id);
+    if (!d) return;
+    document.getElementById('liv-modal-title').textContent='Modifier livraison';
+    document.getElementById('liv-id').value=id;
+    sel.value=d.plat;
+    document.getElementById('liv-rev').value=d.rev||'';
+    document.getElementById('liv-tip').value=d.tip||'';
+    document.getElementById('liv-km').value=d.km||'';
+    document.getElementById('liv-debut').value=d.debut?d.debut.slice(0,16):'';
+    document.getElementById('liv-fin').value=d.fin?d.fin.slice(0,16):'';
+    document.getElementById('liv-notes').value=d.notes||'';
+  } else {
+    document.getElementById('liv-modal-title').textContent='Nouvelle livraison';
+    document.getElementById('liv-id').value='';
+    sel.value=S.cfg.defaultPlat;
+    document.getElementById('liv-rev').value='';
+    document.getElementById('liv-tip').value='';
+    document.getElementById('liv-km').value=S.gps.km>0&&!S.gps.on?S.gps.km.toFixed(1):'';
+    document.getElementById('liv-debut').value=loc;
+    document.getElementById('liv-fin').value='';
+    document.getElementById('liv-notes').value='';
+    const hint=document.getElementById('gps-hint');
+    if(hint) hint.textContent=S.gps.on?`GPS actif: ${S.gps.km.toFixed(2)} km`:'';
+  }
+  openM('m-liv');
+}
+
+function editLiv(id) { openLivModal(id); }
+
+function saveLiv(e) {
+  e.preventDefault();
+  const now=new Date();
+  const loc=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString();
+  const id=document.getElementById('liv-id').value||uid();
+  const fin=document.getElementById('liv-fin').value||loc;
+  const d={id,
+    plat:document.getElementById('liv-plat').value,
+    rev:parseFloat(document.getElementById('liv-rev').value)||0,
+    tip:parseFloat(document.getElementById('liv-tip').value)||0,
+    km:parseFloat(document.getElementById('liv-km').value)||0,
+    debut:document.getElementById('liv-debut').value||loc,
+    fin, notes:document.getElementById('liv-notes').value,
+    ts:now.toISOString()
+  };
+  const i=S.deliveries.findIndex(x=>x.id===id);
+  if(i>=0) S.deliveries[i]=d; else S.deliveries.unshift(d);
+  if(!S.gps.on) S.gps.km=0;
+  save(); closeM('m-liv'); renderTab(S.tab); toast('✅ Livraison enregistrée!');
+}
+
+function delLiv(id) {
+  if(!confirm('Supprimer cette livraison?')) return;
+  S.deliveries=S.deliveries.filter(d=>d.id!==id);
+  save(); renderTab(S.tab); toast('🗑️ Livraison supprimée');
+}
+
+// ─── DÉPENSES ────────────────────────────────────────────────────────────────
+function renderDep() {
+  const cats=Object.keys(CAT_ICONS);
+  let filt=[...S.expenses].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(S.eFilt&&S.eFilt!=='Toutes') filt=filt.filter(e=>e.cat===S.eFilt);
+  const totals={};
+  cats.forEach(c=>{ totals[c]=S.expenses.filter(e=>e.cat===c).reduce((s,e)=>s+(e.amt||0),0); });
+  const grand=S.expenses.reduce((s,e)=>s+(e.amt||0),0);
+  document.getElementById('tab-depenses').innerHTML = `
+    <div class="grid2">${cats.map(c=>`<div class="scard"><div class="slabel">${CAT_ICONS[c]} ${c}</div><div class="sval" style="font-size:17px">${$f(totals[c])}</div></div>`).join('')}</div>
+    <div class="card"><div class="card-title">Total dépenses déductibles</div><div class="card-value">${$f(grand)}</div></div>
+    <div class="chips">${['Toutes',...cats].map(c=>`<button class="chip ${(S.eFilt||'Toutes')===c?'active':''}" onclick="setEF('${c}')">${CAT_ICONS[c]||''} ${c}</button>`).join('')}</div>
+    ${filt.length===0?`<div class="empty"><div class="empty-ico">💰</div><p>Aucune dépense enregistrée.</p></div>`:filt.map(e=>depCard(e)).join('')}
+    <button class="fab" onclick="openDepModal()">+</button>
+  `;
+}
+
+function depCard(e) {
+  return `<div class="li">
+    <div class="li-icon">${CAT_ICONS[e.cat]||'📦'}</div>
+    <div class="li-body">
+      <div class="li-title">${e.desc||e.cat}</div>
+      <div class="li-sub">${fdate(e.date)} · ${e.cat}${e.kwh?` · ${e.kwh} kWh`:''}${e.recu?` · ${e.recu}`:''}</div>
+    </div>
+    <div class="li-right">
+      <div class="li-amt" style="color:var(--warn)">${$f(e.amt)}</div>
+      <div class="li-acts"><button class="btn btn-sm btn-s" onclick="editDep('${e.id}')">✏️</button><button class="btn btn-sm btn-d" onclick="delDep('${e.id}')">🗑️</button></div>
+    </div>
+  </div>`;
+}
+
+function setEF(c) { S.eFilt=c; renderDep(); }
+
+function openDepModal(id=null) {
+  const today=new Date().toISOString().split('T')[0];
+  if (id) {
+    const e=S.expenses.find(x=>x.id===id);
+    if(!e) return;
+    document.getElementById('dep-modal-title').textContent='Modifier dépense';
+    document.getElementById('dep-id').value=id;
+    document.getElementById('dep-cat').value=e.cat;
+    document.getElementById('dep-amt').value=e.amt||'';
+    document.getElementById('dep-date').value=e.date||today;
+    document.getElementById('dep-desc').value=e.desc||'';
+    document.getElementById('dep-recu').value=e.recu||'';
+    document.getElementById('dep-kwh').value=e.kwh||'';
+    document.getElementById('dep-kwh-rate').value=e.kwhRate||'';
+  } else {
+    document.getElementById('dep-modal-title').textContent='Nouvelle dépense';
+    document.getElementById('dep-id').value='';
+    document.getElementById('dep-cat').value='Recharge VE';
+    document.getElementById('dep-amt').value='';
+    document.getElementById('dep-date').value=today;
+    document.getElementById('dep-desc').value='';
+    document.getElementById('dep-recu').value='';
+    document.getElementById('dep-kwh').value='';
+    document.getElementById('dep-kwh-rate').value=S.cfg.kwhCost;
+  }
+  toggleEV(); openM('m-dep');
+}
+
+function editDep(id) { openDepModal(id); }
+
+function toggleEV() {
+  const ev=document.getElementById('ev-fields');
+  if(ev) ev.style.display=document.getElementById('dep-cat').value==='Recharge VE'?'block':'none';
+}
+
+function recalcKwh() {
+  const kwh=parseFloat(document.getElementById('dep-kwh').value)||0;
+  const amt=parseFloat(document.getElementById('dep-amt').value)||0;
+  const el=document.getElementById('dep-kwh-rate');
+  if(kwh>0&&amt>0) el.value=(amt/kwh).toFixed(4);
+  else if(kwh===0) el.value=S.cfg.kwhCost;
+}
+
+function saveDep(e) {
+  e.preventDefault();
+  const id=document.getElementById('dep-id').value||uid();
+  const kwh=parseFloat(document.getElementById('dep-kwh').value)||0;
+  const amt=parseFloat(document.getElementById('dep-amt').value)||0;
+  const dep={id,
+    cat:document.getElementById('dep-cat').value,
+    amt, date:document.getElementById('dep-date').value,
+    desc:document.getElementById('dep-desc').value,
+    recu:document.getElementById('dep-recu').value,
+    kwh, kwhRate:kwh>0&&amt>0?+(amt/kwh).toFixed(4):0
+  };
+  const i=S.expenses.findIndex(x=>x.id===id);
+  if(i>=0) S.expenses[i]=dep; else S.expenses.unshift(dep);
+  save(); closeM('m-dep'); renderTab(S.tab); toast('✅ Dépense enregistrée!');
+}
+
+function delDep(id) {
+  if(!confirm('Supprimer cette dépense?')) return;
+  S.expenses=S.expenses.filter(e=>e.id!==id);
+  save(); renderTab(S.tab); toast('🗑️ Dépense supprimée');
+}
+
+// ─── FISCAL ──────────────────────────────────────────────────────────────────
+function renderFisc() {
+  document.getElementById('tab-fiscal').innerHTML = `
+    <div class="subtabs">
+      <button class="stab ${S.fsub==='revenus'?'active':''}" onclick="goFsub('revenus')">Revenus &amp; Impôt</button>
+      <button class="stab ${S.fsub==='deductions'?'active':''}" onclick="goFsub('deductions')">Déductions</button>
+    </div>
+    <div id="fsub"></div>`;
+  renderFsub();
+}
+
+function goFsub(t) {
+  S.fsub=t;
+  document.querySelectorAll('.stab').forEach(b=>b.classList.toggle('active',
+    (t==='revenus'&&b.textContent.includes('Revenus'))||(t==='deductions'&&b.textContent.includes('Déductions'))
+  ));
+  renderFsub();
+}
+
+function renderFsub() {
+  const f=calcFiscal();
+  const yr=S.cfg.year;
+  const el=document.getElementById('fsub');
+  if (!el) return;
+  if (S.fsub==='revenus') {
+    const setA=f.gross*Math.max(f.rate,.25);
+    el.innerHTML=`
+      <div class="card"><div class="card-title">Revenus bruts ${yr}</div><div class="card-value">${$f(f.gross)}</div><div class="card-sub">${f.divs.length} livraisons</div></div>
+      ${f.needsTPS?`
+        <div class="alert alert-w"><em>⚠️</em><p>Tu dois percevoir et remettre la TPS/TVQ. Inscris-toi auprès de l'ARC et Revenu Québec.</p></div>
+        <div class="grid2">
+          <div class="scard"><div class="slabel">TPS (5%)</div><div class="sval" style="font-size:17px">${$f(f.tps)}</div></div>
+          <div class="scard"><div class="slabel">TVQ (9.975%)</div><div class="sval" style="font-size:17px">${$f(f.tvq)}</div></div>
+        </div>
+      `:`
+        <div class="alert alert-i"><em>ℹ️</em><p>Seuil TPS/TVQ : ${$f(f.gross)} / ${$f(30000)} (${$f(Math.max(0,30000-f.gross))} restant)</p></div>
+        <div class="pbar"><div class="pfill" style="width:${Math.min(100,(f.gross/30000)*100).toFixed(1)}%"></div></div>
+      `}
+      <div class="stitle">Estimation impôt (revenu net ${$f(f.net)})</div>
+      <div class="card"><table class="dtable">
+        <tr><td>Impôt fédéral</td><td style="text-align:right;font-weight:600">${$f(f.fedOwed)}</td></tr>
+        <tr><td>Impôt provincial (Québec)</td><td style="text-align:right;font-weight:600">${$f(f.qcOwed)}</td></tr>
+        <tr><td>Cotisation RRQ (autonome)</td><td style="text-align:right;font-weight:600">${$f(f.rrq)}</td></tr>
+        <tr><td style="font-weight:700">Total estimé</td><td style="text-align:right;font-weight:700;color:var(--err)">${$f(f.total)}</td></tr>
+      </table></div>
+      <div class="stitle">Mise de côté recommandée</div>
+      <div class="card" style="background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(99,102,241,.12));border:1px solid rgba(56,189,248,.3)">
+        <div class="card-title">💰 À mettre de côté</div>
+        <div class="card-value" style="color:var(--accent)">${$f(setA)}</div>
+        <div class="card-sub">${Math.ceil(Math.max(f.rate,.25)*100)}% de tes revenus bruts</div>
+      </div>
+      <div class="alert alert-i"><em>⚠️</em><p style="font-size:12px">Estimations à titre indicatif — consulte un comptable. Taux ${yr}.</p></div>
+    `;
+  } else {
+    el.innerHTML=`
+      <div class="card"><div class="card-title">Déduction kilométrique CRA / Revenu Québec</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-size:22px;font-weight:700">${$f(f.kmDed)}</div>
+          <div style="font-size:12px;color:var(--text2)">${f.km.toFixed(1)} km · ${$f(KM_R1)}/km (≤5 000) / ${$f(KM_R2)}/km après</div></div>
+          <span class="badge ${f.km<=KM_THRESH?'bdg-b':'bdg-y'}">${f.km<=KM_THRESH?'≤ 5 000 km':'> 5 000 km'}</span>
+        </div>
+      </div>
+      <div class="stitle">Dépenses ${yr}</div>
+      ${f.exps.length===0?`<div class="empty"><div class="empty-ico">🧾</div><p>Aucune dépense pour ${yr}.</p></div>`:`
+        <div class="card"><table class="dtable">
+          <thead><tr><th>Catégorie</th><th>Description</th><th style="text-align:right">Montant</th></tr></thead>
+          <tbody>${f.exps.map(e=>`<tr><td>${CAT_ICONS[e.cat]||''} ${e.cat}</td><td style="color:var(--text2);font-size:12px">${e.desc||'—'}</td><td style="text-align:right">${$f(e.amt)}</td></tr>`).join('')}</tbody>
+        </table></div>
+      `}
+      <div class="card"><table class="dtable">
+        <tr><td>Déduction km</td><td style="text-align:right;font-weight:600">${$f(f.kmDed)}</td></tr>
+        <tr><td>Dépenses d'entreprise</td><td style="text-align:right;font-weight:600">${$f(f.expDed)}</td></tr>
+        <tr><td style="font-weight:700">Total déductions</td><td style="text-align:right;font-weight:700;color:var(--ok)">${$f(f.totDed)}</td></tr>
+        <tr><td style="font-weight:700">Revenu net imposable</td><td style="text-align:right;font-weight:700;color:var(--accent)">${$f(f.net)}</td></tr>
+      </table></div>
+    `;
+  }
+}
+
+// ─── IA ──────────────────────────────────────────────────────────────────────
+function renderIA() {
+  const hasKey=!!S.cfg.geminiKey;
+  const cnt=S.deliveries.length;
+  document.getElementById('tab-ia').innerHTML=`
+    ${!hasKey?`<div class="alert alert-w"><em>🔑</em><p>Configure ta clé API Gemini dans les <button onclick="openSettings()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;padding:0">⚙️ Paramètres</button>.</p></div>`:''}
+    <div class="card">
+      <div class="card-title">🤖 Analyse IA • Gemini</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6">Analyse ${cnt} livraisons pour identifier tes meilleures opportunités et optimiser tes revenus.</p>
+      <button class="btn btn-p btn-w" onclick="runAI()" ${!hasKey||cnt<3?'disabled':''}>
+        ${S.aiLoading?'⏳ Analyse en cours…':'✨ Analyser mes livraisons'}
+      </button>
+      ${cnt<3?`<p style="font-size:12px;color:var(--text2);margin-top:8px;text-align:center">${cnt}/3 livraisons minimum</p>`:''}
+    </div>
+    ${S.aiReport?`
+      <div class="stitle">Dernier rapport IA</div>
+      <div class="ai-report">${S.aiReport}</div>
+      <button class="btn btn-s btn-sm btn-w" style="margin-top:8px" onclick="clearAI()">Effacer le rapport</button>
+    `:`<div class="empty"><div class="empty-ico">🧠</div><p>Lance une analyse pour obtenir des suggestions personnalisées sur tes livraisons.</p></div>`}
+  `;
+}
+
+async function runAI() {
+  if (!S.cfg.geminiKey||S.aiLoading) return;
+  S.aiLoading=true; renderIA();
+  const anon=S.deliveries.map(d=>({
+    plat:d.plat, rev:d.rev, tip:d.tip, km:d.km,
+    heure:new Date(d.debut).getHours(),
+    jour:new Date(d.debut).getDay(),
+    dureeMin:d.fin?Math.round((new Date(d.fin)-new Date(d.debut))/60000):null
+  }));
+  const f=calcFiscal();
+  const prompt=`Tu es un assistant financier pour travailleurs autonomes en gig economy au Québec. Réponds en français québécois, de façon directe et amicale.
+
+DONNÉES (${anon.length} livraisons):
+${JSON.stringify(anon)}
+
+RÉSUMÉ: revenus bruts ${$f(f.gross)}, distance ${f.km.toFixed(1)} km, revenu net estimé ${$f(f.net)}
+
+Fournis un rapport structuré avec:
+
+📊 MEILLEURES HEURES & JOURS
+- Quelles heures sont les plus payantes?
+- Quel jour de la semaine rapporte le mieux?
+- Exemple: "Tu gagnes 40% de plus le mardi entre 18h-21h"
+
+🏆 PERFORMANCE PAR PLATEFORME
+- Revenu moyen par livraison par plateforme
+- Meilleur ratio revenu/km
+
+⚠️ LIVRAISONS PEU RENTABLES
+- Identifier les patterns à éviter (km élevés / faible revenu)
+
+💡 3 RECOMMANDATIONS CONCRÈTES
+- Actions spécifiques pour augmenter le revenu horaire
+
+📈 PROJECTION
+- Revenu mensuel estimé si rythme maintenu
+- Objectif hebdomadaire recommandé
+
+Sois précis avec les chiffres.`;
+  try {
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${S.cfg.geminiKey}`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:.7,maxOutputTokens:1800}})
+    });
+    if(!r.ok){ const e=await r.json(); throw new Error(e.error?.message||'Erreur API'); }
+    const data=await r.json();
+    S.aiReport=data.candidates?.[0]?.content?.parts?.[0]?.text||'Aucune réponse';
+    save(false); toast('✅ Analyse terminée!');
+  } catch(e) { toast('❌ IA: '+e.message); }
+  S.aiLoading=false; renderIA();
+}
+
+function clearAI() { S.aiReport=''; save(false); renderIA(); }
+
+// ─── SETTINGS ────────────────────────────────────────────────────────────────
+function openSettings() {
+  document.getElementById('s-gemini').value=S.cfg.geminiKey||'';
+  document.getElementById('s-gh-token').value=S.cfg.ghToken||'';
+  document.getElementById('s-gh-repo').value=S.cfg.ghRepo||'';
+  document.getElementById('s-year').value=S.cfg.year;
+  document.getElementById('s-kwh').value=S.cfg.kwhCost;
+  renderPlatList();
+  openM('m-settings');
+}
+
+function renderPlatList() {
+  const sel=document.getElementById('default-plat');
+  document.getElementById('plat-list').innerHTML=S.cfg.platforms.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+      <div style="flex:1;background:var(--bg3);padding:10px 13px;border-radius:10px;font-size:14px">${platIcon(p)} ${p}</div>
+      ${i>0?`<button class="btn btn-sm btn-d" onclick="rmPlat(${i})">✕</button>`:`<div style="width:40px"></div>`}
+    </div>`).join('');
+  sel.innerHTML=S.cfg.platforms.map(p=>`<option value="${p}" ${p===S.cfg.defaultPlat?'selected':''}>${p}</option>`).join('');
+}
+
+function addPlat() {
+  const v=document.getElementById('new-plat').value.trim();
+  if(!v) return;
+  if(S.cfg.platforms.includes(v)){toast('Cette plateforme existe déjà');return;}
+  S.cfg.platforms.push(v);
+  document.getElementById('new-plat').value='';
+  renderPlatList();
+}
+
+function rmPlat(i) {
+  S.cfg.platforms.splice(i,1);
+  renderPlatList();
+}
+
+function applySettings() {
+  S.cfg.geminiKey=document.getElementById('s-gemini').value.trim();
+  S.cfg.ghToken=document.getElementById('s-gh-token').value.trim();
+  S.cfg.ghRepo=document.getElementById('s-gh-repo').value.trim();
+  S.cfg.year=parseInt(document.getElementById('s-year').value)||new Date().getFullYear();
+  S.cfg.kwhCost=parseFloat(document.getElementById('s-kwh').value)||0.085;
+  S.cfg.defaultPlat=document.getElementById('default-plat').value;
+  save(false); closeM('m-settings'); toast('✅ Paramètres sauvegardés'); renderTab(S.tab);
+}
+
+function clearAll() {
+  if(!confirm('⚠️ Supprimer TOUTES les livraisons et dépenses localement? Cette action est irréversible.')) return;
+  S.deliveries=[]; S.expenses=[]; S.aiReport='';
+  save(false); closeM('m-settings'); renderTab(S.tab); toast('🗑️ Données effacées');
+}
+
+// ─── MODAL HELPERS ───────────────────────────────────────────────────────────
+function openM(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeM(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+function bgClose(e,id) { if(e.target===e.currentTarget) closeM(id); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.moverlay.open').forEach(m=>m.classList.remove('open')); });
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),3200);
+}
+
+// ─── PWA ─────────────────────────────────────────────────────────────────────
+function setupPWA() {
+  const manifest={name:'Livraisons Tracker',short_name:'Livraisons',
+    description:'Suivi livraisons gig economy — Québec',start_url:'.',display:'standalone',
+    background_color:'#0f172a',theme_color:'#0f172a',orientation:'portrait',
+    icons:[{src:"data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#0f172a"/><text x="50%" y="57%" font-size="110" text-anchor="middle" dominant-baseline="middle">🚚</text></svg>'),sizes:'192x192',type:'image/svg+xml'}]};
+  const mb=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  document.getElementById('pwa-manifest').href=URL.createObjectURL(mb);
+
+  if (!('serviceWorker' in navigator)) return;
+  const sw=`
+const C='lt-sw-v1';
+self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.add('/')));self.skipWaiting();});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});
+self.addEventListener('fetch',e=>{
+  if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).catch(()=>caches.match('/')));return;}
+  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
+});`;
+  const sb=new Blob([sw],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(sb)).catch(()=>{});
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+load();
+setupPWA();
+renderDash();
+</script>
+</body>
+</html>
