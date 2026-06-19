@@ -1,0 +1,17 @@
+{
+  "deliveries": [
+    {
+      "id": "mqlinlerszga",
+      "plat": "Instacart",
+      "rev": 20,
+      "tip": 10,
+      "km": 15,
+      "debut": "2026-06-19T18:44",
+      "fin": "2026-06-19T18:45",
+      "notes": "",
+      "ts": "2026-06-19T22:44:34.467Z"
+    }
+  ],
+  "expenses": [],
+  "lastSync": "2026-06-19T22:49:12.513Z"
+}
