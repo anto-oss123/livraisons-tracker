@@ -1,6 +1,17 @@
 {
   "deliveries": [
     {
+      "id": "mqlj0vsn15k2",
+      "plat": "DoorDash",
+      "rev": 50,
+      "tip": 10,
+      "km": 12,
+      "debut": "2026-06-19T18:54",
+      "fin": "2026-06-19T18:20",
+      "notes": "",
+      "ts": "2026-06-19T22:54:54.454Z"
+    },
+    {
       "id": "mqlinlerszga",
       "plat": "Instacart",
       "rev": 20,
@@ -13,5 +24,5 @@
     }
   ],
   "expenses": [],
-  "lastSync": "2026-06-19T22:49:12.513Z"
+  "lastSync": "2026-06-19T22:54:54.654Z"
 }
