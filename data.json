@@ -36,6 +36,17 @@
   ],
   "expenses": [
     {
+      "id": "mqlkxujm4dw7",
+      "cat": "Assurance auto",
+      "amt": 1600,
+      "date": "2026-06-19",
+      "desc": "",
+      "recu": "",
+      "kwh": 0,
+      "kwhRate": 0,
+      "proRatioOverride": null
+    },
+    {
       "id": "mqlkww7ty14e",
       "cat": "Recharge VE",
       "amt": 10,
@@ -67,5 +78,5 @@
       "notes": ""
     }
   ],
-  "lastSync": "2026-06-19T23:47:47.767Z"
+  "lastSync": "2026-06-19T23:48:32.293Z"
 }
