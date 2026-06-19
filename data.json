@@ -1,50 +1,5 @@
 {
-  "deliveries": [
-    {
-      "id": "mqlj1aqggvbr",
-      "plat": "Instacart",
-      "rev": 1,
-      "tip": 20,
-      "km": 150,
-      "debut": "2026-06-19T18:54",
-      "fin": "2026-06-11T20:00",
-      "notes": "",
-      "ts": "2026-06-19T22:55:13.816Z"
-    },
-    {
-      "id": "mqlj0vsn15k2",
-      "plat": "DoorDash",
-      "rev": 50,
-      "tip": 10,
-      "km": 12,
-      "debut": "2026-06-19T18:54",
-      "fin": "2026-06-19T18:20",
-      "notes": "",
-      "ts": "2026-06-19T22:54:54.454Z"
-    },
-    {
-      "id": "mqlinlerszga",
-      "plat": "Instacart",
-      "rev": 20,
-      "tip": 10,
-      "km": 15,
-      "debut": "2026-06-19T18:44",
-      "fin": "2026-06-19T18:45",
-      "notes": "",
-      "ts": "2026-06-19T22:44:34.467Z"
-    }
-  ],
-  "expenses": [
-    {
-      "id": "mqlj5ixnp9eo",
-      "cat": "Recharge VE",
-      "amt": 10,
-      "date": "2026-06-19",
-      "desc": "",
-      "recu": "",
-      "kwh": 61,
-      "kwhRate": 0.1639
-    }
-  ],
-  "lastSync": "2026-06-19T23:04:56.092Z"
+  "deliveries": [],
+  "expenses": [],
+  "lastSync": "2026-06-19T23:05:01.884Z"
 }
