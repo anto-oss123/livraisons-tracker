@@ -491,6 +491,32 @@ function b64decode(b64){
   return new TextDecoder().decode(bytes);
 }
 
+// Sync startup — appelée AVANT le rendu, écrase localStorage avec données GitHub
+async function syncOnStartup(){
+  if(!S.cfg.ghToken||!S.cfg.ghRepo) return;
+  const [owner,repo]=S.cfg.ghRepo.split('/');
+  const url=`https://api.github.com/repos/${owner}/${repo}/contents/data.json`;
+  const hdrs={'Authorization':'token '+S.cfg.ghToken,'Accept':'application/vnd.github.v3+json'};
+  try{
+    console.log('[Sync] Chargement depuis GitHub...');
+    const r=await fetch(url,{headers:hdrs});
+    if(!r.ok) return;
+    const json=await r.json();
+    const data=JSON.parse(b64decode(json.content));
+    if(data.deliveries) S.deliveries=data.deliveries;
+    if(data.expenses)   S.expenses=data.expenses;
+    if(data.quarts)     S.quarts=data.quarts;
+    // Écraser complètement le localStorage
+    localStorage.setItem('lt_v2',JSON.stringify({
+      deliveries:S.deliveries,expenses:S.expenses,quarts:S.quarts,
+      cfg:S.cfg,aiReport:S.aiReport,chatHistory:S.chatHistory
+    }));
+    console.log('[Sync] Données chargées depuis GitHub');
+  }catch(e){
+    console.log('[Sync] Fallback localStorage:',e.message);
+  }
+}
+
 async function loadFromGH(){
   if(!S.cfg.ghToken||!S.cfg.ghRepo) return;
   const [owner,repo]=S.cfg.ghRepo.split('/');
@@ -501,8 +527,8 @@ async function loadFromGH(){
     try{
       const r=await fetch(url,{headers:hdrs});
       if(!r.ok){break;}
-      const {content}=await r.json();
-      const data=JSON.parse(b64decode(content));
+      const json=await r.json();
+      const data=JSON.parse(b64decode(json.content));
       if(data.deliveries) S.deliveries=data.deliveries;
       if(data.expenses)   S.expenses=data.expenses;
       if(data.quarts)     S.quarts=data.quarts;
@@ -1309,14 +1335,16 @@ function chatKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send
 
 // Gemini fetch — single call, 10s min between calls, no auto-retry on 429
 let lastGeminiCallTs=0;
+const GEMINI_MIN_INTERVAL=15000; // 15s entre appels (free tier ~5 RPM)
 async function geminiFetch(apiKey,body){
   const now=Date.now();
-  if(now-lastGeminiCallTs<10000){
-    const wait=Math.ceil((10000-(now-lastGeminiCallTs))/1000);
-    throw new Error(`Attends encore ${wait}s avant un nouvel appel`);
+  const elapsed=now-lastGeminiCallTs;
+  if(elapsed<GEMINI_MIN_INTERVAL){
+    const wait=Math.ceil((GEMINI_MIN_INTERVAL-elapsed)/1000);
+    throw new Error(`Patiente encore ${wait}s avant un nouvel appel`);
   }
   lastGeminiCallTs=Date.now();
-  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(r.status===429) throw new Error('Limite atteinte — réessaie dans 1 minute');
   return r;
@@ -1448,15 +1476,11 @@ function setupPWA(){
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
-load();
+load();        // 1. charger localStorage → S.cfg (récupère ghToken/ghRepo)
 setupPWA();
-// GitHub sync FIRST — blocking before first render
 (async()=>{
-  if(S.cfg.ghToken&&S.cfg.ghRepo){
-    console.log('[Sync] Chargement depuis GitHub...');
-    await loadFromGH();
-  }
-  renderDash();
+  await syncOnStartup(); // 2. sync GitHub BLOQUANT avant tout rendu
+  renderDash();          // 3. afficher l'interface avec les données à jour
 })();
 </script>
 </body>
