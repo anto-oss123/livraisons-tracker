@@ -1,6 +1,19 @@
 {
   "deliveries": [
     {
+      "id": "mqlmcaiqwlob",
+      "plat": "Instacart",
+      "rev": 20,
+      "tip": 40,
+      "km": 300,
+      "date": "2026-06-20",
+      "heure": "",
+      "debut": "2026-06-20T00:00",
+      "dureeMin": 0,
+      "notes": "",
+      "ts": "2026-06-20T00:27:45.602Z"
+    },
+    {
       "id": "mqll1ckknbrx",
       "plat": "Instacart",
       "rev": 120,
@@ -59,7 +72,7 @@
   "expenses": [
     {
       "id": "mqlkycw8dafq",
-      "cat": "TÃ©lÃ©phone",
+      "cat": "TÃÂ©lÃÂ©phone",
       "amt": 1500,
       "date": "2026-06-19",
       "desc": "",
@@ -157,5 +170,5 @@
       "notes": ""
     }
   ],
-  "lastSync": "2026-06-20T00:06:41.021Z"
+  "lastSync": "2026-06-20T00:27:45.937Z"
 }
