@@ -1,28 +1,5 @@
 {
-  "deliveries": [
-    {
-      "id": "mqlkpsc4anyg",
-      "plat": "DoorDash",
-      "rev": 20,
-      "tip": 10,
-      "km": 20,
-      "debut": "2026-06-17T19:42",
-      "fin": "2026-06-17T21:42",
-      "notes": "",
-      "ts": "2026-06-19T23:42:15.988Z"
-    },
-    {
-      "id": "mqlkpg3m1p40",
-      "plat": "Instacart",
-      "rev": 10,
-      "tip": 15,
-      "km": 20,
-      "debut": "2026-06-19T19:41",
-      "fin": "2026-06-19T19:42:00.130Z",
-      "notes": "",
-      "ts": "2026-06-19T23:42:00.130Z"
-    }
-  ],
+  "deliveries": [],
   "expenses": [],
   "quarts": [
     {
@@ -90,5 +67,5 @@
       "notes": ""
     }
   ],
-  "lastSync": "2026-06-20T00:49:47.771Z"
+  "lastSync": "2026-06-20T00:49:49.169Z"
 }
