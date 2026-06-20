@@ -2,7 +2,7 @@
 <html lang="fr-CA">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#007AFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1C1C1E" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
   --text:#000000;--text2:#6E6E73;--text3:#AEAEB2;
   --ok:#34C759;--warn:#FF9500;--err:#FF3B30;--purple:#5856D6;
   --r:16px;
-  --glass-bg:rgba(255,255,255,0.92);
+  --glass-bg:#ffffff;
   --glass-border:rgba(0,0,0,0.08);
   --glass-shadow:0 2px 12px rgba(0,0,0,0.08);
   --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.04);
@@ -33,7 +33,7 @@
   :root{
     --bg:#000000;--bg2:#1c1c1e;--bg3:#2c2c2e;--bg4:#3a3a3c;--bg5:#48484A;
     --text:#ffffff;--text2:rgba(235,235,245,0.6);--text3:#636366;
-    --glass-bg:rgba(28,28,30,0.95);
+    --glass-bg:#1c1c1e;
     --glass-border:rgba(58,58,60,1);
     --glass-shadow:0 2px 12px rgba(0,0,0,0.4);
     --shadow:0 1px 3px rgba(0,0,0,.3),0 4px 12px rgba(0,0,0,.2);
@@ -41,21 +41,15 @@
   }
 }
 
-/* ── BODY GRADIENT (for glass to show) ── */
-html{
-  height:100%;
-  background:linear-gradient(160deg,#dce8ff 0%,#ecdeff 55%,#ffd9ec 100%) fixed;
-}
-@media(prefers-color-scheme:dark){
-  html{background:#000 fixed;}
-}
-body{height:100%;background:transparent;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;font-size:16px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+html{height:100%;background:#f2f2f7;}
+@media(prefers-color-scheme:dark){html{background:#000;}}
+body{height:100%;background:inherit;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;font-size:16px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
 /* ── LAYOUT ── */
 #app{display:flex;height:100vh;height:100dvh;overflow:hidden}
 #sidebar{display:none;width:240px;background:var(--glass-bg);border-right:1px solid var(--glass-border);flex-direction:column;flex-shrink:0;padding-top:var(--st);padding-left:var(--sl)}
 .sidebar-logo{padding:24px 20px 8px;font-size:20px;font-weight:700;color:var(--accent);letter-spacing:-.3px}
-.sidebar-nav{flex:1;padding:6px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.sidebar-nav{flex:1;padding:6px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .snbtn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;background:none;border-radius:10px;color:var(--text2);font-size:15px;font-weight:500;cursor:pointer;text-align:left;transition:background .15s,color .15s;min-height:44px;width:100%;font-family:inherit;touch-action:manipulation;pointer-events:auto}
 .snbtn .ico{font-size:18px;width:24px;text-align:center;flex-shrink:0}
 .snbtn:hover{background:rgba(0,0,0,.05)}
@@ -147,7 +141,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 /* ── MODALS ── */
 .moverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
 .moverlay.open{opacity:1;pointer-events:all}
-.modal{background:#FFFFFF;border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding:12px 16px calc(24px + var(--sb));transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 24px rgba(0,0,0,0.12)}
+.modal{background:#FFFFFF;border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px calc(24px + var(--sb));transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 24px rgba(0,0,0,0.12)}
 @media(prefers-color-scheme:dark){.modal{background:#1C1C1E}}
 .moverlay.open .modal{transform:translateY(0)}
 .mhandle{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 16px}
@@ -430,8 +424,8 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
   <button class="btn btn-d btn-w btn-sm" onclick="clearAll()">⚠️ Effacer toutes les données</button>
 </div></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="console.warn('[LT] Supabase CDN indisponible')"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" onerror="console.warn('[LT] Leaflet CDN indisponible')"></script>
 <script>
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 const FED_BRACKETS=[{max:57375,rate:.15},{max:114750,rate:.205},{max:158519,rate:.26},{max:220000,rate:.29},{max:Infinity,rate:.33}];
@@ -957,11 +951,6 @@ function renderQuart(){
     ${heroHtml}
     ${S.quarts.length>0?`<div class="stitle">Quarts précédents</div>${history}`:''}
   `;
-  document.getElementById('tab-quart').addEventListener('click',function(ev){
-    const btn=ev.target.closest('[data-action]');
-    if(!btn) return;
-    if(btn.dataset.action==='del-quart') delQuart(btn.dataset.id);
-  },{once:true});
 }
 
 function useLastQuartKm(){
@@ -982,12 +971,6 @@ function renderLiv(){
     ${filt.length===0?`<div class="empty"><div class="empty-ico">📦</div><p>Aucune livraison.<br>Appuie sur + pour en ajouter une.</p></div>`:filt.map(d=>liCard(d,true)).join('')}
     <button class="fab" onclick="openLivModal()">+</button>
   `;
-  document.getElementById('tab-livraisons').addEventListener('click',function(ev){
-    const btn=ev.target.closest('[data-action]');
-    if(!btn) return;
-    if(btn.dataset.action==='edit-liv') editLiv(btn.dataset.id);
-    else if(btn.dataset.action==='del-liv') delLiv(btn.dataset.id);
-  },{once:true});
 }
 
 function liCard(d,acts=false){
@@ -1096,12 +1079,6 @@ function renderDep(){
     ${filt.length===0?`<div class="empty"><div class="empty-ico">💰</div><p>Aucune dépense enregistrée.</p></div>`:filt.map(e=>depCard(e,proRatio)).join('')}
     <button class="fab" onclick="openDepModal()">+</button>
   `;
-  document.getElementById('tab-depenses').addEventListener('click',function(ev){
-    const btn=ev.target.closest('[data-action]');
-    if(!btn) return;
-    if(btn.dataset.action==='edit') editDep(btn.dataset.id);
-    else if(btn.dataset.action==='del') delDep(btn.dataset.id);
-  },{once:true});
 }
 
 function depCard(e,proRatio){
@@ -1538,6 +1515,24 @@ function clearAll(){
   saveLocal();closeM('m-settings');renderTab(S.tab);toast('🗑️ Données effacées');
 }
 
+// ─── EVENT DELEGATION (persistante, évite le bug {once:true}) ────────────────
+function initDelegation(){
+  document.getElementById('tab-quart').addEventListener('click',ev=>{
+    const btn=ev.target.closest('[data-action]');if(!btn)return;
+    if(btn.dataset.action==='del-quart') delQuart(btn.dataset.id);
+  });
+  document.getElementById('tab-livraisons').addEventListener('click',ev=>{
+    const btn=ev.target.closest('[data-action]');if(!btn)return;
+    if(btn.dataset.action==='edit-liv') editLiv(btn.dataset.id);
+    else if(btn.dataset.action==='del-liv') delLiv(btn.dataset.id);
+  });
+  document.getElementById('tab-depenses').addEventListener('click',ev=>{
+    const btn=ev.target.closest('[data-action]');if(!btn)return;
+    if(btn.dataset.action==='edit') editDep(btn.dataset.id);
+    else if(btn.dataset.action==='del') delDep(btn.dataset.id);
+  });
+}
+
 // ─── MODAL HELPERS ───────────────────────────────────────────────────────────
 function openM(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
 function closeM(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
@@ -1558,21 +1553,26 @@ function setupPWA(){
   const mb=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
   document.getElementById('pwa-manifest').href=URL.createObjectURL(mb);
   if(!('serviceWorker' in navigator)) return;
-  const sw=`const C='lt-sw-v3';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.add('/')));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).catch(()=>caches.match('/')));return;}e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});`;
+  const CDN_URLS=['https://unpkg.com/leaflet@1.9.4/dist/leaflet.css','https://unpkg.com/leaflet@1.9.4/dist/leaflet.js','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'];
+  const sw=`const C='lt-sw-v4';const CDNS=${JSON.stringify(CDN_URLS)};self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.add('/').then(()=>Promise.allSettled(CDNS.map(u=>c.add(u))))));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{if(e.request.mode==='navigate'){e.respondWith(caches.match('/').then(r=>r||fetch(e.request)).catch(()=>caches.match('/')));return;}e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const clone=res.clone();caches.open(C).then(c=>c.put(e.request,clone));return res;}).catch(()=>new Response('',{status:503}))));});`;
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
-load();
+load();           // charge localStorage — synchrone, jamais bloquant
 setupPWA();
-renderDash();
+initDelegation(); // listeners persistants avant tout rendu
+renderDash();     // affiche immédiatement l'UI avec les données en cache
 logSetupSQL();
+// Supabase en arrière-plan — ne bloque jamais le rendu initial
 if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
-  showSyncBanner(true);
-  sbLoad().then(ok=>{
-    if(ok){renderTab(S.tab);sbSubscribe();offerMigration();}
-    showSyncBanner(false);
-  }).catch(()=>showSyncBanner(false));
+  setTimeout(()=>{
+    showSyncBanner(true);
+    sbLoad().then(ok=>{
+      if(ok){renderTab(S.tab);sbSubscribe();offerMigration();}
+      showSyncBanner(false);
+    }).catch(()=>showSyncBanner(false));
+  },0);
 }
 
 function showSyncBanner(on){
