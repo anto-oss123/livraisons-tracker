@@ -14,7 +14,19 @@
       "ts": "2026-06-20T00:52:22.346Z"
     }
   ],
-  "expenses": [],
+  "expenses": [
+    {
+      "id": "mqln8jkivpx2",
+      "cat": "Recharge VE",
+      "amt": 10,
+      "date": "2026-06-20",
+      "desc": "",
+      "recu": "",
+      "kwh": 61,
+      "kwhRate": 0.1639,
+      "proRatioOverride": null
+    }
+  ],
   "quarts": [],
-  "lastSync": "2026-06-20T00:52:22.727Z"
+  "lastSync": "2026-06-20T00:52:50.446Z"
 }
