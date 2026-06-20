@@ -85,19 +85,19 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 .nb-ico{font-size:22px;line-height:1.1}
 .nb-lbl{font-size:9px;font-weight:500;letter-spacing:.1px}
 
-/* ── CARDS — Liquid Glass ── */
-.card{background:var(--glass-bg);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid var(--glass-border);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--glass-shadow)}
+/* ── CARDS — Glass (sans backdrop-filter pour éviter blocage touch iOS) ── */
+.card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--glass-shadow);position:relative}
 .card-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600}
 .card-value{font-size:28px;font-weight:700;letter-spacing:-.5px}
 .card-sub{font-size:12px;color:var(--text2);margin-top:4px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.scard{background:var(--glass-bg);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid var(--glass-border);border-radius:var(--r);padding:14px;box-shadow:var(--glass-shadow)}
+.scard{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--r);padding:14px;box-shadow:var(--glass-shadow)}
 .slabel{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500}
 .sval{font-size:20px;font-weight:700;letter-spacing:-.3px}
 .sval.g{color:var(--ok)}.sval.b{color:var(--accent)}.sval.y{color:var(--warn)}.sval.r{color:var(--err)}
 
 /* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;min-height:48px;transition:opacity .15s,transform .1s;letter-spacing:-.1px;font-family:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;min-height:48px;transition:opacity .15s,transform .1s;letter-spacing:-.1px;font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,0);position:relative;z-index:1}
 .btn:active{opacity:.8;transform:scale(.97)}
 .btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
 .btn-p{background:var(--accent);color:#fff}
@@ -118,8 +118,8 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 .fs{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%238E8E93' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-/* ── LIST ITEMS — Glass ── */
-.li{background:var(--glass-bg);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);border:1px solid var(--glass-border);border-radius:var(--r);padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--glass-shadow)}
+/* ── LIST ITEMS — Glass (sans backdrop-filter, préserve touch iOS) ── */
+.li{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--r);padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--glass-shadow)}
 .li-icon{width:42px;height:42px;border-radius:12px;background:rgba(120,120,128,0.12);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .li-body{flex:1;min-width:0}
 .li-title{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -189,7 +189,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 /* ── FILTER CHIPS ── */
 .chips{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{border:1px solid var(--glass-border);padding:8px 16px;border-radius:20px;background:var(--glass-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text2);font-size:13px;cursor:pointer;white-space:nowrap;min-height:36px;font-weight:500;font-family:inherit;transition:all .15s}
+.chip{border:1px solid var(--glass-border);padding:8px 16px;border-radius:20px;background:var(--glass-bg);color:var(--text2);font-size:13px;cursor:pointer;white-space:nowrap;min-height:36px;font-weight:500;font-family:inherit;transition:all .15s;-webkit-tap-highlight-color:rgba(0,0,0,0);touch-action:manipulation}
 .chip.active{background:var(--accent);color:#fff;font-weight:600;border-color:var(--accent)}
 
 /* ── EMPTY ── */
@@ -205,7 +205,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 .chat-msgs{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;min-height:60px}
 .chat-msg{max-width:85%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.55;word-break:break-word}
 .chat-user{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
-.chat-ai{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px;box-shadow:var(--glass-shadow)}
+.chat-ai{background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px;box-shadow:var(--glass-shadow)}
 .chat-typing{display:flex;gap:4px;padding:12px 14px;align-items:center}
 .chat-typing span{width:7px;height:7px;background:var(--text3);border-radius:50%;animation:bounce .9s infinite}
 .chat-typing span:nth-child(2){animation-delay:.15s}
@@ -216,7 +216,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 .chat-in:focus{border-color:var(--accent)}
 
 /* ── AI REPORT ── */
-.ai-report{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:var(--r);padding:16px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;box-shadow:var(--glass-shadow)}
+.ai-report{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--r);padding:16px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;box-shadow:var(--glass-shadow);max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 /* ── DIVIDER ── */
 .div{height:1px;background:var(--bg4);margin:14px 0}
@@ -1476,12 +1476,32 @@ function setupPWA(){
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
-load();        // 1. charger localStorage → S.cfg (récupère ghToken/ghRepo)
+load();      // 1. localStorage → état immédiat
 setupPWA();
-(async()=>{
-  await syncOnStartup(); // 2. sync GitHub BLOQUANT avant tout rendu
-  renderDash();          // 3. afficher l'interface avec les données à jour
-})();
+renderDash(); // 2. afficher immédiatement depuis localStorage
+// 3. sync GitHub en arrière-plan — sans bloquer le rendu
+if(S.cfg.ghToken&&S.cfg.ghRepo){
+  showSyncBanner(true);
+  syncOnStartup().then(()=>{
+    renderTab(S.tab);
+    showSyncBanner(false);
+  }).catch(()=>showSyncBanner(false));
+}
+
+function showSyncBanner(on){
+  let b=document.getElementById('sync-banner');
+  if(on){
+    if(!b){
+      b=document.createElement('div');
+      b.id='sync-banner';
+      b.style.cssText='position:fixed;top:0;left:0;right:0;background:var(--accent);color:#fff;font-size:12px;font-weight:500;text-align:center;padding:4px 0 calc(4px + var(--st));z-index:500;pointer-events:none';
+      b.textContent='Synchronisation…';
+      document.body.appendChild(b);
+    }
+  }else{
+    if(b) b.remove();
+  }
+}
 </script>
 </body>
 </html>
