@@ -20,9 +20,9 @@
   --text:#000000;--text2:#6E6E73;--text3:#AEAEB2;
   --ok:#34C759;--warn:#FF9500;--err:#FF3B30;--purple:#5856D6;
   --r:16px;
-  --glass-bg:rgba(255,255,255,0.72);
-  --glass-border:rgba(255,255,255,0.65);
-  --glass-shadow:0 2px 12px rgba(0,0,0,0.08),0 0 0 1px rgba(255,255,255,0.5) inset;
+  --glass-bg:rgba(255,255,255,0.35);
+  --glass-border:rgba(255,255,255,0.55);
+  --glass-shadow:0 2px 12px rgba(0,0,0,0.08),0 0 0 1px rgba(255,255,255,0.4) inset;
   --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.04);
   --shadow-lg:0 4px 16px rgba(0,0,0,.1),0 8px 32px rgba(0,0,0,.06);
   --st:env(safe-area-inset-top,0px);
@@ -33,9 +33,9 @@
   :root{
     --bg:#000000;--bg2:#1C1C1E;--bg3:#2C2C2E;--bg4:#3A3A3C;--bg5:#48484A;
     --text:#FFFFFF;--text2:#8E8E93;--text3:#636366;
-    --glass-bg:rgba(28,28,30,0.75);
-    --glass-border:rgba(255,255,255,0.1);
-    --glass-shadow:0 2px 12px rgba(0,0,0,0.4),0 0 0 1px rgba(255,255,255,0.06) inset;
+    --glass-bg:rgba(0,0,0,0.45);
+    --glass-border:rgba(255,255,255,0.12);
+    --glass-shadow:0 2px 12px rgba(0,0,0,0.4),0 0 0 1px rgba(255,255,255,0.07) inset;
     --shadow:0 1px 3px rgba(0,0,0,.3),0 4px 12px rgba(0,0,0,.2);
     --shadow-lg:0 4px 16px rgba(0,0,0,.4),0 8px 32px rgba(0,0,0,.3);
   }
@@ -480,24 +480,37 @@ function save(sync=true){
 }
 
 // ─── GITHUB SYNC ─────────────────────────────────────────────────────────────
+// UTF-8 safe base64 helpers
+function b64encode(str){
+  const bytes=new TextEncoder().encode(str);
+  return btoa(String.fromCharCode(...bytes));
+}
+function b64decode(b64){
+  const bytes=Uint8Array.from(atob(b64.replace(/\s/g,'')),c=>c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
 async function loadFromGH(){
   if(!S.cfg.ghToken||!S.cfg.ghRepo) return;
   const [owner,repo]=S.cfg.ghRepo.split('/');
   const url=`https://api.github.com/repos/${owner}/${repo}/contents/data.json`;
   const hdrs={'Authorization':'token '+S.cfg.ghToken,'Accept':'application/vnd.github.v3+json'};
-  try{
-    setSyncSpinner(true);
-    const r=await fetch(url,{headers:hdrs});
-    if(!r.ok){setSyncSpinner(false);return;}
-    const {content}=await r.json();
-    const data=JSON.parse(atob(content));
-    if(data.deliveries) S.deliveries=data.deliveries;
-    if(data.expenses)   S.expenses=data.expenses;
-    if(data.quarts)     S.quarts=data.quarts;
-    save(false);
-    renderTab(S.tab);
-    toast('✅ Synchronisé depuis GitHub');
-  }catch(e){}
+  setSyncSpinner(true);
+  for(let attempt=0;attempt<3;attempt++){
+    try{
+      const r=await fetch(url,{headers:hdrs});
+      if(!r.ok){break;}
+      const {content}=await r.json();
+      const data=JSON.parse(b64decode(content));
+      if(data.deliveries) S.deliveries=data.deliveries;
+      if(data.expenses)   S.expenses=data.expenses;
+      if(data.quarts)     S.quarts=data.quarts;
+      save(false);renderTab(S.tab);toast('✅ Synchronisé depuis GitHub');
+      break;
+    }catch(e){
+      if(attempt<2) await new Promise(res=>setTimeout(res,2000));
+    }
+  }
   setSyncSpinner(false);
 }
 
@@ -507,17 +520,23 @@ async function syncGH(){
   const [owner,repo]=S.cfg.ghRepo.split('/');
   const url=`https://api.github.com/repos/${owner}/${repo}/contents/data.json`;
   const hdrs={'Authorization':'token '+S.cfg.ghToken,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'};
-  try{
-    let sha=null;
-    const g=await fetch(url,{headers:hdrs});
-    if(g.ok) sha=(await g.json()).sha;
-    const payload={deliveries:S.deliveries,expenses:S.expenses,quarts:S.quarts,lastSync:new Date().toISOString()};
-    const content=btoa(unescape(encodeURIComponent(JSON.stringify(payload,null,2))));
-    const r=await fetch(url,{method:'PUT',headers:hdrs,body:JSON.stringify({
-      message:`Sync ${new Date().toLocaleDateString('fr-CA')}`,content,...(sha?{sha}:{})
-    })});
-    if(!r.ok) toast('❌ Erreur sync GitHub');
-  }catch(e){toast('❌ Réseau: '+e.message);}
+  for(let attempt=0;attempt<3;attempt++){
+    try{
+      let sha=null;
+      const g=await fetch(url,{headers:hdrs});
+      if(g.ok) sha=(await g.json()).sha;
+      const payload={deliveries:S.deliveries,expenses:S.expenses,quarts:S.quarts,lastSync:new Date().toISOString()};
+      const content=b64encode(JSON.stringify(payload,null,2));
+      const r=await fetch(url,{method:'PUT',headers:hdrs,body:JSON.stringify({
+        message:`Sync ${new Date().toLocaleDateString('fr-CA')}`,content,...(sha?{sha}:{})
+      })});
+      if(r.ok){break;}
+      throw new Error(`HTTP ${r.status}`);
+    }catch(e){
+      if(attempt<2){await new Promise(res=>setTimeout(res,2000));continue;}
+      toast('❌ Sync GitHub échouée');
+    }
+  }
   S.syncing=false; setSyncSpinner(false);
 }
 
@@ -1287,6 +1306,18 @@ function renderIA(){
 
 function chatKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
 
+// Gemini fetch with 429 retry (up to 3 attempts, 3s delay)
+async function geminiFetch(apiKey,body){
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  for(let i=0;i<3;i++){
+    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(r.status===429){
+      if(i<2){toast('⏳ Patiente un instant…');await new Promise(res=>setTimeout(res,3000));continue;}
+    }
+    return r;
+  }
+}
+
 async function runAI(){
   if(!S.cfg.geminiKey||S.aiLoading) return;
   S.aiLoading=true;renderIA();
@@ -1306,11 +1337,8 @@ Fournis un rapport structuré avec:
 
 Sois précis avec les chiffres.`;
   try{
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${S.cfg.geminiKey}`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:.7,maxOutputTokens:1800}})
-    });
-    if(!r.ok){const err=await r.json();throw new Error(err.error?.message||'Erreur API');}
+    const r=await geminiFetch(S.cfg.geminiKey,{contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:.7,maxOutputTokens:1800}});
+    if(!r||!r.ok){const err=r?await r.json():{};throw new Error(err.error?.message||'Erreur API');}
     const data=await r.json();
     S.aiReport=data.candidates?.[0]?.content?.parts?.[0]?.text||'Aucune réponse';
     save(false);toast('✅ Analyse terminée !');
@@ -1335,11 +1363,8 @@ Dernières livraisons: ${JSON.stringify(S.deliveries.slice(0,15).map(d=>({plat:d
     {role:'user',parts:[{text:msg}]}
   ];
   try{
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${S.cfg.geminiKey}`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents,generationConfig:{temperature:.8,maxOutputTokens:600}})
-    });
-    if(!r.ok) throw new Error('Erreur API');
+    const r=await geminiFetch(S.cfg.geminiKey,{contents,generationConfig:{temperature:.8,maxOutputTokens:600}});
+    if(!r||!r.ok) throw new Error('Erreur API');
     const data=await r.json();
     S.chatHistory.push({role:'ai',text:data.candidates?.[0]?.content?.parts?.[0]?.text||'Pas de réponse'});
     save(false);
