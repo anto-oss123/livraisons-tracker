@@ -1,19 +1,6 @@
 {
   "deliveries": [
     {
-      "id": "mqlmuccn8psb",
-      "plat": "Instacart",
-      "rev": 20,
-      "tip": 20,
-      "km": 20,
-      "date": "2026-06-20",
-      "heure": "",
-      "debut": "2026-06-20T00:00",
-      "dureeMin": 0,
-      "notes": "",
-      "ts": "2026-06-20T00:41:47.783Z"
-    },
-    {
       "id": "mqlmeugzi2ti",
       "plat": "Instacart",
       "rev": 20000,
@@ -97,39 +84,6 @@
   ],
   "expenses": [
     {
-      "id": "mqln21ukgb6a",
-      "cat": "Téléphone",
-      "amt": 280,
-      "date": "2026-06-20",
-      "desc": "",
-      "recu": "",
-      "kwh": 25,
-      "kwhRate": 11.2,
-      "proRatioOverride": null
-    },
-    {
-      "id": "mqlkycw8dafq",
-      "cat": "TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©lÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©phone",
-      "amt": 1500,
-      "date": "2026-06-19",
-      "desc": "",
-      "recu": "",
-      "kwh": 0,
-      "kwhRate": 0,
-      "proRatioOverride": null
-    },
-    {
-      "id": "mqlkxujm4dw7",
-      "cat": "Assurance auto",
-      "amt": 1600,
-      "date": "2026-06-19",
-      "desc": "",
-      "recu": "",
-      "kwh": 0,
-      "kwhRate": 0,
-      "proRatioOverride": null
-    },
-    {
       "id": "mqlkww7ty14e",
       "cat": "Recharge VE",
       "amt": 10,
@@ -207,5 +161,5 @@
       "notes": ""
     }
   ],
-  "lastSync": "2026-06-20T00:47:54.934Z"
+  "lastSync": "2026-06-20T00:49:37.273Z"
 }
