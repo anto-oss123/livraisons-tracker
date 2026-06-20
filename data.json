@@ -1,16 +1,20 @@
 {
-  "deliveries": [],
-  "expenses": [],
-  "quarts": [
+  "deliveries": [
     {
-      "id": "mqlkuliub7r9",
-      "startTs": "2026-06-19T23:41:38.433Z",
-      "endTs": "2026-06-19T23:45:54.254Z",
-      "durationMs": 255821,
-      "km": 15,
-      "path": [],
-      "notes": ""
+      "id": "mqln7xzeqb2p",
+      "plat": "Instacart",
+      "rev": 20,
+      "tip": 10,
+      "km": 20,
+      "date": "2026-06-20",
+      "heure": "",
+      "debut": "2026-06-20T00:00",
+      "dureeMin": 20,
+      "notes": "",
+      "ts": "2026-06-20T00:52:22.346Z"
     }
   ],
-  "lastSync": "2026-06-20T00:52:09.902Z"
+  "expenses": [],
+  "quarts": [],
+  "lastSync": "2026-06-20T00:52:22.727Z"
 }
