@@ -145,6 +145,13 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--s
 .ia-insight{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 /* Export */
 .export-section{margin-bottom:20px}
+/* 3-col grid for dep categories */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+/* ensure dep card buttons never clip */
+.li-right{flex-shrink:0;text-align:right;min-width:72px}
+/* tooltip helper */
+.tip{display:inline-block;width:16px;height:16px;border-radius:50%;background:var(--card2);color:var(--text2);font-size:10px;font-weight:700;text-align:center;line-height:16px;cursor:help;border:1px solid var(--border);margin-left:4px;vertical-align:middle}
+.note-sm{font-size:11px;color:var(--text2);line-height:1.5;margin-top:4px;padding:6px 10px;background:var(--card2);border-radius:8px}
 @media(min-width:768px){
   #sidebar{display:flex}
   #bnav{display:none}
@@ -581,8 +588,12 @@ function rDash(){
       <div class="scard"><div class="slabel">Cette semaine</div><div class="sval b">${$f(sum(wk))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${wk.length} livraison${wk.length!==1?'s':''}</div></div>
     </div>
     <div class="grid2">
-      <div class="scard"><div class="slabel">Ce mois</div><div class="sval">${$f(sum(mo))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${mo.length} livraison${mo.length!==1?'s':''}</div></div>
-      <div class="scard"><div class="slabel">Km pro</div><div class="sval y">${f.km.toFixed(0)}<span style="font-size:13px"> km</span></div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.divs.length} livraisons</div></div>
+      <div class="scard"><div class="slabel">Revenus ce mois</div><div class="sval">${$f(sum(mo))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${mo.length} livraison${mo.length!==1?'s':''}</div></div>
+      <div class="scard"><div class="slabel">Dépenses ce mois</div><div class="sval r">${$f(S.expenses.filter(e=>parseDate(e.date)>=moStart).reduce((s,e)=>s+expAnnual(e),0))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${S.expenses.filter(e=>parseDate(e.date)>=moStart).length} dépense${S.expenses.filter(e=>parseDate(e.date)>=moStart).length!==1?'s':''}</div></div>
+    </div>
+    <div class="grid2">
+      <div class="scard"><div class="slabel">Km pro ${S.cfg.year}</div><div class="sval y">${f.km.toFixed(0)}<span style="font-size:13px"> km</span></div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.divs.length} livraisons</div></div>
+      <div class="scard"><div class="slabel">Ratio pro</div><div class="sval b">${f.proRatio!=null?Math.round(f.proRatio*100)+'%':'—'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.proRatio!=null?'km pro / km total':'Configurer les km'}</div></div>
     </div>
     ${iaTile}
     ${alerts.map(a=>`<div class="alert alert-${a.t}"><em>${a.i}</em><p>${a.m}</p></div>`).join('')}
@@ -671,11 +682,9 @@ function rDep(){
   const grand=S.expenses.reduce((s,e)=>s+expAnnual(e),0);
   const proRatio=calcProRatio();
   const ratioInfo=proRatio!=null?`<div class="alert alert-i"><em>🚗</em><p>Ratio pro : <strong>${Math.round(proRatio*100)}%</strong> · ${S.deliveries.reduce((s,d)=>s+(d.km||0),0).toFixed(0)} km pro / ${Math.max(0,(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0)).toFixed(0)} km total</p></div>`:'';
-  const half=Math.ceil(cats.length/2);
   document.getElementById('panel-depenses').innerHTML=`
     ${ratioInfo}
-    <div class="grid2">${cats.slice(0,half).map(c=>`<div class="scard"><div class="slabel">${CAT_ICO[c]} ${c}</div><div class="sval" style="font-size:15px">${$f(totals[c])}</div></div>`).join('')}</div>
-    <div class="grid2">${cats.slice(half).map(c=>`<div class="scard"><div class="slabel">${CAT_ICO[c]} ${c}</div><div class="sval" style="font-size:15px">${$f(totals[c])}</div></div>`).join('')}</div>
+    <div class="grid3">${cats.map(c=>`<div class="scard"><div class="slabel">${CAT_ICO[c]} ${c}</div><div class="sval" style="font-size:14px">${$f(totals[c])}</div></div>`).join('')}</div>
     <div class="card"><div class="card-title">Total annualisé</div><div class="card-value">${$f(grand)}</div></div>
     <div class="chips">${['Toutes',...cats].map(c=>`<button class="chip${(S.eFilt||'Toutes')===c?' active':''}" data-action="filt-dep" data-val="${esc(c)}">${CAT_ICO[c]||''} ${esc(c)}</button>`).join('')}</div>
     ${filt.length===0?`<div class="empty"><div class="empty-ico">💰</div><p>Aucune dépense enregistrée.</p></div>`:filt.map(e=>depCard(e,proRatio)).join('')}
@@ -792,7 +801,7 @@ function rFsub(){
       <div class="card"><div class="card-title">Revenus bruts ${yr}</div><div class="card-value">${$f(f.gross)}</div><div class="card-sub">${f.divs.length} livraisons</div></div>
       ${f.needsTPS?`<div class="alert alert-w"><em>⚠️</em><p>Tu dois percevoir et remettre la TPS/TVQ.</p></div><div class="grid2"><div class="scard"><div class="slabel">TPS (5%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TPS)}</div></div><div class="scard"><div class="slabel">TVQ (9.975%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TVQ)}</div></div></div>`
       :`<div class="alert alert-i"><em>ℹ️</em><p>Seuil TPS/TVQ : ${$f(f.gross)} / ${$f(30000)} (${$f(Math.max(0,30000-f.gross))} restant)</p></div><div class="pbar"><div class="pfill" style="width:${Math.min(100,f.gross/300).toFixed(1)}%"></div></div>`}
-      ${f.total>0?`<div class="stitle">Estimation impôt</div><div class="card"><table class="dtable"><tr><td>Revenu net imposable</td><td>${$f(f.net)}</td></tr><tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr><tr><td>Impôt provincial (QC)</td><td>${$f(f.qcOwed)}</td></tr><tr><td>Cotisation RRQ</td><td>${$f(f.rrq)}</td></tr><tr><td style="font-weight:700">Total estimé</td><td style="color:var(--err);font-weight:700">${$f(f.total)}</td></tr></table></div><div class="card" style="background:rgba(0,122,255,.06);border:1px solid rgba(0,122,255,.15)"><div class="card-title">💰 Mise de côté recommandée</div><div class="card-value" style="color:var(--accent)">${$f(setA)}</div><div class="card-sub">${Math.ceil(Math.max(f.rate,.25)*100)}% des revenus bruts</div></div>`:''}
+      ${f.total>0?`<div class="stitle">Estimation impôt</div><div class="card"><table class="dtable"><tr><td>Revenu net imposable <span class="tip" title="Votre revenu brut moins toutes vos déductions admissibles. C'est sur ce montant que l'impôt est calculé.">?</span></td><td>${$f(f.net)}</td></tr><tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr><tr><td>Impôt provincial (QC)</td><td>${$f(f.qcOwed)}</td></tr><tr><td>Cotisation RRQ</td><td>${$f(f.rrq)}</td></tr><tr><td style="font-weight:700">Total estimé</td><td style="color:var(--err);font-weight:700">${$f(f.total)}</td></tr></table></div><div class="card" style="background:rgba(0,122,255,.06);border:1px solid rgba(0,122,255,.15)"><div class="card-title">💰 Mise de côté recommandée</div><div class="card-value" style="color:var(--accent)">${$f(setA)}</div><div class="card-sub">${Math.ceil(Math.max(f.rate,.25)*100)}% des revenus bruts</div></div>`:''}
     `;
   }else if(S.fsub==='deductions'){
     const many=f.exps.length>5;
@@ -800,15 +809,16 @@ function rFsub(){
     const detailRows=(!many||S.dedDetailOpen)?`<div class="card" style="margin-top:10px"><table class="dtable"><thead><tr><th>Catégorie</th><th>Total</th><th>Déductible</th></tr></thead><tbody>${f.exps.map(e=>`<tr><td>${CAT_ICO[e.cat]||''} ${e.cat}</td><td style="text-align:right">${$f(expAnnual(e))}</td><td style="color:var(--ok)">${$f(expDed(e,f.proRatio))}</td></tr>`).join('')}</tbody></table></div>`:'';
     el.innerHTML=`
       <div class="card"><div class="card-title">Méthode de déduction véhicule</div>
-        <div class="subtabs" style="margin-top:8px;margin-bottom:0">
-          <button class="stab${S.cfg.deductionMethod==='cra'?' active':''}" data-dedmethod="cra">Taux CRA (¢/km)</button>
-          <button class="stab${S.cfg.deductionMethod==='detailed'?' active':''}" data-dedmethod="detailed">Frais réels</button>
+        <div class="subtabs" style="margin-top:8px;margin-bottom:8px">
+          <button class="stab${S.cfg.deductionMethod==='cra'?' active':''}" data-dedmethod="cra">Taux CRA (¢/km) <span class="tip" title="Méthode simplifiée : multiplie vos km professionnels par le taux fixe gouvernemental. Aucun reçu requis.">?</span></button>
+          <button class="stab${S.cfg.deductionMethod==='detailed'?' active':''}" data-dedmethod="detailed">Frais réels <span class="tip" title="Utilise vos dépenses véhicule réelles au prorata du % professionnel.">?</span></button>
         </div>
+        ${S.cfg.deductionMethod==='detailed'?`<p class="note-sm">💡 Si vos frais réels dépassent vos revenus, votre revenu net imposable est 0$ — vous ne payez pas d'impôt sur ces livraisons cette année.</p>`:''}
       </div>
       <div class="card"><div class="card-title">Déduction km CRA</div><div style="font-size:22px;font-weight:700">${$f(f.kmDed)}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${f.km.toFixed(1)} km · 0,70$/km ≤5 000 / 0,64$ après</div></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span class="stitle" style="margin:0">Dépenses</span>${detailBtn}</div>
       ${f.exps.length===0?`<div class="alert alert-i"><em>ℹ️</em><p>Aucune dépense pour ${yr}.</p></div>`:detailRows}
-      <div class="card"><table class="dtable"><tr><td>${S.cfg.deductionMethod==='cra'?'Déduction km CRA':'Frais véhicule réels'}</td><td>${$f(S.cfg.deductionMethod==='cra'?f.kmDed:f.vehDed)}</td></tr><tr><td>Autres dépenses</td><td>${$f(f.otherDed)}</td></tr><tr><td style="font-weight:700">Total déductions</td><td style="color:var(--ok);font-weight:700">${$f(f.totDed)}</td></tr><tr><td style="font-weight:700">Revenu net imposable</td><td style="color:var(--accent);font-weight:700">${$f(f.net)}</td></tr></table></div>
+      <div class="card"><table class="dtable"><tr><td>${S.cfg.deductionMethod==='cra'?'Déduction km CRA':'Frais véhicule réels'}</td><td>${$f(S.cfg.deductionMethod==='cra'?f.kmDed:f.vehDed)}</td></tr><tr><td>Autres dépenses</td><td>${$f(f.otherDed)}</td></tr><tr><td style="font-weight:700">Total déductions</td><td style="color:var(--ok);font-weight:700">${$f(f.totDed)}</td></tr><tr><td style="font-weight:700">Revenu net imposable <span class="tip" title="Revenu brut moins toutes les déductions. L'impôt est calculé sur ce montant.">?</span></td><td style="color:var(--accent);font-weight:700">${$f(f.net)}</td></tr></table></div>
     `;
   }else{
     const pct=f.proRatio!=null?Math.round(f.proRatio*100):null;
@@ -941,15 +951,15 @@ async function sendChat(){
   rIA();
 
   const f=calcFiscal();
-  const ctx=`Tu es un assistant pour livreurs gig economy au Québec. Réponds en français, concis.\nContexte: ${S.deliveries.length} livraisons, revenus ${$f(f.gross)}, net ${$f(f.net)}, ${f.km.toFixed(0)} km pro.`;
+  const ctx=`Tu es un assistant concis pour livreurs gig economy au Québec. Réponds en français. Maximum 5-6 points courts. Pas d'introduction ni de conclusion.\nContexte: ${S.deliveries.length} livraisons, revenus ${$f(f.gross)}, net ${$f(f.net)}, ${f.km.toFixed(0)} km pro.`;
   const contents=[
     {role:'user',parts:[{text:ctx}]},
-    {role:'model',parts:[{text:'Compris, prêt à t\'aider !'}]},
+    {role:'model',parts:[{text:'Compris !'}]},
     ...conv.messages.slice(0,-1).map(m=>({role:m.role==='user'?'user':'model',parts:[{text:m.text}]})),
     {role:'user',parts:[{text:msg}]}
   ];
   try{
-    const data=await geminiFetch({contents,generationConfig:{temperature:.8,maxOutputTokens:600}});
+    const data=await geminiFetch({contents,generationConfig:{temperature:.8,maxOutputTokens:800}});
     conv.messages.push({role:'ai',text:data.candidates?.[0]?.content?.parts?.[0]?.text||'Pas de réponse',ts:Date.now()});
     saveLS(); sbSaveConv(conv);
   }catch(e){conv.messages.push({role:'ai',text:'❌ '+e.message,ts:Date.now()});}
@@ -970,6 +980,8 @@ function delConv(id){
 
 // ── EXPORT ─────────────────────────────────────────────────────────────────────
 function rExport(){
+  const f=calcFiscal();
+  const kmPro=S.deliveries.reduce((s,d)=>s+(d.km||0),0);
   document.getElementById('panel-export').innerHTML=`
     <div class="card">
       <div class="card-title">Période</div>
@@ -977,6 +989,14 @@ function rExport(){
         <div class="fg"><label class="fl">Du</label><input type="date" class="fi" id="exp-from" value="${S.exportDateFrom}"></div>
         <div class="fg"><label class="fl">Au</label><input type="date" class="fi" id="exp-to" value="${S.exportDateTo}"></div>
       </div>
+    </div>
+    <div class="grid2">
+      <div class="scard"><div class="slabel">📦 Livraisons</div><div class="sval b">${S.deliveries.length}</div></div>
+      <div class="scard"><div class="slabel">💳 Dépenses</div><div class="sval r">${S.expenses.length}</div></div>
+    </div>
+    <div class="grid2">
+      <div class="scard"><div class="slabel">💵 Revenus bruts</div><div class="sval g" style="font-size:16px">${$f(f.gross)}</div></div>
+      <div class="scard"><div class="slabel">🚗 Km pro total</div><div class="sval y">${kmPro.toFixed(0)} km</div></div>
     </div>
     <div class="export-section">
       <div class="stitle">Excel (.xlsx)</div>
@@ -1026,8 +1046,9 @@ function exportExcel(){
     ['Revenus bruts',$f(f.gross)],['Km pro',f.kmPro.toFixed(0)],['Déduction km CRA',$f(f.kmDed)],
     ['Total déductions',$f(f.totDed)],['Revenu net imposable',$f(f.net)],
     ['Impôt fédéral',$f(f.fedOwed)],['Impôt provincial',$f(f.qcOwed)],['RRQ',$f(f.rrq)],['Total impôt estimé',$f(f.total)]];
+  const kmPro=livs.reduce((s,d)=>s+(d.km||0),0);
   const sumRows=[['Résumé',''],[`Période`,`${S.exportDateFrom||'Début'} — ${S.exportDateTo||'Maintenant'}`],
-    ['Livraisons',livs.length],['Dépenses',exps.length],['Revenus bruts',$f(f.gross)],
+    ['Livraisons',livs.length],['Dépenses',exps.length],['Km pro total',kmPro.toFixed(0)+' km'],['Revenus bruts',$f(f.gross)],
     ['Net estimé',$f(f.net)],['Impôt total',$f(f.total)]];
 
   const wb=XLSX.utils.book_new();
@@ -1061,7 +1082,7 @@ function exportPDF(){
   // Summary
   doc.setFontSize(14);doc.setFont('helvetica','bold');doc.text('Résumé',14,y);y+=8;
   doc.setFontSize(10);doc.setFont('helvetica','normal');
-  const sumData=[['Livraisons',livs.length.toString()],['Dépenses',exps.length.toString()],
+  const sumData=[['Livraisons',livs.length.toString()],['Dépenses',exps.length.toString()],['Km pro total',livs.reduce((s,d)=>s+(d.km||0),0).toFixed(0)+' km'],
     ['Revenus bruts',$f(f.gross)],['Revenu net',$f(f.net)],['Impôt estimé',$f(f.total)]];
   if(doc.autoTable){
     doc.autoTable({startY:y,head:[['Indicateur','Valeur']],body:sumData,theme:'striped',margin:{left:14,right:14},headStyles:{fillColor:[0,122,255]}});
