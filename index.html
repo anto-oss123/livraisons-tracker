@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Livraisons">
 <title>Livraisons Tracker</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -17,22 +16,14 @@
   --text:#000;--text2:#6e6e73;--text3:#aeaeb2;
   --accent:#007AFF;--ok:#34C759;--warn:#FF9500;--err:#FF3B30;--purple:#5856D6;
   --r:16px;
-  --st:env(safe-area-inset-top,0px);
-  --sb:env(safe-area-inset-bottom,0px);
-  --sl:env(safe-area-inset-left,0px);
-  --sr:env(safe-area-inset-right,0px);
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+  --sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);
 }
 @media(prefers-color-scheme:dark){
-  :root{
-    --bg:#000;--card:#1c1c1e;--card2:#2c2c2e;
-    --border:rgba(255,255,255,0.1);
-    --text:#fff;--text2:rgba(235,235,245,0.6);--text3:#636366;
-  }
+  :root{--bg:#000;--card:#1c1c1e;--card2:#2c2c2e;--border:rgba(255,255,255,0.1);--text:#fff;--text2:rgba(235,235,245,0.6);--text3:#636366;}
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;font-size:16px;-webkit-font-smoothing:antialiased}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;font-size:16px;-webkit-font-smoothing:antialiased}
 #app{display:flex;height:100vh;height:100dvh;overflow:hidden}
-
-/* SIDEBAR */
 #sidebar{display:none;width:240px;background:var(--card);border-right:1px solid var(--border);flex-direction:column;flex-shrink:0;padding-top:var(--st)}
 .sb-logo{padding:24px 20px 8px;font-size:20px;font-weight:700;color:var(--accent)}
 .sb-nav{flex:1;padding:6px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
@@ -40,37 +31,28 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .sb-btn.active{background:rgba(0,122,255,.12);color:var(--accent);font-weight:600}
 .sb-btn .ico{font-size:18px;width:24px;text-align:center}
 .sb-footer{padding:10px calc(10px + var(--sl)) calc(16px + var(--sb));border-top:1px solid var(--border)}
-
-/* MAIN */
 #app-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:calc(10px + var(--st));background:var(--card);border-bottom:1px solid var(--border)}
 .hdr-title{font-size:17px;font-weight:600}
 .hdr-actions{display:flex;gap:8px}
 .icon-btn{width:36px;height:36px;border:none;border-radius:50%;background:var(--card2);color:var(--accent);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
-
 main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--sb))}
 .panel{display:none;padding:16px;min-height:100%}
 .panel.active{display:block}
-
-/* BOTTOM NAV */
 #bnav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding-bottom:var(--sb);z-index:100}
 .nb{flex:1;border:none;background:none;color:var(--text3);padding:6px 2px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:48px;font-family:inherit;touch-action:manipulation}
 .nb.active{color:var(--accent)}
-.nb-ico{font-size:22px;line-height:1.1}
-.nb-lbl{font-size:10px;font-weight:500}
-
-/* CARDS */
-.card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.nb-ico{font-size:20px;line-height:1.1}
+.nb-lbl{font-size:9px;font-weight:500}
+.card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .card-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600}
 .card-value{font-size:28px;font-weight:700;letter-spacing:-.5px}
 .card-sub{font-size:12px;color:var(--text2);margin-top:4px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.scard{background:var(--card);border-radius:var(--r);padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.scard{background:var(--card);border-radius:var(--r);padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .slabel{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500}
 .sval{font-size:20px;font-weight:700;letter-spacing:-.3px}
 .sval.g{color:var(--ok)}.sval.b{color:var(--accent)}.sval.y{color:var(--warn)}.sval.r{color:var(--err)}
-
-/* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px;font-family:inherit;touch-action:manipulation;transition:opacity .1s}
 .btn:active{opacity:.7}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -81,17 +63,13 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--s
 .btn-w{width:100%}
 .btn-sm{padding:8px 14px;font-size:14px;min-height:36px;border-radius:10px}
 .btn-xs{padding:5px 10px;font-size:12px;min-height:30px;border-radius:8px}
-
-/* FORMS */
 .fg{margin-bottom:14px}
 .fl{display:block;font-size:13px;color:var(--text2);margin-bottom:5px;font-weight:500}
 .fi,.fs,.fta{width:100%;background:var(--card2);border:1.5px solid transparent;border-radius:12px;color:var(--text);font-size:16px;padding:12px 14px;outline:none;-webkit-appearance:none;appearance:none;font-family:inherit}
 .fi:focus,.fs:focus,.fta:focus{border-color:var(--accent)}
 .fs{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238E8E93' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-
-/* LIST */
-.li{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.li{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .li-ico{width:40px;height:40px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .li-body{flex:1;min-width:0}
 .li-title{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -99,78 +77,54 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--s
 .li-right{flex-shrink:0;text-align:right}
 .li-amt{font-size:16px;font-weight:700;color:var(--ok)}
 .li-acts{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
-
-/* SECTION TITLE */
 .stitle{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin:20px 0 10px}
 .stitle:first-child{margin-top:0}
-
-/* DIVIDER */
 .div{height:1px;background:var(--border);margin:14px 0}
-
-/* ALERTS */
 .alert{border-radius:var(--r);padding:12px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px}
 .alert-w{background:rgba(255,149,0,.1);border:1px solid rgba(255,149,0,.25)}
 .alert-i{background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.18)}
 .alert-g{background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.18)}
 .alert em{font-size:16px;flex-shrink:0}
 .alert p{font-size:13px;color:var(--text2);line-height:1.5}
-
-/* CHIPS */
 .chips{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{border:1px solid var(--border);padding:8px 14px;border-radius:20px;background:var(--card);color:var(--text2);font-size:13px;cursor:pointer;white-space:nowrap;min-height:36px;font-family:inherit;touch-action:manipulation}
 .chip.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
-
-/* SUBTABS */
 .subtabs{display:flex;background:var(--card2);border-radius:10px;padding:3px;margin-bottom:16px;gap:2px}
 .stab{flex:1;padding:7px 4px;border:none;border-radius:8px;background:none;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;touch-action:manipulation}
 .stab.active{background:var(--card);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-
-/* PROGRESS */
 .pbar{height:6px;background:var(--card2);border-radius:3px;overflow:hidden;margin:6px 0}
 .pfill{height:100%;background:var(--accent);border-radius:3px}
-
-/* TABLE */
 .dtable{width:100%;border-collapse:collapse}
 .dtable th{text-align:left;font-size:11px;color:var(--text2);text-transform:uppercase;padding:7px 0;border-bottom:1px solid var(--border);font-weight:600}
 .dtable td{padding:10px 0;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
 .dtable tr:last-child td{border-bottom:none}
 .dtable td:last-child{text-align:right;font-weight:600}
-
-/* QUART */
-.q-hero{background:linear-gradient(135deg,#007AFF,#5856D6);border-radius:var(--r);padding:24px 20px 20px;color:#fff;margin-bottom:12px}
-.q-timer{font-size:52px;font-weight:700;letter-spacing:-2px;font-variant-numeric:tabular-nums;line-height:1;margin-bottom:4px}
-.q-km{font-size:22px;font-weight:600;opacity:.9}
-#q-map{height:200px;border-radius:12px;overflow:hidden;margin-top:14px;background:var(--card2)}
-#sum-map{height:160px;border-radius:12px;overflow:hidden;margin-bottom:14px;background:var(--card2)}
-
-/* RATIO */
 .ratio-row{display:flex;gap:3px;height:8px;border-radius:4px;overflow:hidden;margin:6px 0}
 .ratio-pro{background:var(--accent)}
 .ratio-perso{background:var(--card2)}
-
-/* EMPTY */
 .empty{text-align:center;padding:48px 20px;color:var(--text2)}
 .empty-ico{font-size:48px;margin-bottom:12px}
 .empty p{font-size:14px;line-height:1.6}
-
-/* FAB */
 .fab{position:fixed;bottom:calc(60px + var(--sb) + 16px);right:16px;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,122,255,.4);z-index:150;touch-action:manipulation}
-
-/* CHAT */
-.chat-msgs{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;min-height:60px}
-.chat-msg{max-width:85%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.55;word-break:break-word}
-.chat-user{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
-.chat-ai{background:var(--card2);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px}
-.chat-row{display:flex;gap:8px;align-items:flex-end;padding:8px 0 2px}
+/* CHAT / IA */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 200px);min-height:400px}
+.conv-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.conv-list{background:var(--card);border-radius:var(--r);margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.conv-item{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;display:flex;align-items:center;gap:8px;touch-action:manipulation}
+.conv-item:last-child{border-bottom:none}
+.conv-item.active{background:rgba(0,122,255,.08);color:var(--accent);font-weight:600}
+.chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 0 12px}
+.chat-bubble{max-width:82%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.55;word-break:break-word}
+.chat-bubble.user{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-bubble.ai{background:var(--card2);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px}
+.chat-input-row{display:flex;gap:8px;align-items:flex-end;padding-top:8px;border-top:1px solid var(--border)}
 .chat-in{flex:1;background:var(--card2);border:1.5px solid var(--border);border-radius:20px;color:var(--text);font-size:15px;padding:10px 16px;outline:none;font-family:inherit;resize:none;max-height:100px;line-height:1.4}
 .chat-in:focus{border-color:var(--accent)}
 .ai-out{background:var(--card2);border-radius:var(--r);padding:16px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;overflow-y:auto;max-height:55vh;margin-top:8px}
-
 /* TOAST */
 #toast{position:fixed;bottom:calc(68px + var(--sb));left:50%;transform:translateX(-50%) translateY(10px);background:rgba(30,30,30,.95);color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;font-weight:500;z-index:400;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;max-width:90vw}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
 /* MODAL */
 .moverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end}
 .moverlay.open{display:flex}
@@ -178,25 +132,19 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--s
 .mhandle{width:36px;height:4px;background:var(--card2);border-radius:2px;margin:0 auto 16px}
 .mtitle{font-size:18px;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
 .mclose{background:var(--card2);border:none;color:var(--text2);font-size:15px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-
-/* BADGE */
 .badge{display:inline-block;padding:3px 9px;border-radius:8px;font-size:11px;font-weight:600}
 .bdg-b{background:rgba(0,122,255,.12);color:var(--accent)}
 .bdg-g{background:rgba(52,199,89,.12);color:var(--ok)}
 .bdg-y{background:rgba(255,149,0,.12);color:var(--warn)}
-
-/* SPIN */
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{display:inline-block;animation:spin .9s linear infinite}
-
-/* CONN DOT */
 .conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#8E8E93;flex-shrink:0}
-
-/* SCROLLBAR */
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-
-/* DESKTOP */
+/* IA insight card */
+.ia-insight{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+/* Export */
+.export-section{margin-bottom:20px}
 @media(min-width:768px){
   #sidebar{display:flex}
   #bnav{display:none}
@@ -207,22 +155,22 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--s
   #toast{bottom:24px}
   .modal{max-width:540px;margin:0 auto;border-radius:20px}
   .moverlay{align-items:center;justify-content:center;padding:20px}
+  .chat-wrap{height:calc(100vh - 160px)}
 }
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- SIDEBAR desktop -->
 <aside id="sidebar">
   <div class="sb-logo">🚚 Livraisons</div>
   <nav class="sb-nav" id="sb-nav">
     <button class="sb-btn active" data-tab="dashboard"><span class="ico">🏠</span>Tableau de bord</button>
-    <button class="sb-btn" data-tab="quart"><span class="ico">⏱</span>Quart</button>
     <button class="sb-btn" data-tab="livraisons"><span class="ico">📦</span>Livraisons</button>
     <button class="sb-btn" data-tab="depenses"><span class="ico">💳</span>Dépenses</button>
     <button class="sb-btn" data-tab="fiscal"><span class="ico">🧾</span>Fiscal</button>
     <button class="sb-btn" data-tab="ia"><span class="ico">✨</span>IA</button>
+    <button class="sb-btn" data-tab="export"><span class="ico">📤</span>Export</button>
   </nav>
   <div class="sb-footer">
     <button class="sb-btn" id="sb-sync"><span class="ico" id="sb-sync-ico">⟳</span>Synchroniser</button>
@@ -241,24 +189,22 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--s
   </header>
   <main id="main-scroll">
     <div id="panel-dashboard" class="panel active"></div>
-    <div id="panel-quart" class="panel"></div>
     <div id="panel-livraisons" class="panel"></div>
     <div id="panel-depenses" class="panel"></div>
     <div id="panel-fiscal" class="panel"></div>
     <div id="panel-ia" class="panel"></div>
+    <div id="panel-export" class="panel"></div>
   </main>
 </div>
+</div>
 
-</div><!-- #app -->
-
-<!-- BOTTOM NAV mobile -->
 <nav id="bnav">
   <button class="nb active" data-tab="dashboard"><span class="nb-ico">🏠</span><span class="nb-lbl">Accueil</span></button>
-  <button class="nb" data-tab="quart"><span class="nb-ico">⏱</span><span class="nb-lbl">Quart</span></button>
   <button class="nb" data-tab="livraisons"><span class="nb-ico">📦</span><span class="nb-lbl">Livraisons</span></button>
   <button class="nb" data-tab="depenses"><span class="nb-ico">💳</span><span class="nb-lbl">Dépenses</span></button>
   <button class="nb" data-tab="fiscal"><span class="nb-ico">🧾</span><span class="nb-lbl">Fiscal</span></button>
   <button class="nb" data-tab="ia"><span class="nb-ico">✨</span><span class="nb-lbl">IA</span></button>
+  <button class="nb" data-tab="export"><span class="nb-ico">📤</span><span class="nb-lbl">Export</span></button>
 </nav>
 
 <div id="toast"></div>
@@ -275,10 +221,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--s
     <div class="fg"><label class="fl">Pourboire ($)</label><input type="number" inputmode="decimal" class="fi" id="liv-tip" step="0.01" min="0" placeholder="0.00"></div>
   </div>
   <div class="fg"><label class="fl">Distance (km)</label><input type="number" inputmode="decimal" class="fi" id="liv-km" step="0.1" min="0" placeholder="0.0"></div>
-  <div class="frow">
-    <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="liv-date"></div>
-    <div class="fg"><label class="fl">Heure début</label><input type="time" class="fi" id="liv-heure"></div>
-  </div>
+  <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="liv-date"></div>
   <div class="fg"><label class="fl">Durée (min)</label><input type="number" inputmode="numeric" class="fi" id="liv-duree" step="1" min="0" placeholder="45"></div>
   <div class="fg"><label class="fl">Notes</label><input type="text" class="fi" id="liv-notes" placeholder="Optionnel…"></div>
   <div style="display:flex;gap:10px">
@@ -299,6 +242,9 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--s
       <option value="Téléphone">📱 Téléphone</option>
       <option value="Assurance auto">🛡️ Assurance auto</option>
       <option value="Entretien véhicule">🔧 Entretien véhicule</option>
+      <option value="Immatriculation">📋 Immatriculation</option>
+      <option value="Leasing">🚗 Leasing</option>
+      <option value="Stationnement">🅿️ Stationnement</option>
       <option value="Équipement">🛠️ Équipement</option>
       <option value="Autre">📦 Autre</option>
     </select>
@@ -320,31 +266,13 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--s
   </div>
   <div class="frow">
     <div class="fg"><label class="fl" id="dep-amt-label">Montant ($)</label><input type="number" inputmode="decimal" class="fi" id="dep-amt" step="0.01" min="0" placeholder="0.00"></div>
-    <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="dep-date"></div>
+    <div class="fg"><label class="fl" id="dep-date-label">Date</label><input type="date" class="fi" id="dep-date"></div>
   </div>
   <div class="fg"><label class="fl">Description</label><input type="text" class="fi" id="dep-desc" placeholder="Ex : Circuit électrique…"></div>
   <div class="fg"><label class="fl">Note de reçu</label><textarea class="fta" id="dep-recu" rows="2" placeholder="No de reçu…"></textarea></div>
   <div style="display:flex;gap:10px">
     <button class="btn btn-p" style="flex:1" id="dep-save">Enregistrer</button>
     <button class="btn btn-s" data-close="m-dep">Annuler</button>
-  </div>
-</div></div>
-
-<!-- MODAL RÉSUMÉ QUART -->
-<div class="moverlay" id="m-quart-sum">
-<div class="modal">
-  <div class="mhandle"></div>
-  <div class="mtitle"><span>Résumé du quart</span><button class="mclose" data-close="m-quart-sum">✕</button></div>
-  <div id="sum-map"></div>
-  <div class="grid2">
-    <div class="scard"><div class="slabel">Durée</div><div class="sval b" id="sum-dur">—</div></div>
-    <div class="scard"><div class="slabel">GPS km</div><div class="sval" id="sum-gps-km">—</div></div>
-  </div>
-  <div class="fg"><label class="fl">Distance finale (km)</label><input type="number" inputmode="decimal" class="fi" id="sum-km" step="0.1" min="0"></div>
-  <div class="fg"><label class="fl">Notes</label><input type="text" class="fi" id="sum-notes" placeholder="Optionnel…"></div>
-  <div style="display:flex;gap:10px">
-    <button class="btn btn-p" style="flex:1" id="quart-confirm">Sauvegarder</button>
-    <button class="btn btn-s" data-close="m-quart-sum">Annuler</button>
   </div>
 </div></div>
 
@@ -375,12 +303,18 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--s
   <div class="div"></div>
   <div class="stitle">Clé API Gemini</div>
   <div class="fg"><input type="password" class="fi" id="s-gemini" placeholder="AIzaSy…" autocomplete="off"></div>
+  <div style="font-size:12px;color:var(--text2);margin-top:-8px;margin-bottom:12px">Stockée dans Supabase si configuré, sinon localement.</div>
 
   <div class="div"></div>
   <div class="stitle">Fiscal</div>
   <div class="frow">
     <div class="fg"><label class="fl">Année fiscale</label><input type="number" class="fi" id="s-year" min="2020" max="2035"></div>
-    <div class="fg"><label class="fl">Coût moyen kWh ($)</label><input type="number" class="fi" id="s-kwh" step="0.001" min="0"></div>
+    <div class="fg"><label class="fl">Coût/kWh ($)</label><input type="number" class="fi" id="s-kwh" step="0.001" min="0"></div>
+  </div>
+  <div id="auto-km-cost-wrap" style="background:var(--card2);border-radius:12px;padding:12px 14px;margin-bottom:12px;display:none">
+    <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500;text-transform:uppercase">Coût moyen / km (calculé)</div>
+    <div id="auto-km-cost" style="font-size:20px;font-weight:700;color:var(--accent)">—</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:2px">Total dépenses véhicule ÷ km pro</div>
   </div>
 
   <div class="div"></div>
@@ -393,32 +327,38 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--s
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="console.warn('[LT] Supabase CDN indisponible')"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" onerror="console.warn('[LT] Leaflet CDN indisponible')"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" onerror="console.warn('[LT] SheetJS CDN indisponible')"></script>
+<script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js" onerror="console.warn('[LT] jsPDF CDN indisponible')"></script>
+<script src="https://unpkg.com/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js" onerror="console.warn('[LT] AutoTable CDN indisponible')"></script>
 <script>
 'use strict';
 window.addEventListener('unhandledrejection',e=>e.preventDefault());
-// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+
+// ── CONSTANTS ──────────────────────────────────────────────────────────────────
 const FED_BR=[{max:57375,r:.15},{max:114750,r:.205},{max:158519,r:.26},{max:220000,r:.29},{max:Infinity,r:.33}];
 const QC_BR=[{max:51780,r:.14},{max:103545,r:.19},{max:126000,r:.24},{max:Infinity,r:.2575}];
 const FED_BASIC=15705,QC_BASIC=17183,KM_R1=.70,KM_R2=.64,KM_THRESH=5000,TPS=.05,TVQ=.09975,TPS_SEUIL=30000;
-const CAT_ICO={'Recharge VE':'🔋','Téléphone':'📱','Assurance auto':'🛡️','Entretien véhicule':'🔧','Équipement':'🛠️','Autre':'📦'};
+const CAT_ICO={'Recharge VE':'🔋','Téléphone':'📱','Assurance auto':'🛡️','Entretien véhicule':'🔧','Immatriculation':'📋','Leasing':'🚗','Stationnement':'🅿️','Équipement':'🛠️','Autre':'📦'};
 const PLAT_ICO={'Instacart':'🛒','DoorDash':'🔴','Uber Eats':'🟢','SkipTheDishes':'🟡','Cornershop':'🟣'};
-const MIXED=['Téléphone','Assurance auto','Entretien véhicule'];
-const VEH=['Recharge VE','Assurance auto','Entretien véhicule'];
-const TABS=['dashboard','quart','livraisons','depenses','fiscal','ia'];
-const TAB_TITLES={dashboard:'Tableau de bord',quart:'Quart',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',ia:'IA'};
-const LS_KEY='lt_v3';
+const MIXED=['Téléphone','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
+const VEH=['Recharge VE','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
+const DATE_LABEL_CATS=['Téléphone','Assurance auto','Immatriculation','Leasing'];
+const TABS=['dashboard','livraisons','depenses','fiscal','ia','export'];
+const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',ia:'IA',export:'Export'};
+const LS_KEY='lt_v4';
 
 // ── STATE ──────────────────────────────────────────────────────────────────────
 const S={
   tab:'dashboard', fsub:'revenus',
-  deliveries:[], expenses:[], quarts:[],
+  deliveries:[], expenses:[],
+  conversations:[], currentConvId:null,
   cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',geminiKey:'',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra'},
-  quart:null,      // active quart session
-  pendingQ:null,
-  aiReport:'', chatHistory:[],
+  aiReport:'',
   dFilt:{plat:'',date:''}, eFilt:'',
-  lastGeminiTs:0
+  lastGeminiTs:0,
+  showConvList:false,
+  dedDetailOpen:false,
+  exportDateFrom:'', exportDateTo:''
 };
 
 // ── STORAGE ────────────────────────────────────────────────────────────────────
@@ -427,14 +367,14 @@ function loadLS(){
     const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
     if(d.deliveries) S.deliveries=d.deliveries;
     if(d.expenses)   S.expenses=d.expenses;
-    if(d.quarts)     S.quarts=d.quarts;
     if(d.cfg)        S.cfg={...S.cfg,...d.cfg};
     if(d.aiReport)   S.aiReport=d.aiReport;
-    if(d.chatHistory)S.chatHistory=d.chatHistory;
+    if(d.conversations) S.conversations=d.conversations;
+    if(d.currentConvId) S.currentConvId=d.currentConvId;
   }catch(e){}
 }
 function saveLS(){
-  try{localStorage.setItem(LS_KEY,JSON.stringify({deliveries:S.deliveries,expenses:S.expenses,quarts:S.quarts,cfg:S.cfg,aiReport:S.aiReport,chatHistory:S.chatHistory}));}catch(e){}
+  try{localStorage.setItem(LS_KEY,JSON.stringify({deliveries:S.deliveries,expenses:S.expenses,cfg:S.cfg,aiReport:S.aiReport,conversations:S.conversations,currentConvId:S.currentConvId}));}catch(e){}
 }
 
 // ── SUPABASE ───────────────────────────────────────────────────────────────────
@@ -447,7 +387,7 @@ function sbClient(){
   return _sb;
 }
 function sbReset(){
-  try{if(_sbCh) _sbCh.unsubscribe();}catch(e){}
+  try{if(_sbCh)_sbCh.unsubscribe();}catch(e){}
   _sbCh=null; _sb=null; connDot(null);
 }
 function connDot(ok){
@@ -456,29 +396,34 @@ function connDot(ok){
   if(st) st.textContent=ok===true?'Connecté':ok===false?'Erreur':'Non configuré';
 }
 
-// DB mappers
-function dFromDB(r){return{id:r.id,plat:r.plateforme,rev:r.revenu||0,tip:r.pourboire||0,km:r.distance||0,dureeMin:r.duree||0,heure:r.heure_debut||'',date:r.date,debut:r.date+'T'+(r.heure_debut||'00:00'),notes:r.notes||''};}
-function dToDB(d){return{id:d.id,plateforme:d.plat,revenu:d.rev||0,pourboire:d.tip||0,distance:d.km||0,duree:d.dureeMin||0,heure_debut:d.heure||null,date:d.date,notes:d.notes||null};}
+function dFromDB(r){return{id:r.id,plat:r.plateforme,rev:r.revenu||0,tip:r.pourboire||0,km:r.distance||0,dureeMin:r.duree||0,date:r.date,notes:r.notes||''};}
+function dToDB(d){return{id:d.id,plateforme:d.plat,revenu:d.rev||0,pourboire:d.tip||0,distance:d.km||0,duree:d.dureeMin||0,date:d.date,notes:d.notes||null};}
 function eFromDB(r){return{id:r.id,cat:r.categorie,amt:r.montant||0,desc:r.description||'',recu:r.note_recu||'',date:r.date,proRatioOverride:r.ratio_pro!=null?r.ratio_pro:null,kwh:r.kwh||0};}
 function eToDB(e){return{id:e.id,categorie:e.cat,montant:e.amt||0,montant_annuel:expAnnual(e),description:e.desc||null,note_recu:e.recu||null,date:e.date,ratio_pro:e.proRatioOverride,kwh:e.kwh||null};}
-function qFromDB(r){const d=r.date||new Date().toISOString().slice(0,10);return{id:r.id,startTs:d+'T'+(r.heure_debut||'00:00:00'),endTs:d+'T'+(r.heure_fin||'00:00:00'),durationMs:(r.duree||0)*60000,km:r.distance||0,path:r.points_gps||[]};}
-function qToDB(q){const d=q.startTs?q.startTs.slice(0,10):new Date().toISOString().slice(0,10);const hd=q.startTs?(q.startTs.slice(11,19)||'00:00:00'):'00:00:00';const hf=q.endTs?(q.endTs.slice(11,19)||'00:00:00'):'00:00:00';return{id:q.id,date:d,heure_debut:hd,heure_fin:hf,duree:Math.round((q.durationMs||0)/60000),distance:q.km||0,points_gps:q.path||[]};}
+function convFromDB(r){return{id:r.id,titre:r.titre||'Sans titre',messages:r.messages||[]};}
 
 async function sbLoad(){
   const sb=sbClient();if(!sb){connDot(false);return false;}
   try{
-    const[l,d,q]=await Promise.all([
+    const[l,d,cv,pm]=await Promise.all([
       sb.from('livraisons').select('*').order('created_at',{ascending:false}),
       sb.from('depenses').select('*').order('created_at',{ascending:false}),
-      sb.from('quarts').select('*').order('created_at',{ascending:false})
+      sb.from('conversations_ia').select('*').order('updated_at',{ascending:false}).limit(50),
+      sb.from('parametres').select('*')
     ]);
-    if(l.error)throw l.error; if(d.error)throw d.error; if(q.error)throw q.error;
+    if(l.error)throw l.error;
+    if(d.error)throw d.error;
     S.deliveries=l.data.map(dFromDB);
     S.expenses=d.data.map(eFromDB);
-    S.quarts=q.data.map(qFromDB);
+    if(!cv.error&&cv.data) S.conversations=cv.data.map(convFromDB);
+    if(!pm.error&&pm.data){
+      const gemRow=pm.data.find(r=>r.cle==='gemini_api_key');
+      if(gemRow&&gemRow.valeur) S.cfg.geminiKey=gemRow.valeur;
+    }
     saveLS(); connDot(true); return true;
   }catch(e){console.error('[SB load]',e.message); connDot(false); return false;}
 }
+
 function sbSubscribe(){
   const sb=sbClient();if(!sb)return;
   try{if(_sbCh)_sbCh.unsubscribe();}catch(e){}
@@ -486,10 +431,11 @@ function sbSubscribe(){
     _sbCh=sb.channel('lt-rt')
       .on('postgres_changes',{event:'*',schema:'public',table:'livraisons'},p=>onRT('livraisons',p))
       .on('postgres_changes',{event:'*',schema:'public',table:'depenses'},p=>onRT('depenses',p))
-      .on('postgres_changes',{event:'*',schema:'public',table:'quarts'},p=>onRT('quarts',p))
+      .on('postgres_changes',{event:'*',schema:'public',table:'conversations_ia'},p=>onRT('conversations_ia',p))
       .subscribe(st=>connDot(st==='SUBSCRIBED'?true:false));
   }catch(e){console.warn('[LT] Realtime disabled:',e.message);_sbCh=null;}
 }
+
 function onRT(table,{eventType,new:nr,old:or}){
   if(table==='livraisons'){
     if(eventType==='DELETE')S.deliveries=S.deliveries.filter(x=>x.id!==or.id);
@@ -497,12 +443,13 @@ function onRT(table,{eventType,new:nr,old:or}){
   }else if(table==='depenses'){
     if(eventType==='DELETE')S.expenses=S.expenses.filter(x=>x.id!==or.id);
     else{const v=eFromDB(nr);const i=S.expenses.findIndex(x=>x.id===v.id);if(i>=0)S.expenses[i]=v;else S.expenses.unshift(v);}
-  }else if(table==='quarts'){
-    if(eventType==='DELETE')S.quarts=S.quarts.filter(x=>x.id!==or.id);
-    else{const v=qFromDB(nr);const i=S.quarts.findIndex(x=>x.id===v.id);if(i>=0)S.quarts[i]=v;else S.quarts.unshift(v);}
+  }else if(table==='conversations_ia'){
+    if(eventType==='DELETE')S.conversations=S.conversations.filter(x=>x.id!==or.id);
+    else{const v=convFromDB(nr);const i=S.conversations.findIndex(x=>x.id===v.id);if(i>=0)S.conversations[i]=v;else S.conversations.unshift(v);}
   }
   saveLS(); render();
 }
+
 async function sbUpsert(table,row){
   const sb=sbClient();if(!sb)return;
   try{const{error}=await sb.from(table).upsert(row);if(error)throw error;}catch(e){console.error('[SB upsert]',table,e.message);}
@@ -511,29 +458,45 @@ async function sbDelete(table,id){
   const sb=sbClient();if(!sb)return;
   try{const{error}=await sb.from(table).delete().eq('id',id);if(error)throw error;}catch(e){console.error('[SB delete]',table,e.message);}
 }
+async function sbSaveGeminiKey(key){
+  const sb=sbClient();if(!sb)return;
+  try{await sb.from('parametres').upsert({cle:'gemini_api_key',valeur:key});}catch(e){}
+}
+async function sbSaveConv(conv){
+  const sb=sbClient();if(!sb)return;
+  try{await sb.from('conversations_ia').upsert({id:conv.id,titre:conv.titre,messages:conv.messages,updated_at:new Date().toISOString()});}catch(e){}
+}
 
 // ── HELPERS ────────────────────────────────────────────────────────────────────
 const uid=()=>typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():(Date.now().toString(36)+Math.random().toString(36).slice(2));
 const $f=n=>new Intl.NumberFormat('fr-CA',{style:'currency',currency:'CAD'}).format(n||0);
-const fdate=s=>{try{return new Date(s).toLocaleDateString('fr-CA',{day:'numeric',month:'short'});}catch(e){return s||'';}};
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const platIco=p=>PLAT_ICO[p]||'🚚';
-function fmtMs(ms,short=false){const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);if(short)return h>0?`${h}h${String(m).padStart(2,'0')}`:`${m}m${String(s).padStart(2,'0')}s`;return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+// Fix timezone: parse date strings as local time
+function parseDate(s){if(!s)return new Date(NaN);return s.includes('T')?new Date(s):new Date(s+'T00:00:00');}
+function fdate(s){try{const d=parseDate(s);return d.toLocaleDateString('fr-CA',{day:'numeric',month:'short'});}catch(e){return s||'';}}
+function fdateShort(s){try{const d=parseDate(s);return d.toLocaleDateString('fr-CA',{day:'2-digit',month:'2-digit',year:'2-digit'});}catch(e){return s||'';}}
 function fmtDur(min){if(!min||min<=0)return'';return min>=60?`${Math.floor(min/60)}h${String(min%60).padStart(2,'0')}`:`${min}min`;}
-function haversine(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dO=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dO/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
-function expAnnual(e){return e.cat==='Téléphone'?e.amt*12:e.amt;}
-function expDed(e,proRatio){if(!MIXED.includes(e.cat))return expAnnual(e);const ratio=e.proRatioOverride!=null?e.proRatioOverride/100:(proRatio??1);return expAnnual(e)*ratio;}
 function calcBracket(inc,brackets){let tax=0,prev=0;for(const b of brackets){if(inc<=prev)break;tax+=(Math.min(inc,b.max)-prev)*b.r;prev=b.max;}return tax;}
+
+function expAnnual(e){
+  if(e.cat==='Téléphone') return (e.amt||0)*12;
+  if(e.cat==='Leasing') return (e.amt||0)*26;
+  return e.amt||0;
+}
+function expDed(e,proRatio){
+  if(!MIXED.includes(e.cat)) return expAnnual(e);
+  const ratio=e.proRatioOverride!=null?e.proRatioOverride/100:(proRatio??1);
+  return expAnnual(e)*ratio;
+}
 
 function calcFiscal(){
   const yr=S.cfg.year;
-  const divs=S.deliveries.filter(d=>new Date(d.debut).getFullYear()===yr);
-  const exps=S.expenses.filter(e=>new Date(e.date).getFullYear()===yr);
-  const quartsYr=S.quarts.filter(q=>new Date(q.startTs).getFullYear()===yr);
+  const divs=S.deliveries.filter(d=>parseDate(d.date).getFullYear()===yr);
+  const exps=S.expenses.filter(e=>parseDate(e.date).getFullYear()===yr);
   const gross=divs.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
   const km=divs.reduce((s,d)=>s+(d.km||0),0);
-  const kmQ=quartsYr.reduce((s,q)=>s+(q.km||0),0);
-  const kmPro=km+kmQ;
+  const kmPro=km;
   const kmTotal=Math.max(0,(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0));
   const proRatio=kmTotal>0&&kmPro>0?Math.min(1,kmPro/kmTotal):null;
   const kmDed=km<=KM_THRESH?km*KM_R1:KM_THRESH*KM_R1+(km-KM_THRESH)*KM_R2;
@@ -546,16 +509,16 @@ function calcFiscal(){
   const qcOwed=Math.max(0,calcBracket(net,QC_BR)-QC_BASIC*.14);
   const rrq=net>3500?Math.min(Math.max(0,Math.min(net,73200)-3500)*.119,8316.05):0;
   const total=fedOwed+qcOwed+rrq;
-  return{gross,km,kmPro,kmTotal,kmDed,vehDed,otherDed,totDed,net,fedOwed,qcOwed,rrq,total,rate:gross>0?total/gross:0,divs,exps,quartsYr,proRatio,needsTPS:gross>=TPS_SEUIL};
+  const vehExpTotal=exps.filter(e=>VEH.includes(e.cat)).reduce((s,e)=>s+expAnnual(e),0);
+  const autoKmCost=kmPro>0?vehExpTotal/kmPro:null;
+  return{gross,km,kmPro,kmTotal,kmDed,vehDed,otherDed,totDed,net,fedOwed,qcOwed,rrq,total,rate:gross>0?total/gross:0,divs,exps,proRatio,needsTPS:gross>=TPS_SEUIL,autoKmCost,vehExpTotal};
 }
-
 function calcProRatio(){return calcFiscal().proRatio;}
 
 // ── TOAST ──────────────────────────────────────────────────────────────────────
 let _toastT;
 function toast(msg,dur=3000){
-  const el=document.getElementById('toast');
-  if(!el)return;
+  const el=document.getElementById('toast');if(!el)return;
   el.textContent=msg; el.classList.add('show');
   clearTimeout(_toastT);
   _toastT=setTimeout(()=>el.classList.remove('show'),dur);
@@ -564,18 +527,14 @@ function toast(msg,dur=3000){
 // ── NAVIGATION ─────────────────────────────────────────────────────────────────
 function goTab(tab){
   S.tab=tab;
-  TABS.forEach(t=>{
-    document.getElementById('panel-'+t)?.classList.toggle('active',t===tab);
-  });
+  TABS.forEach(t=>document.getElementById('panel-'+t)?.classList.toggle('active',t===tab));
   document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
   const hdr=document.getElementById('hdr-title');if(hdr)hdr.textContent=TAB_TITLES[tab]||tab;
   document.getElementById('main-scroll').scrollTop=0;
   render();
-  if(tab==='quart'&&S.quart) setTimeout(initQMap,100);
 }
-
 function render(){
-  ({dashboard:rDash,quart:rQuart,livraisons:rLiv,depenses:rDep,fiscal:rFisc,ia:rIA})[S.tab]?.();
+  ({dashboard:rDash,livraisons:rLiv,depenses:rDep,fiscal:rFisc,ia:rIA,export:rExport})[S.tab]?.();
 }
 
 // ── SYNC ───────────────────────────────────────────────────────────────────────
@@ -587,222 +546,57 @@ function setSyncSpin(on){
 async function doSync(){
   if(!S.cfg.supabaseUrl||!S.cfg.supabaseKey){toast('⚙️ Configure Supabase dans Paramètres');return;}
   setSyncSpin(true);
-  try{
-    const ok=await sbLoad();
-    if(ok){render();toast('✅ Synchronisé');}
-    else toast('❌ Erreur de synchronisation');
-  }catch(e){toast('❌ '+e.message);}
+  try{const ok=await sbLoad();if(ok){render();toast('✅ Synchronisé');}else toast('❌ Erreur de synchronisation');}
+  catch(e){toast('❌ '+e.message);}
   setSyncSpin(false);
 }
 
 // ── DASHBOARD ──────────────────────────────────────────────────────────────────
 function rDash(){
-  const now=new Date(), todStr=now.toDateString();
+  const now=new Date(), todStr=now.toLocaleDateString('fr-CA');
   const wkStart=new Date(now);wkStart.setDate(now.getDate()-now.getDay());wkStart.setHours(0,0,0,0);
   const moStart=new Date(now.getFullYear(),now.getMonth(),1);
   const sum=arr=>arr.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
-  const tod=S.deliveries.filter(d=>new Date(d.debut).toDateString()===todStr);
-  const wk=S.deliveries.filter(d=>new Date(d.debut)>=wkStart);
-  const mo=S.deliveries.filter(d=>new Date(d.debut)>=moStart);
-  const allKm=S.deliveries.reduce((s,d)=>s+(d.km||0),0);
-  const hmap={};
-  S.deliveries.forEach(d=>{const h=new Date(d.debut).getHours();if(!hmap[h])hmap[h]={r:0,n:0};hmap[h].r+=(d.rev||0)+(d.tip||0);hmap[h].n++;});
-  let bestH=null,bestAvg=0;
-  for(const[h,v]of Object.entries(hmap)){const a=v.r/v.n;if(a>bestAvg){bestAvg=a;bestH=+h;}}
+  const tod=S.deliveries.filter(d=>d.date===todStr);
+  const wk=S.deliveries.filter(d=>parseDate(d.date)>=wkStart);
+  const mo=S.deliveries.filter(d=>parseDate(d.date)>=moStart);
   const f=calcFiscal();
-  const recent=[...S.deliveries].sort((a,b)=>new Date(b.debut)-new Date(a.debut)).slice(0,5);
   const alerts=[];
-  if(f.needsTPS)alerts.push({t:'w',i:'⚠️',m:`Tu dépasses ${$f(30000)} — inscription TPS/TVQ obligatoire !`});
-  else if(f.gross>24000)alerts.push({t:'w',i:'⚡',m:`À ${$f(30000-f.gross)} du seuil TPS/TVQ`});
-  if(f.rate>0)alerts.push({t:'i',i:'💡',m:`Mets ~${Math.ceil(Math.max(f.rate,.25)*100)}% de côté (~${$f(f.gross*Math.max(f.rate,.25))})`});
-  const activeQ=S.quart?`<div class="alert alert-g"><em>⏱</em><p>Quart en cours — ${fmtMs(getElapsed())} · ${(S.quart.km||0).toFixed(1)} km</p></div>`:'';
+  if(f.needsTPS) alerts.push({t:'w',i:'⚠️',m:`Tu dépasses ${$f(30000)} — inscription TPS/TVQ obligatoire !`});
+  else if(f.gross>24000) alerts.push({t:'w',i:'⚡',m:`À ${$f(30000-f.gross)} du seuil TPS/TVQ`});
+  if(f.rate>0) alerts.push({t:'i',i:'💡',m:`Mets ~${Math.ceil(Math.max(f.rate,.25)*100)}% de côté (~${$f(f.gross*Math.max(f.rate,.25))})`});
+  // IA insight tile: last AI message from current conversation or aiReport
+  const curConv=S.conversations.find(c=>c.id===S.currentConvId);
+  const lastAIMsgs=curConv?.messages?.filter(m=>m.role==='ai')||[];
+  const lastAI=lastAIMsgs[lastAIMsgs.length-1]?.text||S.aiReport||'';
+  const iaTile=`<div class="scard" style="margin-bottom:12px">
+    <div class="slabel">✨ Analyse IA</div>
+    ${lastAI?`<p class="ia-insight">${esc(lastAI.slice(0,300))}</p><button class="btn btn-s btn-xs" id="dash-ia-refresh">Actualiser</button>`
+    :`<p style="font-size:13px;color:var(--text2);margin-bottom:8px">Aucune analyse encore.</p><button class="btn btn-p btn-xs" id="dash-ia-go">Analyser</button>`}
+  </div>`;
+  const recent=[...S.deliveries].sort((a,b)=>parseDate(b.date)-parseDate(a.date)).slice(0,5);
   document.getElementById('panel-dashboard').innerHTML=`
-    ${activeQ}
     <div class="grid2">
       <div class="scard"><div class="slabel">Aujourd'hui</div><div class="sval g">${$f(sum(tod))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${tod.length} livraison${tod.length!==1?'s':''}</div></div>
       <div class="scard"><div class="slabel">Cette semaine</div><div class="sval b">${$f(sum(wk))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${wk.length} livraison${wk.length!==1?'s':''}</div></div>
     </div>
     <div class="grid2">
       <div class="scard"><div class="slabel">Ce mois</div><div class="sval">${$f(sum(mo))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${mo.length} livraison${mo.length!==1?'s':''}</div></div>
-      <div class="scard"><div class="slabel">Meilleure heure</div><div class="sval y">${bestH!==null?bestH+'h00':'—'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${bestH!==null?`~${$f(bestAvg)}/liv`:'Besoin de données'}</div></div>
+      <div class="scard"><div class="slabel">Km pro</div><div class="sval y">${f.km.toFixed(0)}<span style="font-size:13px"> km</span></div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.divs.length} livraisons</div></div>
     </div>
-    <div class="scard" style="margin-bottom:12px"><div class="slabel">Km total livraisons</div><div class="sval">${allKm.toFixed(0)}<span style="font-size:14px"> km</span></div></div>
+    ${iaTile}
     ${alerts.map(a=>`<div class="alert alert-${a.t}"><em>${a.i}</em><p>${a.m}</p></div>`).join('')}
     <div class="stitle">Dernières livraisons</div>
     ${recent.length===0?`<div class="empty"><div class="empty-ico">🚚</div><p>Aucune livraison encore.</p></div>`:recent.map(d=>livCard(d,false)).join('')}
   `;
 }
 
-// ── QUART ──────────────────────────────────────────────────────────────────────
-let _qInterval=null, _qMap=null, _qPoly=null, _sumMap=null;
-
-function getElapsed(){
-  if(!S.quart)return 0;
-  let ms=S.quart.elapsedMs;
-  if(!S.quart.paused&&S.quart.startTs)ms+=Date.now()-new Date(S.quart.startTs).getTime();
-  return ms;
-}
-
-function startQuart(){
-  S.quart={startTs:new Date().toISOString(),elapsedMs:0,paused:false,km:0,path:[],watchId:null};
-  _qInterval=setInterval(tickQuart,1000);
-  startGPS();
-  requestWakeLock();
-  rQuart();
-  setTimeout(initQMap,150);
-  toast('🟢 Quart démarré !');
-}
-
-function tickQuart(){
-  const te=document.getElementById('q-timer'), ke=document.getElementById('q-km');
-  if(te)te.textContent=fmtMs(getElapsed());
-  if(ke&&S.quart)ke.textContent=(S.quart.km||0).toFixed(2)+' km';
-}
-
-function pauseQuart(){
-  if(!S.quart)return;
-  if(S.quart.paused){
-    S.quart.startTs=new Date().toISOString();S.quart.paused=false;
-    requestWakeLock();toast('▶ Quart repris');
-  }else{
-    S.quart.elapsedMs+=Date.now()-new Date(S.quart.startTs).getTime();S.quart.startTs=null;S.quart.paused=true;
-    try{S.quart.wakeLock?.release();}catch(e){}
-    toast('⏸ Quart en pause');
-  }
-  const btn=document.getElementById('q-pause');if(btn)btn.textContent=S.quart.paused?'▶ Reprendre':'⏸ Pause';
-}
-
-function stopQuart(){
-  if(!S.quart)return;
-  if(!S.quart.paused&&S.quart.startTs)S.quart.elapsedMs+=Date.now()-new Date(S.quart.startTs).getTime();
-  clearInterval(_qInterval);_qInterval=null;
-  if(S.quart.watchId!=null){try{navigator.geolocation.clearWatch(S.quart.watchId);}catch(e){}}
-  try{S.quart.wakeLock?.release();}catch(e){}
-  S.pendingQ={startTs:S.quart.startTs||new Date().toISOString(),endTs:new Date().toISOString(),durationMs:S.quart.elapsedMs,km:S.quart.km,path:[...S.quart.path]};
-  S.quart=null;
-  destroyQMap();
-  rQuart();
-  openSummaryModal();
-}
-
-function startGPS(){
-  if(!navigator.geolocation){toast('⚠️ GPS non disponible');return;}
-  try{
-    S.quart.watchId=navigator.geolocation.watchPosition(pos=>{
-      if(!S.quart||S.quart.paused)return;
-      const{latitude:la,longitude:lo}=pos.coords;
-      const path=S.quart.path;
-      if(path.length){const last=path[path.length-1];const d=haversine(last[0],last[1],la,lo);if(d>0.01)S.quart.km+=d;}
-      if(path.length<500)path.push([la,lo]);
-      if(_qMap&&_qPoly){_qPoly.addLatLng([la,lo]);_qMap.panTo([la,lo]);}
-    },e=>toast('⚠️ GPS: '+e.message),{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
-  }catch(e){}
-}
-
-async function requestWakeLock(){
-  if(!S.quart||!('wakeLock' in navigator))return;
-  try{S.quart.wakeLock=await navigator.wakeLock.request('screen');}catch(e){}
-}
-
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.quart&&!S.quart.paused)requestWakeLock();});
-
-function initQMap(){
-  destroyQMap();
-  const el=document.getElementById('q-map');
-  if(!el||typeof L==='undefined')return;
-  try{
-    _qMap=L.map(el,{zoomControl:false,attributionControl:false});
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(_qMap);
-    _qPoly=L.polyline([],{color:'#007AFF',weight:4}).addTo(_qMap);
-    if(S.quart?.path.length){_qPoly.setLatLngs(S.quart.path);_qMap.setView(S.quart.path[S.quart.path.length-1],14);}
-    else _qMap.setView([45.5088,-73.5878],12);
-  }catch(e){}
-}
-
-function destroyQMap(){
-  if(_qMap){try{_qMap.remove();}catch(e){}_qMap=null;_qPoly=null;}
-}
-
-function rQuart(){
-  const lastQ=S.quarts[0];
-  let hero='';
-  if(S.quart){
-    hero=`<div class="q-hero">
-      <div style="font-size:12px;opacity:.75;margin-bottom:6px">🟢 Quart en cours</div>
-      <div id="q-timer" class="q-timer">${fmtMs(getElapsed())}</div>
-      <div id="q-km" class="q-km">${(S.quart.km||0).toFixed(2)} km</div>
-      <div style="display:flex;gap:10px;margin-top:16px">
-        <button id="q-pause" class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;flex:1" data-action="q-pause">${S.quart.paused?'▶ Reprendre':'⏸ Pause'}</button>
-        <button class="btn btn-sm" style="background:#FF3B30;color:#fff" data-action="q-stop">⏹ Arrêter</button>
-      </div>
-      <div id="q-map"></div>
-    </div>`;
-  }else{
-    hero=`<div class="card" style="text-align:center;padding:28px 16px">
-      <div style="font-size:44px;margin-bottom:10px">⏱</div>
-      <div style="font-size:17px;font-weight:600;margin-bottom:6px">Démarrer un quart</div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:18px">GPS + chrono automatique</div>
-      <button class="btn btn-p btn-w" data-action="q-start">🟢 Démarrer</button>
-      ${lastQ?`<button class="btn btn-s btn-w btn-sm" style="margin-top:8px" data-action="use-last-km">Utiliser ${lastQ.km.toFixed(1)} km du dernier quart</button>`:''}
-    </div>`;
-  }
-  const history=S.quarts.slice(0,30).map(q=>`
-    <div class="li">
-      <div class="li-ico">⏱</div>
-      <div class="li-body">
-        <div class="li-title">${fdate(q.startTs)}</div>
-        <div class="li-sub">${fmtMs(q.durationMs,true)} · ${(q.km||0).toFixed(1)} km</div>
-      </div>
-      <div class="li-right"><div class="li-acts"><button class="btn btn-xs btn-d" data-action="del-quart" data-id="${q.id}">🗑️</button></div></div>
-    </div>`).join('');
-  document.getElementById('panel-quart').innerHTML=`${hero}${S.quarts.length>0?`<div class="stitle">Quarts précédents</div>${history}`:''}`;
-}
-
-function openSummaryModal(){
-  const q=S.pendingQ;if(!q)return;
-  document.getElementById('sum-dur').textContent=fmtMs(q.durationMs,true);
-  document.getElementById('sum-gps-km').textContent=q.km.toFixed(2)+' km';
-  document.getElementById('sum-km').value=q.km.toFixed(1);
-  document.getElementById('sum-notes').value='';
-  openM('m-quart-sum');
-  setTimeout(()=>initSumMap(q.path),350);
-}
-
-function initSumMap(path){
-  if(_sumMap){try{_sumMap.remove();}catch(e){}_sumMap=null;}
-  const el=document.getElementById('sum-map');
-  if(!el||typeof L==='undefined')return;
-  if(!path||path.length<2){el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text2);font-size:13px">Aucune donnée GPS</div>';return;}
-  try{
-    _sumMap=L.map(el,{zoomControl:false,attributionControl:false});
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(_sumMap);
-    const poly=L.polyline(path,{color:'#007AFF',weight:4}).addTo(_sumMap);
-    _sumMap.fitBounds(poly.getBounds().pad(.15));
-  }catch(e){}
-}
-
-function confirmQuart(){
-  if(!S.pendingQ)return;
-  const km=parseFloat(document.getElementById('sum-km').value)||S.pendingQ.km;
-  const nq={id:uid(),startTs:S.pendingQ.startTs,endTs:S.pendingQ.endTs,durationMs:S.pendingQ.durationMs,km,path:S.pendingQ.path};
-  S.quarts.unshift(nq);S.pendingQ=null;
-  if(_sumMap){try{_sumMap.remove();}catch(e){}_sumMap=null;}
-  saveLS(); sbUpsert('quarts',qToDB(nq));
-  closeM('m-quart-sum'); toast('✅ Quart sauvegardé !'); rQuart();
-}
-
-function delQuart(id){
-  if(!confirm('Supprimer ce quart ?'))return;
-  S.quarts=S.quarts.filter(q=>q.id!==id);
-  saveLS(); sbDelete('quarts',id); rQuart(); toast('🗑️ Quart supprimé');
-}
-
 // ── LIVRAISONS ─────────────────────────────────────────────────────────────────
 function rLiv(){
   const plats=['Toutes',...S.cfg.platforms];
-  let filt=[...S.deliveries].sort((a,b)=>new Date(b.debut)-new Date(a.debut));
-  if(S.dFilt.plat&&S.dFilt.plat!=='Toutes')filt=filt.filter(d=>d.plat===S.dFilt.plat);
-  if(S.dFilt.date){const ds=new Date(S.dFilt.date).toDateString();filt=filt.filter(d=>new Date(d.debut).toDateString()===ds);}
+  let filt=[...S.deliveries].sort((a,b)=>parseDate(b.date)-parseDate(a.date));
+  if(S.dFilt.plat&&S.dFilt.plat!=='Toutes') filt=filt.filter(d=>d.plat===S.dFilt.plat);
+  if(S.dFilt.date) filt=filt.filter(d=>d.date===S.dFilt.date);
   document.getElementById('panel-livraisons').innerHTML=`
     <div class="chips">${plats.map(p=>`<button class="chip${(S.dFilt.plat||'Toutes')===p?' active':''}" data-action="filt-plat" data-val="${esc(p)}">${esc(p)}</button>`).join('')}</div>
     <div class="fg"><input type="date" class="fi" value="${S.dFilt.date}" data-action="filt-date"></div>
@@ -817,7 +611,7 @@ function livCard(d,acts=false){
     <div class="li-ico">${platIco(d.plat)}</div>
     <div class="li-body">
       <div class="li-title">${esc(d.plat)}</div>
-      <div class="li-sub">${fdate(d.debut)}${d.heure?' à '+d.heure:''}${dur?' · '+dur:''}${d.km?' · '+d.km+' km':''}${hr>0?' · '+$f(hr)+'/h':''}</div>
+      <div class="li-sub">${fdate(d.date)}${dur?' · '+dur:''}${d.km?' · '+d.km+' km':''}${hr>0?' · '+$f(hr)+'/h':''}</div>
       ${d.notes?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(d.notes)}</div>`:''}
     </div>
     <div class="li-right">
@@ -829,7 +623,7 @@ function livCard(d,acts=false){
 }
 
 function openLivModal(id=null){
-  const today=new Date().toISOString().slice(0,10);
+  const today=new Date().toLocaleDateString('fr-CA');
   const sel=document.getElementById('liv-plat');
   sel.innerHTML=S.cfg.platforms.map(p=>`<option value="${esc(p)}">${platIco(p)} ${esc(p)}</option>`).join('');
   if(id){
@@ -841,20 +635,14 @@ function openLivModal(id=null){
     document.getElementById('liv-tip').value=d.tip||'';
     document.getElementById('liv-km').value=d.km||'';
     document.getElementById('liv-date').value=d.date||today;
-    document.getElementById('liv-heure').value=d.heure||'';
     document.getElementById('liv-duree').value=d.dureeMin||'';
     document.getElementById('liv-notes').value=d.notes||'';
   }else{
     document.getElementById('liv-title').textContent='Nouvelle livraison';
     document.getElementById('liv-id').value='';
     sel.value=S.cfg.defaultPlat;
-    document.getElementById('liv-rev').value='';
-    document.getElementById('liv-tip').value='';
-    document.getElementById('liv-km').value='';
+    ['liv-rev','liv-tip','liv-km','liv-duree','liv-notes'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('liv-date').value=today;
-    document.getElementById('liv-heure').value='';
-    document.getElementById('liv-duree').value='';
-    document.getElementById('liv-notes').value='';
   }
   openM('m-liv');
 }
@@ -862,14 +650,12 @@ function openLivModal(id=null){
 function saveLiv(){
   const id=document.getElementById('liv-id').value||uid();
   const dateVal=document.getElementById('liv-date').value;
-  const heure=document.getElementById('liv-heure').value;
   if(!dateVal){toast('⚠️ Date requise');return;}
-  const d={id,plat:document.getElementById('liv-plat').value,rev:parseFloat(document.getElementById('liv-rev').value)||0,tip:parseFloat(document.getElementById('liv-tip').value)||0,km:parseFloat(document.getElementById('liv-km').value)||0,date:dateVal,heure:heure||'',debut:dateVal+'T'+(heure||'00:00'),dureeMin:parseInt(document.getElementById('liv-duree').value)||0,notes:document.getElementById('liv-notes').value};
+  const d={id,plat:document.getElementById('liv-plat').value,rev:parseFloat(document.getElementById('liv-rev').value)||0,tip:parseFloat(document.getElementById('liv-tip').value)||0,km:parseFloat(document.getElementById('liv-km').value)||0,date:dateVal,dureeMin:parseInt(document.getElementById('liv-duree').value)||0,notes:document.getElementById('liv-notes').value};
   const i=S.deliveries.findIndex(x=>x.id===id);
   if(i>=0)S.deliveries[i]=d;else S.deliveries.unshift(d);
   saveLS(); sbUpsert('livraisons',dToDB(d)); closeM('m-liv'); render(); toast('✅ Livraison enregistrée !');
 }
-
 function delLiv(id){
   if(!confirm('Supprimer cette livraison ?'))return;
   S.deliveries=S.deliveries.filter(d=>d.id!==id);
@@ -879,16 +665,17 @@ function delLiv(id){
 // ── DÉPENSES ───────────────────────────────────────────────────────────────────
 function rDep(){
   const cats=Object.keys(CAT_ICO);
-  let filt=[...S.expenses].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  if(S.eFilt&&S.eFilt!=='Toutes')filt=filt.filter(e=>e.cat===S.eFilt);
+  let filt=[...S.expenses].sort((a,b)=>parseDate(b.date)-parseDate(a.date));
+  if(S.eFilt&&S.eFilt!=='Toutes') filt=filt.filter(e=>e.cat===S.eFilt);
   const totals={};cats.forEach(c=>{totals[c]=S.expenses.filter(e=>e.cat===c).reduce((s,e)=>s+expAnnual(e),0);});
   const grand=S.expenses.reduce((s,e)=>s+expAnnual(e),0);
   const proRatio=calcProRatio();
-  const ratioInfo=proRatio!=null?`<div class="alert alert-i"><em>🚗</em><p>Ratio pro : <strong>${Math.round(proRatio*100)}%</strong></p></div>`:'';
+  const ratioInfo=proRatio!=null?`<div class="alert alert-i"><em>🚗</em><p>Ratio pro : <strong>${Math.round(proRatio*100)}%</strong> · ${S.deliveries.reduce((s,d)=>s+(d.km||0),0).toFixed(0)} km pro / ${Math.max(0,(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0)).toFixed(0)} km total</p></div>`:'';
+  const half=Math.ceil(cats.length/2);
   document.getElementById('panel-depenses').innerHTML=`
     ${ratioInfo}
-    <div class="grid2">${cats.slice(0,4).map(c=>`<div class="scard"><div class="slabel">${CAT_ICO[c]} ${c}</div><div class="sval" style="font-size:17px">${$f(totals[c])}</div></div>`).join('')}</div>
-    <div class="grid2">${cats.slice(4).map(c=>`<div class="scard"><div class="slabel">${CAT_ICO[c]} ${c}</div><div class="sval" style="font-size:17px">${$f(totals[c])}</div></div>`).join('')}</div>
+    <div class="grid2">${cats.slice(0,half).map(c=>`<div class="scard"><div class="slabel">${CAT_ICO[c]} ${c}</div><div class="sval" style="font-size:15px">${$f(totals[c])}</div></div>`).join('')}</div>
+    <div class="grid2">${cats.slice(half).map(c=>`<div class="scard"><div class="slabel">${CAT_ICO[c]} ${c}</div><div class="sval" style="font-size:15px">${$f(totals[c])}</div></div>`).join('')}</div>
     <div class="card"><div class="card-title">Total annualisé</div><div class="card-value">${$f(grand)}</div></div>
     <div class="chips">${['Toutes',...cats].map(c=>`<button class="chip${(S.eFilt||'Toutes')===c?' active':''}" data-action="filt-dep" data-val="${esc(c)}">${CAT_ICO[c]||''} ${esc(c)}</button>`).join('')}</div>
     ${filt.length===0?`<div class="empty"><div class="empty-ico">💰</div><p>Aucune dépense enregistrée.</p></div>`:filt.map(e=>depCard(e,proRatio)).join('')}
@@ -916,7 +703,7 @@ function depCard(e,proRatio){
 }
 
 function openDepModal(id=null){
-  const today=new Date().toISOString().slice(0,10);
+  const today=new Date().toLocaleDateString('fr-CA');
   if(id){
     const e=S.expenses.find(x=>x.id===id);if(!e)return;
     document.getElementById('dep-title').textContent='Modifier dépense';
@@ -932,12 +719,8 @@ function openDepModal(id=null){
     document.getElementById('dep-title').textContent='Nouvelle dépense';
     document.getElementById('dep-id').value='';
     document.getElementById('dep-cat').value='Recharge VE';
-    document.getElementById('dep-amt').value='';
+    ['dep-amt','dep-desc','dep-recu','dep-kwh','dep-ratio'].forEach(i=>document.getElementById(i).value='');
     document.getElementById('dep-date').value=today;
-    document.getElementById('dep-desc').value='';
-    document.getElementById('dep-recu').value='';
-    document.getElementById('dep-kwh').value='';
-    document.getElementById('dep-ratio').value='';
   }
   updateDepCat(); openM('m-dep');
 }
@@ -948,13 +731,16 @@ function updateDepCat(){
   document.getElementById('ev-fields').style.display=isEV?'block':'none';
   document.getElementById('ratio-fields').style.display=isMixed?'block':'none';
   const lbl=document.getElementById('dep-amt-label');
-  if(cat==='Téléphone')lbl.textContent='Montant mensuel ($)';
-  else if(cat==='Assurance auto')lbl.textContent='Montant annuel ($)';
-  else lbl.textContent='Montant ($)';
+  const dlbl=document.getElementById('dep-date-label');
+  if(cat==='Téléphone'){lbl.textContent='Montant mensuel ($)';}
+  else if(cat==='Assurance auto'){lbl.textContent='Montant annuel ($)';}
+  else if(cat==='Immatriculation'){lbl.textContent='Montant annuel ($)';}
+  else if(cat==='Leasing'){lbl.textContent='Paiement aux 2 semaines ($)';}
+  else{lbl.textContent='Montant ($)';}
+  dlbl.textContent=DATE_LABEL_CATS.includes(cat)?'Date de début de paiement':'Date';
   const proRatio=calcProRatio();
   const hint=document.getElementById('auto-ratio-hint');
   if(hint)hint.textContent=proRatio!=null?`Auto: ${Math.round(proRatio*100)}%`:'';
-  // update kwh rate
   const rate=document.getElementById('dep-kwh-rate');
   if(rate&&!rate.value)rate.value=S.cfg.kwhCost;
 }
@@ -963,8 +749,7 @@ function updateKwh(){
   const kwh=parseFloat(document.getElementById('dep-kwh').value)||0;
   const amt=parseFloat(document.getElementById('dep-amt').value)||0;
   const el=document.getElementById('dep-kwh-rate');
-  if(kwh>0&&amt>0)el.value=(amt/kwh).toFixed(4);
-  else el.value=S.cfg.kwhCost;
+  if(kwh>0&&amt>0)el.value=(amt/kwh).toFixed(4);else el.value=S.cfg.kwhCost;
 }
 
 function saveDep(){
@@ -980,7 +765,6 @@ function saveDep(){
   if(i>=0)S.expenses[i]=e;else S.expenses.unshift(e);
   saveLS(); sbUpsert('depenses',eToDB(e)); closeM('m-dep'); render(); toast('✅ Dépense enregistrée !');
 }
-
 function delDep(id){
   if(!confirm('Supprimer cette dépense ?'))return;
   S.expenses=S.expenses.filter(e=>e.id!==id);
@@ -1006,10 +790,14 @@ function rFsub(){
     const setA=f.gross*Math.max(f.rate,.25);
     el.innerHTML=`
       <div class="card"><div class="card-title">Revenus bruts ${yr}</div><div class="card-value">${$f(f.gross)}</div><div class="card-sub">${f.divs.length} livraisons</div></div>
-      ${f.needsTPS?`<div class="alert alert-w"><em>⚠️</em><p>Tu dois percevoir et remettre la TPS/TVQ.</p></div><div class="grid2"><div class="scard"><div class="slabel">TPS (5%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TPS)}</div></div><div class="scard"><div class="slabel">TVQ (9.975%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TVQ)}</div></div></div>`:`<div class="alert alert-i"><em>ℹ️</em><p>Seuil TPS/TVQ : ${$f(f.gross)} / ${$f(30000)} (${$f(Math.max(0,30000-f.gross))} restant)</p></div><div class="pbar"><div class="pfill" style="width:${Math.min(100,f.gross/300).toFixed(1)}%"></div></div>`}
+      ${f.needsTPS?`<div class="alert alert-w"><em>⚠️</em><p>Tu dois percevoir et remettre la TPS/TVQ.</p></div><div class="grid2"><div class="scard"><div class="slabel">TPS (5%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TPS)}</div></div><div class="scard"><div class="slabel">TVQ (9.975%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TVQ)}</div></div></div>`
+      :`<div class="alert alert-i"><em>ℹ️</em><p>Seuil TPS/TVQ : ${$f(f.gross)} / ${$f(30000)} (${$f(Math.max(0,30000-f.gross))} restant)</p></div><div class="pbar"><div class="pfill" style="width:${Math.min(100,f.gross/300).toFixed(1)}%"></div></div>`}
       ${f.total>0?`<div class="stitle">Estimation impôt</div><div class="card"><table class="dtable"><tr><td>Revenu net imposable</td><td>${$f(f.net)}</td></tr><tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr><tr><td>Impôt provincial (QC)</td><td>${$f(f.qcOwed)}</td></tr><tr><td>Cotisation RRQ</td><td>${$f(f.rrq)}</td></tr><tr><td style="font-weight:700">Total estimé</td><td style="color:var(--err);font-weight:700">${$f(f.total)}</td></tr></table></div><div class="card" style="background:rgba(0,122,255,.06);border:1px solid rgba(0,122,255,.15)"><div class="card-title">💰 Mise de côté recommandée</div><div class="card-value" style="color:var(--accent)">${$f(setA)}</div><div class="card-sub">${Math.ceil(Math.max(f.rate,.25)*100)}% des revenus bruts</div></div>`:''}
     `;
   }else if(S.fsub==='deductions'){
+    const many=f.exps.length>5;
+    const detailBtn=many?`<button class="btn btn-s btn-xs" id="ded-toggle">${S.dedDetailOpen?'Masquer le détail':'Afficher le détail ('+f.exps.length+' dépenses)'}</button>`:'';
+    const detailRows=(!many||S.dedDetailOpen)?`<div class="card" style="margin-top:10px"><table class="dtable"><thead><tr><th>Catégorie</th><th>Total</th><th>Déductible</th></tr></thead><tbody>${f.exps.map(e=>`<tr><td>${CAT_ICO[e.cat]||''} ${e.cat}</td><td style="text-align:right">${$f(expAnnual(e))}</td><td style="color:var(--ok)">${$f(expDed(e,f.proRatio))}</td></tr>`).join('')}</tbody></table></div>`:'';
     el.innerHTML=`
       <div class="card"><div class="card-title">Méthode de déduction véhicule</div>
         <div class="subtabs" style="margin-top:8px;margin-bottom:0">
@@ -1017,13 +805,15 @@ function rFsub(){
           <button class="stab${S.cfg.deductionMethod==='detailed'?' active':''}" data-dedmethod="detailed">Frais réels</button>
         </div>
       </div>
-      <div class="card"><div class="card-title">Déduction km CRA</div><div style="font-size:22px;font-weight:700">${$f(f.kmDed)}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${f.km.toFixed(1)} km livraison · 0,70$/km ≤5000 / 0,64$ après</div></div>
-      ${f.exps.length>0?`<div class="card"><table class="dtable"><thead><tr><th>Catégorie</th><th>Total</th><th>Déductible</th></tr></thead><tbody>${f.exps.map(e=>`<tr><td>${CAT_ICO[e.cat]||''} ${e.cat}</td><td style="text-align:right">${$f(expAnnual(e))}</td><td style="color:var(--ok)">${$f(expDed(e,f.proRatio))}</td></tr>`).join('')}</tbody></table></div>`:''}
+      <div class="card"><div class="card-title">Déduction km CRA</div><div style="font-size:22px;font-weight:700">${$f(f.kmDed)}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${f.km.toFixed(1)} km · 0,70$/km ≤5 000 / 0,64$ après</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span class="stitle" style="margin:0">Dépenses</span>${detailBtn}</div>
+      ${f.exps.length===0?`<div class="alert alert-i"><em>ℹ️</em><p>Aucune dépense pour ${yr}.</p></div>`:detailRows}
       <div class="card"><table class="dtable"><tr><td>${S.cfg.deductionMethod==='cra'?'Déduction km CRA':'Frais véhicule réels'}</td><td>${$f(S.cfg.deductionMethod==='cra'?f.kmDed:f.vehDed)}</td></tr><tr><td>Autres dépenses</td><td>${$f(f.otherDed)}</td></tr><tr><td style="font-weight:700">Total déductions</td><td style="color:var(--ok);font-weight:700">${$f(f.totDed)}</td></tr><tr><td style="font-weight:700">Revenu net imposable</td><td style="color:var(--accent);font-weight:700">${$f(f.net)}</td></tr></table></div>
     `;
   }else{
     const pct=f.proRatio!=null?Math.round(f.proRatio*100):null;
     const craWins=f.kmDed>=f.vehDed;
+    const kmCostStr=f.autoKmCost!=null?(f.autoKmCost*100).toFixed(1)+'¢/km':'Données insuffisantes';
     el.innerHTML=`
       <div class="card">
         <div class="frow" style="margin-bottom:12px">
@@ -1035,7 +825,12 @@ function rFsub(){
           <div class="scard"><div class="slabel">Km totaux</div><div class="sval">${f.kmTotal.toFixed(0)}</div></div>
           <div class="scard"><div class="slabel">Km pro</div><div class="sval b">${f.kmPro.toFixed(0)}</div></div>
         </div>
-        ${pct!=null?`<div style="font-size:14px;font-weight:600;margin:8px 0 4px">Ratio pro — ${pct}%</div><div class="ratio-row"><div class="ratio-pro" style="flex:${pct}"></div><div class="ratio-perso" style="flex:${100-pct}"></div></div>`:``}
+        ${pct!=null?`<div style="font-size:14px;font-weight:600;margin:8px 0 4px">Ratio pro — ${pct}%</div><div class="ratio-row"><div class="ratio-pro" style="flex:${pct}"></div><div class="ratio-perso" style="flex:${100-pct}"></div></div>`:''}
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <div class="card-title">Coût moyen / km (calculé)</div>
+          <div style="font-size:22px;font-weight:700;color:var(--accent)">${kmCostStr}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${$f(f.vehExpTotal)} dépenses véhicule ÷ ${f.kmPro.toFixed(0)} km pro</div>
+        </div>
       </div>
       <div class="grid2">
         <div class="scard" style="${craWins?'border:2px solid var(--ok)':''}"><div class="slabel">${craWins?'✅ ':''}Taux CRA</div><div class="sval${craWins?' g':''}">${$f(f.kmDed)}</div></div>
@@ -1048,26 +843,47 @@ function rFsub(){
 
 // ── IA ─────────────────────────────────────────────────────────────────────────
 let _aiLoading=false, _chatLoading=false;
+
+function getCurrentConv(){
+  return S.currentConvId?S.conversations.find(c=>c.id===S.currentConvId):null;
+}
+function getCurrentMsgs(){
+  return getCurrentConv()?.messages||[];
+}
+
 function rIA(){
-  const hasKey=!!S.cfg.geminiKey, cnt=S.deliveries.length;
-  const chatHtml=S.chatHistory.map(m=>`<div class="chat-msg chat-${m.role==='user'?'user':'ai'}">${esc(m.text).replace(/\n/g,'<br>')}</div>`).join('');
+  const hasKey=!!S.cfg.geminiKey;
+  const msgs=getCurrentMsgs();
+  const conv=getCurrentConv();
+  const convTitle=conv?.titre||'Nouvelle conversation';
+  const convListHtml=S.conversations.length>0?`
+    <div class="conv-list">
+      ${S.conversations.map(c=>`<div class="conv-item${c.id===S.currentConvId?' active':''}" data-action="load-conv" data-id="${c.id}">
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.titre||'Sans titre')}</span>
+        <button class="btn btn-xs btn-d" data-action="del-conv" data-id="${c.id}" style="flex-shrink:0">🗑️</button>
+      </div>`).join('')}
+    </div>`:'';
+  const msgsHtml=msgs.length>0?msgs.map(m=>`<div class="chat-bubble ${m.role==='user'?'user':'ai'}">${esc(m.text).replace(/\n/g,'<br>')}</div>`).join('')
+    :`<div style="text-align:center;color:var(--text2);font-size:13px;padding:20px">Pose une question sur tes livraisons ou analyses…</div>`;
   document.getElementById('panel-ia').innerHTML=`
     ${!hasKey?`<div class="alert alert-w"><em>🔑</em><p>Configure ta clé Gemini dans ⚙️ Paramètres.</p></div>`:''}
-    <div class="card">
-      <div class="card-title">🤖 Analyse automatique · Gemini 2.5 Flash</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">${cnt} livraison${cnt!==1?'s':''} disponibles</p>
-      <button class="btn btn-p btn-w" id="run-ai" ${!hasKey||cnt<3||_aiLoading?'disabled':''}>${_aiLoading?'⏳ Analyse…':'✨ Analyser mes livraisons'}</button>
-      ${cnt<3?`<p style="font-size:12px;color:var(--text2);margin-top:8px;text-align:center">${cnt}/3 minimum</p>`:''}
+    <div class="conv-bar">
+      <button class="btn btn-s btn-sm" id="new-conv-btn">✚ Nouvelle</button>
+      <span style="font-size:14px;font-weight:600;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(convTitle)}</span>
+      <button class="btn btn-s btn-sm" id="toggle-convlist-btn">${S.showConvList?'▲ Cacher':'📋 Conversations'}</button>
     </div>
-    ${S.aiReport?`<div class="stitle">Dernier rapport</div><div class="ai-out">${esc(S.aiReport)}</div><button class="btn btn-s btn-sm btn-w" style="margin-top:8px" id="clear-ai">Effacer le rapport</button><div class="div"></div>`:''}
-    <div class="stitle">Chat</div>
-    <div class="card">
-      <div class="chat-msgs" id="chat-msgs">${chatHtml||`<div style="text-align:center;color:var(--text2);font-size:13px;padding:12px">Pose-moi une question…</div>`}</div>
-      <div class="chat-row">
+    ${S.showConvList?convListHtml:''}
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-title">✨ Analyse automatique</div>
+      <button class="btn btn-p btn-w btn-sm" id="run-ai" ${!hasKey||S.deliveries.length<3||_aiLoading?'disabled':''}>${_aiLoading?'⏳ Analyse…':'Analyser mes livraisons'}</button>
+      ${S.deliveries.length<3?`<p style="font-size:12px;color:var(--text2);margin-top:6px;text-align:center">${S.deliveries.length}/3 minimum</p>`:''}
+    </div>
+    <div class="chat-wrap">
+      <div class="chat-msgs" id="chat-msgs">${msgsHtml}</div>
+      <div class="chat-input-row">
         <textarea class="chat-in" id="chat-in" placeholder="Comment optimiser mes revenus ?" rows="1"></textarea>
         <button class="btn btn-p btn-sm" id="send-chat" ${!hasKey||_chatLoading?'disabled':''}>${_chatLoading?'…':'↑'}</button>
       </div>
-      ${S.chatHistory.length>0?`<button class="btn btn-s btn-xs btn-w" style="margin-top:8px" id="clear-chat">Effacer</button>`:''}
     </div>
   `;
   setTimeout(()=>{const c=document.getElementById('chat-msgs');if(c)c.scrollTop=c.scrollHeight;},50);
@@ -1079,21 +895,27 @@ async function geminiFetch(body){
   S.lastGeminiTs=Date.now();
   const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${S.cfg.geminiKey}`;
   const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(r.status===429)throw new Error('Limite API — réessaie dans 1 minute');
+  if(r.status===429) throw new Error('Limite API — réessaie dans 1 minute');
   if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||'Erreur API '+r.status);}
   return r.json();
 }
 
 async function runAI(){
-  if(!S.cfg.geminiKey||_aiLoading)return;
+  if(!S.cfg.geminiKey||_aiLoading) return;
   _aiLoading=true; rIA();
   const f=calcFiscal();
-  const anon=S.deliveries.map(d=>({plat:d.plat,rev:d.rev,tip:d.tip,km:d.km,h:new Date(d.debut).getHours(),j:new Date(d.debut).getDay(),dur:d.dureeMin||null}));
-  const prompt=`Tu es un assistant financier pour livreurs gig economy au Québec. Réponds en français québécois, directement.\n\nDONNÉES (${anon.length} livraisons): ${JSON.stringify(anon)}\nRÉSUMÉ: revenus bruts ${$f(f.gross)}, ${f.km.toFixed(0)} km, net estimé ${$f(f.net)}\n\nFournis:\n📊 MEILLEURES HEURES & JOURS\n🏆 PERFORMANCE PAR PLATEFORME\n⚠️ PATTERNS À ÉVITER\n💡 3 RECOMMANDATIONS CONCRÈTES\n📈 PROJECTION MENSUELLE`;
+  const anon=S.deliveries.map(d=>({plat:d.plat,rev:d.rev,tip:d.tip,km:d.km,j:parseDate(d.date).getDay(),dur:d.dureeMin||null}));
+  const prompt=`Tu es un assistant financier pour livreurs gig economy au Québec. Réponds en français québécois.\n\nDONNÉES (${anon.length} livraisons): ${JSON.stringify(anon)}\nRÉSUMÉ: revenus bruts ${$f(f.gross)}, ${f.km.toFixed(0)} km, net estimé ${$f(f.net)}\n\nFournis:\n📊 MEILLEURES HEURES & JOURS\n🏆 PERFORMANCE PAR PLATEFORME\n⚠️ PATTERNS À ÉVITER\n💡 3 RECOMMANDATIONS CONCRÈTES\n📈 PROJECTION MENSUELLE`;
   try{
     const data=await geminiFetch({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:.7,maxOutputTokens:1800}});
-    S.aiReport=data.candidates?.[0]?.content?.parts?.[0]?.text||'Aucune réponse';
-    saveLS(); toast('✅ Analyse terminée !');
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'Aucune réponse';
+    S.aiReport=text;
+    // Save as new conversation
+    const convId=uid();
+    const newConv={id:convId,titre:'Analyse automatique — '+new Date().toLocaleDateString('fr-CA'),messages:[{role:'ai',text,ts:Date.now()}]};
+    S.conversations.unshift(newConv);
+    S.currentConvId=convId;
+    saveLS(); sbSaveConv(newConv); toast('✅ Analyse terminée !');
   }catch(e){toast('❌ IA: '+e.message);}
   _aiLoading=false; rIA();
 }
@@ -1101,23 +923,182 @@ async function runAI(){
 async function sendChat(){
   const input=document.getElementById('chat-in');
   const msg=input?.value.trim();
-  if(!msg||_chatLoading||!S.cfg.geminiKey)return;
-  S.chatHistory.push({role:'user',text:msg});
-  input.value=''; _chatLoading=true; rIA();
+  if(!msg||_chatLoading||!S.cfg.geminiKey) return;
+  input.value=''; _chatLoading=true;
+
+  const isNewConv=!S.currentConvId;
+  let convId=S.currentConvId||uid();
+  let conv=S.conversations.find(c=>c.id===convId);
+  if(!conv){
+    const words=msg.split(' ').slice(0,6).join(' ');
+    const titre=words.length>30?words.slice(0,30)+'…':words;
+    conv={id:convId,titre,messages:[]};
+    S.conversations.unshift(conv);
+    S.currentConvId=convId;
+  }
+
+  conv.messages.push({role:'user',text:msg,ts:Date.now()});
+  rIA();
+
   const f=calcFiscal();
-  const ctx=`Tu es un assistant pour livreurs gig economy au Québec. Réponds en français, de façon concise.\nContexte: ${S.deliveries.length} livraisons, revenus ${$f(f.gross)}, net ${$f(f.net)}, ${f.km.toFixed(0)} km.`;
+  const ctx=`Tu es un assistant pour livreurs gig economy au Québec. Réponds en français, concis.\nContexte: ${S.deliveries.length} livraisons, revenus ${$f(f.gross)}, net ${$f(f.net)}, ${f.km.toFixed(0)} km pro.`;
   const contents=[
     {role:'user',parts:[{text:ctx}]},
     {role:'model',parts:[{text:'Compris, prêt à t\'aider !'}]},
-    ...S.chatHistory.slice(0,-1).map(m=>({role:m.role==='user'?'user':'model',parts:[{text:m.text}]})),
+    ...conv.messages.slice(0,-1).map(m=>({role:m.role==='user'?'user':'model',parts:[{text:m.text}]})),
     {role:'user',parts:[{text:msg}]}
   ];
   try{
     const data=await geminiFetch({contents,generationConfig:{temperature:.8,maxOutputTokens:600}});
-    S.chatHistory.push({role:'ai',text:data.candidates?.[0]?.content?.parts?.[0]?.text||'Pas de réponse'});
-    saveLS();
-  }catch(e){S.chatHistory.push({role:'ai',text:'❌ '+e.message});}
+    conv.messages.push({role:'ai',text:data.candidates?.[0]?.content?.parts?.[0]?.text||'Pas de réponse',ts:Date.now()});
+    saveLS(); sbSaveConv(conv);
+  }catch(e){conv.messages.push({role:'ai',text:'❌ '+e.message,ts:Date.now()});}
   _chatLoading=false; rIA();
+}
+
+function loadConv(id){
+  S.currentConvId=id;
+  S.showConvList=false;
+  saveLS(); rIA();
+}
+function delConv(id){
+  if(!confirm('Supprimer cette conversation ?')) return;
+  S.conversations=S.conversations.filter(c=>c.id!==id);
+  if(S.currentConvId===id) S.currentConvId=S.conversations[0]?.id||null;
+  saveLS(); sbDelete('conversations_ia',id); rIA(); toast('🗑️ Conversation supprimée');
+}
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────────
+function rExport(){
+  document.getElementById('panel-export').innerHTML=`
+    <div class="card">
+      <div class="card-title">Période</div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Du</label><input type="date" class="fi" id="exp-from" value="${S.exportDateFrom}"></div>
+        <div class="fg"><label class="fl">Au</label><input type="date" class="fi" id="exp-to" value="${S.exportDateTo}"></div>
+      </div>
+    </div>
+    <div class="export-section">
+      <div class="stitle">Excel (.xlsx)</div>
+      <div class="card">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">4 feuilles : Livraisons, Dépenses, Fiscal, Résumé</p>
+        <button class="btn btn-ok btn-w" id="export-excel-btn">📊 Exporter en Excel</button>
+      </div>
+    </div>
+    <div class="export-section">
+      <div class="stitle">PDF</div>
+      <div class="card">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Rapport complet : livraisons, dépenses, résumé fiscal</p>
+        <button class="btn btn-p btn-w" id="export-pdf-btn">📄 Exporter en PDF</button>
+      </div>
+    </div>
+  `;
+}
+
+function getExportFilter(){
+  const from=document.getElementById('exp-from')?.value||'';
+  const to=document.getElementById('exp-to')?.value||'';
+  S.exportDateFrom=from; S.exportDateTo=to;
+  return{from,to};
+}
+function filterByPeriod(arr,dateKey){
+  const{from,to}=getExportFilter();
+  return arr.filter(r=>{
+    const d=r[dateKey]||'';
+    if(from&&d<from) return false;
+    if(to&&d>to) return false;
+    return true;
+  });
+}
+
+function exportExcel(){
+  if(!window.XLSX){toast('❌ SheetJS non disponible');return;}
+  const XLSX=window.XLSX;
+  const livs=filterByPeriod(S.deliveries,'date');
+  const exps=filterByPeriod(S.expenses,'date');
+  const f=calcFiscal();
+
+  const livRows=[['Date','Plateforme','Revenu','Pourboire','Total','Distance (km)','Durée (min)','Notes'],
+    ...livs.map(d=>[d.date,d.plat,d.rev||0,d.tip||0,(d.rev||0)+(d.tip||0),d.km||0,d.dureeMin||0,d.notes||''])];
+  const depRows=[['Date','Catégorie','Montant','Annualisé','Ratio pro (%)','Description'],
+    ...exps.map(e=>[e.date,e.cat,e.amt||0,expAnnual(e),MIXED.includes(e.cat)?(e.proRatioOverride!=null?e.proRatioOverride:f.proRatio!=null?Math.round(f.proRatio*100):'Auto'):100,e.desc||''])];
+  const fiscRows=[['Indicateur','Valeur'],
+    ['Revenus bruts',$f(f.gross)],['Km pro',f.kmPro.toFixed(0)],['Déduction km CRA',$f(f.kmDed)],
+    ['Total déductions',$f(f.totDed)],['Revenu net imposable',$f(f.net)],
+    ['Impôt fédéral',$f(f.fedOwed)],['Impôt provincial',$f(f.qcOwed)],['RRQ',$f(f.rrq)],['Total impôt estimé',$f(f.total)]];
+  const sumRows=[['Résumé',''],[`Période`,`${S.exportDateFrom||'Début'} — ${S.exportDateTo||'Maintenant'}`],
+    ['Livraisons',livs.length],['Dépenses',exps.length],['Revenus bruts',$f(f.gross)],
+    ['Net estimé',$f(f.net)],['Impôt total',$f(f.total)]];
+
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(livRows),'Livraisons');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(depRows),'Dépenses');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(fiscRows),'Fiscal');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sumRows),'Résumé');
+  XLSX.writeFile(wb,`livraisons-${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('✅ Excel exporté !');
+}
+
+function exportPDF(){
+  const jsPDF=window.jspdf?.jsPDF||window.jsPDF;
+  if(!jsPDF){toast('❌ jsPDF non disponible');return;}
+  const livs=filterByPeriod(S.deliveries,'date');
+  const exps=filterByPeriod(S.expenses,'date');
+  const f=calcFiscal();
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const period=`${S.exportDateFrom||'Début'} — ${S.exportDateTo||'Maintenant'}`;
+
+  // Cover
+  doc.setFillColor(0,122,255);doc.rect(0,0,210,40,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(22);doc.setFont('helvetica','bold');
+  doc.text('Livraisons Tracker',14,18);
+  doc.setFontSize(11);doc.setFont('helvetica','normal');
+  doc.text(`Rapport fiscal · ${period}`,14,28);
+  doc.text(`Généré le ${new Date().toLocaleDateString('fr-CA')}`,14,36);
+  doc.setTextColor(0,0,0);
+
+  let y=52;
+  // Summary
+  doc.setFontSize(14);doc.setFont('helvetica','bold');doc.text('Résumé',14,y);y+=8;
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  const sumData=[['Livraisons',livs.length.toString()],['Dépenses',exps.length.toString()],
+    ['Revenus bruts',$f(f.gross)],['Revenu net',$f(f.net)],['Impôt estimé',$f(f.total)]];
+  if(doc.autoTable){
+    doc.autoTable({startY:y,head:[['Indicateur','Valeur']],body:sumData,theme:'striped',margin:{left:14,right:14},headStyles:{fillColor:[0,122,255]}});
+    y=doc.lastAutoTable.finalY+10;
+  }
+
+  // Livraisons
+  if(y>240){doc.addPage();y=20;}
+  doc.setFontSize(14);doc.setFont('helvetica','bold');doc.text('Livraisons',14,y);y+=6;
+  if(doc.autoTable){
+    doc.autoTable({startY:y,head:[['Date','Plateforme','Total','Km']],
+      body:livs.slice(0,200).map(d=>[d.date,d.plat,$f((d.rev||0)+(d.tip||0)),(d.km||0).toFixed(1)+' km']),
+      theme:'striped',margin:{left:14,right:14},headStyles:{fillColor:[0,122,255]},styles:{fontSize:9}});
+    y=doc.lastAutoTable.finalY+10;
+  }
+
+  // Dépenses
+  if(y>220){doc.addPage();y=20;}
+  doc.setFontSize(14);doc.setFont('helvetica','bold');doc.text('Dépenses',14,y);y+=6;
+  if(doc.autoTable){
+    doc.autoTable({startY:y,head:[['Date','Catégorie','Annualisé','Déductible']],
+      body:exps.map(e=>[e.date,e.cat,$f(expAnnual(e)),$f(expDed(e,f.proRatio))]),
+      theme:'striped',margin:{left:14,right:14},headStyles:{fillColor:[0,122,255]},styles:{fontSize:9}});
+    y=doc.lastAutoTable.finalY+10;
+  }
+
+  // Fiscal
+  if(y>200){doc.addPage();y=20;}
+  doc.setFontSize(14);doc.setFont('helvetica','bold');doc.text('Résumé fiscal',14,y);y+=6;
+  if(doc.autoTable){
+    doc.autoTable({startY:y,head:[['Indicateur','Valeur']],
+      body:[['Revenus bruts',$f(f.gross)],['Déduction km CRA',$f(f.kmDed)],['Autres déductions',$f(f.otherDed)],['Total déductions',$f(f.totDed)],['Revenu net imposable',$f(f.net)],['Impôt fédéral',$f(f.fedOwed)],['Impôt provincial',$f(f.qcOwed)],['Cotisation RRQ',$f(f.rrq)],['TOTAL IMPÔT',$f(f.total)]],
+      theme:'striped',margin:{left:14,right:14},headStyles:{fillColor:[0,122,255]},styles:{fontSize:10}});
+  }
+
+  doc.save(`fiscal-${new Date().toISOString().slice(0,10)}.pdf`);
+  toast('✅ PDF exporté !');
 }
 
 // ── SETTINGS ───────────────────────────────────────────────────────────────────
@@ -1129,6 +1110,13 @@ function openSettings(){
   document.getElementById('s-kwh').value=S.cfg.kwhCost;
   connDot(!!_sb||null);
   renderPlatList();
+  // Auto km cost
+  const f=calcFiscal();
+  const wrap=document.getElementById('auto-km-cost-wrap');
+  if(wrap&&f.autoKmCost!=null){
+    wrap.style.display='block';
+    document.getElementById('auto-km-cost').textContent=(f.autoKmCost*100).toFixed(2)+'¢/km';
+  }
   openM('m-settings');
 }
 
@@ -1143,10 +1131,11 @@ function renderPlatList(){
 }
 
 function saveSettings(){
-  S.cfg.geminiKey=document.getElementById('s-gemini').value.trim();
+  const newGemKey=document.getElementById('s-gemini').value.trim();
   const newUrl=document.getElementById('s-sb-url').value.trim();
   const newKey=document.getElementById('s-sb-key').value.trim();
   const changed=newUrl!==S.cfg.supabaseUrl||newKey!==S.cfg.supabaseKey;
+  S.cfg.geminiKey=newGemKey;
   S.cfg.supabaseUrl=newUrl; S.cfg.supabaseKey=newKey;
   S.cfg.year=parseInt(document.getElementById('s-year').value)||new Date().getFullYear();
   S.cfg.kwhCost=parseFloat(document.getElementById('s-kwh').value)||.085;
@@ -1160,6 +1149,8 @@ function saveSettings(){
         if(ok){render();sbSubscribe();}
       },0);
     }
+  }else if(newGemKey&&_sb){
+    sbSaveGeminiKey(newGemKey);
   }
   closeM('m-settings'); toast('✅ Paramètres sauvegardés'); render();
 }
@@ -1172,9 +1163,9 @@ async function testConn(){
   btn.disabled=true; btn.textContent='Test…';
   try{
     const client=window.supabase?.createClient(url,key);
-    if(!client)throw new Error('Supabase non disponible');
+    if(!client) throw new Error('Supabase non disponible');
     const{error}=await client.from('livraisons').select('id').limit(1);
-    if(error)throw error;
+    if(error) throw error;
     toast('✅ Connexion réussie !'); connDot(true);
   }catch(e){toast('❌ '+(e.message||'Connexion échouée')); connDot(false);}
   btn.disabled=false; btn.textContent='🔌 Tester la connexion';
@@ -1182,79 +1173,49 @@ async function testConn(){
 
 // ── MODAL HELPERS ──────────────────────────────────────────────────────────────
 function openM(id){
-  const el=document.getElementById(id);
-  if(!el)return;
+  const el=document.getElementById(id);if(!el)return;
   el.style.display='flex';
   requestAnimationFrame(()=>el.classList.add('open'));
 }
 function closeM(id){
-  const el=document.getElementById(id);
-  if(!el)return;
+  const el=document.getElementById(id);if(!el)return;
   el.classList.remove('open');
   setTimeout(()=>{if(!el.classList.contains('open'))el.style.display='none';},50);
 }
 
 // ── EVENT DELEGATION ───────────────────────────────────────────────────────────
 function initEvents(){
-  // Tab navigation — bottom nav and sidebar
-  document.getElementById('bnav').addEventListener('click',e=>{
-    const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);
-  });
-  document.getElementById('sb-nav').addEventListener('click',e=>{
-    const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);
-  });
-
-  // Sync buttons
+  document.getElementById('bnav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);});
+  document.getElementById('sb-nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);});
   document.getElementById('mob-sync').addEventListener('click',doSync);
   document.getElementById('sb-sync').addEventListener('click',doSync);
-
-  // Settings open
   document.getElementById('mob-settings').addEventListener('click',openSettings);
   document.getElementById('sb-settings').addEventListener('click',openSettings);
 
-  // ── Global click delegation (Safari-safe: single listener on document) ────────
   document.addEventListener('click',e=>{
-    // close modal buttons
     const closeBtn=e.target.closest('[data-close]');
     if(closeBtn){closeM(closeBtn.dataset.close);return;}
-    // close by clicking overlay backdrop
     if(e.target.classList.contains('moverlay')){const id=e.target.id;if(id)closeM(id);return;}
 
-    // Panel quart actions
-    const qBtn=e.target.closest('#panel-quart [data-action]');
-    if(qBtn){
-      const a=qBtn.dataset.action;
-      if(a==='q-start')startQuart();
-      else if(a==='q-pause')pauseQuart();
-      else if(a==='q-stop'){if(confirm('Arrêter le quart ?'))stopQuart();}
-      else if(a==='del-quart')delQuart(qBtn.dataset.id);
-      else if(a==='use-last-km'){openLivModal();setTimeout(()=>{const f=document.getElementById('liv-km');if(f&&S.quarts[0])f.value=S.quarts[0].km.toFixed(1);},100);}
-      return;
-    }
-
-    // Panel livraisons actions
+    // Livraisons
     const lBtn=e.target.closest('#panel-livraisons [data-action]');
-    if(lBtn){
-      const a=lBtn.dataset.action;
+    if(lBtn){const a=lBtn.dataset.action;
       if(a==='new-liv')openLivModal();
       else if(a==='edit-liv')openLivModal(lBtn.dataset.id);
       else if(a==='del-liv')delLiv(lBtn.dataset.id);
       else if(a==='filt-plat'){S.dFilt.plat=lBtn.dataset.val;rLiv();}
-      return;
-    }
+      return;}
 
-    // Panel dépenses actions
+    // Dépenses
     const dBtn=e.target.closest('#panel-depenses [data-action]');
-    if(dBtn){
-      const a=dBtn.dataset.action;
+    if(dBtn){const a=dBtn.dataset.action;
       if(a==='new-dep')openDepModal();
       else if(a==='edit-dep')openDepModal(dBtn.dataset.id);
       else if(a==='del-dep')delDep(dBtn.dataset.id);
       else if(a==='filt-dep'){S.eFilt=dBtn.dataset.val;rDep();}
-      return;
-    }
+      return;}
 
-    // Panel fiscal actions
+    // Fiscal
     const fBtn=e.target.closest('#panel-fiscal [data-fsub]');
     if(fBtn){S.fsub=fBtn.dataset.fsub;rFsub();return;}
     const dmBtn=e.target.closest('#panel-fiscal [data-dedmethod]');
@@ -1262,95 +1223,89 @@ function initEvents(){
     if(e.target.id==='save-vkm'){
       S.cfg.vehicleKmJan=parseFloat(document.getElementById('v-km-jan')?.value)||0;
       S.cfg.vehicleKmNow=parseFloat(document.getElementById('v-km-now')?.value)||0;
-      saveLS();rFsub();toast('✅ Km enregistrés');return;
-    }
+      saveLS();rFsub();toast('✅ Km enregistrés');return;}
+    if(e.target.id==='ded-toggle'){S.dedDetailOpen=!S.dedDetailOpen;rFsub();return;}
 
-    // Panel IA actions
+    // IA
     if(e.target.id==='run-ai'){runAI();return;}
-    if(e.target.id==='clear-ai'){S.aiReport='';saveLS();rIA();return;}
-    if(e.target.id==='clear-chat'){S.chatHistory=[];saveLS();rIA();return;}
     if(e.target.id==='send-chat'){sendChat();return;}
+    if(e.target.id==='new-conv-btn'){S.currentConvId=null;S.showConvList=false;saveLS();rIA();return;}
+    if(e.target.id==='toggle-convlist-btn'){S.showConvList=!S.showConvList;rIA();return;}
+    const convBtn=e.target.closest('[data-action="load-conv"]');
+    if(convBtn&&!e.target.closest('[data-action="del-conv"]')){loadConv(convBtn.dataset.id);return;}
+    const delConvBtn=e.target.closest('[data-action="del-conv"]');
+    if(delConvBtn){delConv(delConvBtn.dataset.id);return;}
 
-    // Modal: livraison
+    // Dashboard
+    if(e.target.id==='dash-ia-go'){goTab('ia');return;}
+    if(e.target.id==='dash-ia-refresh'){runAI();return;}
+
+    // Export
+    if(e.target.id==='export-excel-btn'){exportExcel();return;}
+    if(e.target.id==='export-pdf-btn'){exportPDF();return;}
+
+    // Modals
     if(e.target.id==='liv-save'){saveLiv();return;}
-
-    // Modal: dépense
     if(e.target.id==='dep-save'){saveDep();return;}
     if(e.target.id==='dep-ratio-clear'){document.getElementById('dep-ratio').value='';return;}
-
-    // Modal: quart summary
-    if(e.target.id==='quart-confirm'){confirmQuart();return;}
-
-    // Modal: settings
     if(e.target.id==='settings-save'){saveSettings();return;}
     if(e.target.id==='test-conn-btn'){testConn();return;}
     if(e.target.id==='add-plat-btn'){
       const v=document.getElementById('new-plat').value.trim();
       if(!v)return;
       if(S.cfg.platforms.includes(v)){toast('Plateforme existante');return;}
-      S.cfg.platforms.push(v);document.getElementById('new-plat').value='';renderPlatList();return;
-    }
+      S.cfg.platforms.push(v);document.getElementById('new-plat').value='';renderPlatList();return;}
     if(e.target.id==='clear-all-btn'){
       if(!confirm('⚠️ Supprimer TOUTES les données localement ?'))return;
-      S.deliveries=[];S.expenses=[];S.quarts=[];S.aiReport='';S.chatHistory=[];
-      saveLS();closeM('m-settings');render();toast('🗑️ Données effacées');return;
-    }
-    // Plat list remove
+      S.deliveries=[];S.expenses=[];S.conversations=[];S.currentConvId=null;S.aiReport='';
+      saveLS();closeM('m-settings');render();toast('🗑️ Données effacées');return;}
     const rmBtn=e.target.closest('#plat-list [data-action="rm-plat"]');
     if(rmBtn){S.cfg.platforms.splice(+rmBtn.dataset.idx,1);renderPlatList();return;}
   });
 
-  // ── Global change delegation ──────────────────────────────────────────────────
   document.addEventListener('change',e=>{
     if(e.target.id==='dep-cat'){updateDepCat();return;}
     if(e.target.closest('#panel-livraisons')&&e.target.dataset.action==='filt-date'){S.dFilt.date=e.target.value;rLiv();return;}
   });
 
-  // ── Global input delegation ───────────────────────────────────────────────────
   document.addEventListener('input',e=>{
     if(e.target.id==='dep-kwh'||e.target.id==='dep-amt'){updateKwh();return;}
   });
 
-  // Close modal on Escape
   document.addEventListener('keydown',e=>{
-    if(e.key==='Escape')document.querySelectorAll('.moverlay.open').forEach(m=>closeM(m.id));
+    if(e.key==='Escape') document.querySelectorAll('.moverlay.open').forEach(m=>closeM(m.id));
     if(e.target.id==='chat-in'&&e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
   });
 }
 
 // ── INIT ───────────────────────────────────────────────────────────────────────
 function init(){
-  loadLS();          // sync — jamais bloquant
-  initEvents();      // listeners une seule fois
-  rDash();           // affichage immédiat depuis cache localStorage
-
-  // Supabase en arrière-plan, après rendu initial
+  loadLS();
+  initEvents();
+  rDash();
   if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
     setTimeout(async()=>{
       const ok=await sbLoad();
       if(ok){render();sbSubscribe();}
     },0);
   }
-
-  // SQL setup hint
   if(!S.cfg.supabaseUrl){
-    console.log('%c[LT] SQL Supabase setup :','color:#007AFF;font-weight:bold');
-    console.log(`create table livraisons (id uuid default gen_random_uuid() primary key, plateforme text, revenu numeric, pourboire numeric, distance numeric, duree integer, heure_debut text, date text, notes text, created_at timestamptz default now());
+    console.log('%c[LT] SQL Supabase setup:','color:#007AFF;font-weight:bold');
+    console.log(`create table livraisons (id uuid default gen_random_uuid() primary key, plateforme text, revenu numeric, pourboire numeric, distance numeric, duree integer, date text, notes text, created_at timestamptz default now());
 create table depenses (id uuid default gen_random_uuid() primary key, categorie text, montant numeric, montant_annuel numeric, description text, note_recu text, date text, ratio_pro numeric, kwh numeric, created_at timestamptz default now());
-create table quarts (id uuid default gen_random_uuid() primary key, date text, heure_debut text, heure_fin text, duree integer, distance numeric, points_gps jsonb, created_at timestamptz default now());
+create table conversations_ia (id uuid default gen_random_uuid() primary key, titre text, messages jsonb default '[]', created_at timestamptz default now(), updated_at timestamptz default now());
 create table parametres (cle text primary key, valeur text);
 alter table livraisons enable row level security;
 alter table depenses enable row level security;
-alter table quarts enable row level security;
+alter table conversations_ia enable row level security;
 alter table parametres enable row level security;
 create policy "Public" on livraisons for all using (true);
 create policy "Public" on depenses for all using (true);
-create policy "Public" on quarts for all using (true);
+create policy "Public" on conversations_ia for all using (true);
 create policy "Public" on parametres for all using (true);`);
   }
 }
-
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
 </html>
