@@ -35,7 +35,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 /* SIDEBAR */
 #sidebar{display:none;width:240px;background:var(--card);border-right:1px solid var(--border);flex-direction:column;flex-shrink:0;padding-top:var(--st)}
 .sb-logo{padding:24px 20px 8px;font-size:20px;font-weight:700;color:var(--accent)}
-.sb-nav{flex:1;padding:6px 10px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:2px}
+.sb-nav{flex:1;padding:6px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
 .sb-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;background:none;border-radius:10px;color:var(--text2);font-size:15px;font-weight:500;cursor:pointer;text-align:left;width:100%;font-family:inherit;min-height:44px;touch-action:manipulation}
 .sb-btn.active{background:rgba(0,122,255,.12);color:var(--accent);font-weight:600}
 .sb-btn .ico{font-size:18px;width:24px;text-align:center}
@@ -48,7 +48,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
 .hdr-actions{display:flex;gap:8px}
 .icon-btn{width:36px;height:36px;border:none;border-radius:50%;background:var(--card2);color:var(--accent);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 
-main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(60px + var(--sb))}
+main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(60px + var(--sb))}
 .panel{display:none;padding:16px;min-height:100%}
 .panel.active{display:block}
 
@@ -165,7 +165,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 .chat-row{display:flex;gap:8px;align-items:flex-end;padding:8px 0 2px}
 .chat-in{flex:1;background:var(--card2);border:1.5px solid var(--border);border-radius:20px;color:var(--text);font-size:15px;padding:10px 16px;outline:none;font-family:inherit;resize:none;max-height:100px;line-height:1.4}
 .chat-in:focus{border-color:var(--accent)}
-.ai-out{background:var(--card2);border-radius:var(--r);padding:16px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;overflow-y:auto;max-height:55vh;-webkit-overflow-scrolling:touch;margin-top:8px}
+.ai-out{background:var(--card2);border-radius:var(--r);padding:16px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;overflow-y:auto;max-height:55vh;margin-top:8px}
 
 /* TOAST */
 #toast{position:fixed;bottom:calc(68px + var(--sb));left:50%;transform:translateX(-50%) translateY(10px);background:rgba(30,30,30,.95);color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;font-weight:500;z-index:400;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;max-width:90vw}
@@ -174,7 +174,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 /* MODAL */
 .moverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end}
 .moverlay.open{display:flex}
-.modal{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px calc(24px + var(--sb))}
+.modal{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding:12px 16px calc(24px + var(--sb))}
 .mhandle{width:36px;height:4px;background:var(--card2);border-radius:2px;margin:0 auto 16px}
 .mtitle{font-size:18px;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
 .mclose{background:var(--card2);border:none;color:var(--text2);font-size:15px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
@@ -396,6 +396,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" onerror="console.warn('[LT] Leaflet CDN indisponible')"></script>
 <script>
 'use strict';
+window.addEventListener('unhandledrejection',e=>e.preventDefault());
 // ── CONSTANTS ─────────────────────────────────────────────────────────────────
 const FED_BR=[{max:57375,r:.15},{max:114750,r:.205},{max:158519,r:.26},{max:220000,r:.29},{max:Infinity,r:.33}];
 const QC_BR=[{max:51780,r:.14},{max:103545,r:.19},{max:126000,r:.24},{max:Infinity,r:.2575}];
@@ -481,11 +482,13 @@ async function sbLoad(){
 function sbSubscribe(){
   const sb=sbClient();if(!sb)return;
   try{if(_sbCh)_sbCh.unsubscribe();}catch(e){}
-  _sbCh=sb.channel('lt-rt')
-    .on('postgres_changes',{event:'*',schema:'public',table:'livraisons'},p=>onRT('livraisons',p))
-    .on('postgres_changes',{event:'*',schema:'public',table:'depenses'},p=>onRT('depenses',p))
-    .on('postgres_changes',{event:'*',schema:'public',table:'quarts'},p=>onRT('quarts',p))
-    .subscribe(st=>connDot(st==='SUBSCRIBED'?true:false));
+  try{
+    _sbCh=sb.channel('lt-rt')
+      .on('postgres_changes',{event:'*',schema:'public',table:'livraisons'},p=>onRT('livraisons',p))
+      .on('postgres_changes',{event:'*',schema:'public',table:'depenses'},p=>onRT('depenses',p))
+      .on('postgres_changes',{event:'*',schema:'public',table:'quarts'},p=>onRT('quarts',p))
+      .subscribe(st=>connDot(st==='SUBSCRIBED'?true:false));
+  }catch(e){console.warn('[LT] Realtime disabled:',e.message);_sbCh=null;}
 }
 function onRT(table,{eventType,new:nr,old:or}){
   if(table==='livraisons'){
@@ -577,16 +580,18 @@ function render(){
 
 // ── SYNC ───────────────────────────────────────────────────────────────────────
 function setSyncSpin(on){
-  const icons=['sync-mob','sb-sync-ico'];
-  document.getElementById('sync-mob').innerHTML=on?'<span class="spin">⟳</span>':'⟳';
-  const ico=document.getElementById('sb-sync-ico');if(ico)ico.innerHTML=on?'<span class="spin">⟳</span>':'⟳';
+  const spin=on?'<span class="spin">⟳</span>':'⟳';
+  const mob=document.getElementById('mob-sync');if(mob)mob.innerHTML=spin;
+  const ico=document.getElementById('sb-sync-ico');if(ico)ico.innerHTML=spin;
 }
 async function doSync(){
   if(!S.cfg.supabaseUrl||!S.cfg.supabaseKey){toast('⚙️ Configure Supabase dans Paramètres');return;}
   setSyncSpin(true);
-  const ok=await sbLoad();
-  if(ok){render();toast('✅ Synchronisé');}
-  else toast('❌ Erreur de synchronisation');
+  try{
+    const ok=await sbLoad();
+    if(ok){render();toast('✅ Synchronisé');}
+    else toast('❌ Erreur de synchronisation');
+  }catch(e){toast('❌ '+e.message);}
   setSyncSpin(false);
 }
 
@@ -688,7 +693,7 @@ function startGPS(){
       const{latitude:la,longitude:lo}=pos.coords;
       const path=S.quart.path;
       if(path.length){const last=path[path.length-1];const d=haversine(last[0],last[1],la,lo);if(d>0.01)S.quart.km+=d;}
-      path.push([la,lo]);
+      if(path.length<500)path.push([la,lo]);
       if(_qMap&&_qPoly){_qPoly.addLatLng([la,lo]);_qMap.panTo([la,lo]);}
     },e=>toast('⚠️ GPS: '+e.message),{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
   }catch(e){}
@@ -1207,110 +1212,109 @@ function initEvents(){
   document.getElementById('mob-settings').addEventListener('click',openSettings);
   document.getElementById('sb-settings').addEventListener('click',openSettings);
 
-  // Close modals via data-close or overlay click
-  document.body.addEventListener('click',e=>{
+  // ── Global click delegation (Safari-safe: single listener on document) ────────
+  document.addEventListener('click',e=>{
+    // close modal buttons
     const closeBtn=e.target.closest('[data-close]');
     if(closeBtn){closeM(closeBtn.dataset.close);return;}
-    if(e.target.classList.contains('moverlay')){
-      const id=e.target.id;if(id)closeM(id);
+    // close by clicking overlay backdrop
+    if(e.target.classList.contains('moverlay')){const id=e.target.id;if(id)closeM(id);return;}
+
+    // Panel quart actions
+    const qBtn=e.target.closest('#panel-quart [data-action]');
+    if(qBtn){
+      const a=qBtn.dataset.action;
+      if(a==='q-start')startQuart();
+      else if(a==='q-pause')pauseQuart();
+      else if(a==='q-stop'){if(confirm('Arrêter le quart ?'))stopQuart();}
+      else if(a==='del-quart')delQuart(qBtn.dataset.id);
+      else if(a==='use-last-km'){openLivModal();setTimeout(()=>{const f=document.getElementById('liv-km');if(f&&S.quarts[0])f.value=S.quarts[0].km.toFixed(1);},100);}
+      return;
     }
+
+    // Panel livraisons actions
+    const lBtn=e.target.closest('#panel-livraisons [data-action]');
+    if(lBtn){
+      const a=lBtn.dataset.action;
+      if(a==='new-liv')openLivModal();
+      else if(a==='edit-liv')openLivModal(lBtn.dataset.id);
+      else if(a==='del-liv')delLiv(lBtn.dataset.id);
+      else if(a==='filt-plat'){S.dFilt.plat=lBtn.dataset.val;rLiv();}
+      return;
+    }
+
+    // Panel dépenses actions
+    const dBtn=e.target.closest('#panel-depenses [data-action]');
+    if(dBtn){
+      const a=dBtn.dataset.action;
+      if(a==='new-dep')openDepModal();
+      else if(a==='edit-dep')openDepModal(dBtn.dataset.id);
+      else if(a==='del-dep')delDep(dBtn.dataset.id);
+      else if(a==='filt-dep'){S.eFilt=dBtn.dataset.val;rDep();}
+      return;
+    }
+
+    // Panel fiscal actions
+    const fBtn=e.target.closest('#panel-fiscal [data-fsub]');
+    if(fBtn){S.fsub=fBtn.dataset.fsub;rFsub();return;}
+    const dmBtn=e.target.closest('#panel-fiscal [data-dedmethod]');
+    if(dmBtn){S.cfg.deductionMethod=dmBtn.dataset.dedmethod;saveLS();rFsub();return;}
+    if(e.target.id==='save-vkm'){
+      S.cfg.vehicleKmJan=parseFloat(document.getElementById('v-km-jan')?.value)||0;
+      S.cfg.vehicleKmNow=parseFloat(document.getElementById('v-km-now')?.value)||0;
+      saveLS();rFsub();toast('✅ Km enregistrés');return;
+    }
+
+    // Panel IA actions
+    if(e.target.id==='run-ai'){runAI();return;}
+    if(e.target.id==='clear-ai'){S.aiReport='';saveLS();rIA();return;}
+    if(e.target.id==='clear-chat'){S.chatHistory=[];saveLS();rIA();return;}
+    if(e.target.id==='send-chat'){sendChat();return;}
+
+    // Modal: livraison
+    if(e.target.id==='liv-save'){saveLiv();return;}
+
+    // Modal: dépense
+    if(e.target.id==='dep-save'){saveDep();return;}
+    if(e.target.id==='dep-ratio-clear'){document.getElementById('dep-ratio').value='';return;}
+
+    // Modal: quart summary
+    if(e.target.id==='quart-confirm'){confirmQuart();return;}
+
+    // Modal: settings
+    if(e.target.id==='settings-save'){saveSettings();return;}
+    if(e.target.id==='test-conn-btn'){testConn();return;}
+    if(e.target.id==='add-plat-btn'){
+      const v=document.getElementById('new-plat').value.trim();
+      if(!v)return;
+      if(S.cfg.platforms.includes(v)){toast('Plateforme existante');return;}
+      S.cfg.platforms.push(v);document.getElementById('new-plat').value='';renderPlatList();return;
+    }
+    if(e.target.id==='clear-all-btn'){
+      if(!confirm('⚠️ Supprimer TOUTES les données localement ?'))return;
+      S.deliveries=[];S.expenses=[];S.quarts=[];S.aiReport='';S.chatHistory=[];
+      saveLS();closeM('m-settings');render();toast('🗑️ Données effacées');return;
+    }
+    // Plat list remove
+    const rmBtn=e.target.closest('#plat-list [data-action="rm-plat"]');
+    if(rmBtn){S.cfg.platforms.splice(+rmBtn.dataset.idx,1);renderPlatList();return;}
+  });
+
+  // ── Global change delegation ──────────────────────────────────────────────────
+  document.addEventListener('change',e=>{
+    if(e.target.id==='dep-cat'){updateDepCat();return;}
+    if(e.target.closest('#panel-livraisons')&&e.target.dataset.action==='filt-date'){S.dFilt.date=e.target.value;rLiv();return;}
+  });
+
+  // ── Global input delegation ───────────────────────────────────────────────────
+  document.addEventListener('input',e=>{
+    if(e.target.id==='dep-kwh'||e.target.id==='dep-amt'){updateKwh();return;}
   });
 
   // Close modal on Escape
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape')document.querySelectorAll('.moverlay.open').forEach(m=>closeM(m.id));
-  });
-
-  // Panel: quart
-  document.getElementById('panel-quart').addEventListener('click',e=>{
-    const btn=e.target.closest('[data-action]');if(!btn)return;
-    const a=btn.dataset.action;
-    if(a==='q-start')startQuart();
-    else if(a==='q-pause')pauseQuart();
-    else if(a==='q-stop'){if(confirm('Arrêter le quart ?'))stopQuart();}
-    else if(a==='del-quart')delQuart(btn.dataset.id);
-    else if(a==='use-last-km'){openLivModal();setTimeout(()=>{const f=document.getElementById('liv-km');if(f&&S.quarts[0])f.value=S.quarts[0].km.toFixed(1);},100);}
-  });
-
-  // Panel: livraisons
-  document.getElementById('panel-livraisons').addEventListener('click',e=>{
-    const btn=e.target.closest('[data-action]');if(!btn)return;
-    const a=btn.dataset.action;
-    if(a==='new-liv')openLivModal();
-    else if(a==='edit-liv')openLivModal(btn.dataset.id);
-    else if(a==='del-liv')delLiv(btn.dataset.id);
-    else if(a==='filt-plat'){S.dFilt.plat=btn.dataset.val;rLiv();}
-    else if(a==='filt-date'){S.dFilt.date=btn.dataset.val;rLiv();}
-  });
-  // date filter input (not button)
-  document.getElementById('panel-livraisons').addEventListener('change',e=>{
-    if(e.target.dataset.action==='filt-date'){S.dFilt.date=e.target.value;rLiv();}
-  });
-
-  // Panel: dépenses
-  document.getElementById('panel-depenses').addEventListener('click',e=>{
-    const btn=e.target.closest('[data-action]');if(!btn)return;
-    const a=btn.dataset.action;
-    if(a==='new-dep')openDepModal();
-    else if(a==='edit-dep')openDepModal(btn.dataset.id);
-    else if(a==='del-dep')delDep(btn.dataset.id);
-    else if(a==='filt-dep'){S.eFilt=btn.dataset.val;rDep();}
-  });
-
-  // Panel: fiscal
-  document.getElementById('panel-fiscal').addEventListener('click',e=>{
-    const btn=e.target.closest('[data-fsub]');
-    if(btn){S.fsub=btn.dataset.fsub;rFsub();return;}
-    const dm=e.target.closest('[data-dedmethod]');
-    if(dm){S.cfg.deductionMethod=dm.dataset.dedmethod;saveLS();rFsub();return;}
-    if(e.target.id==='save-vkm'){
-      S.cfg.vehicleKmJan=parseFloat(document.getElementById('v-km-jan')?.value)||0;
-      S.cfg.vehicleKmNow=parseFloat(document.getElementById('v-km-now')?.value)||0;
-      saveLS();rFsub();toast('✅ Km enregistrés');
-    }
-  });
-
-  // Panel: IA
-  document.getElementById('panel-ia').addEventListener('click',e=>{
-    if(e.target.id==='run-ai')runAI();
-    else if(e.target.id==='clear-ai'){S.aiReport='';saveLS();rIA();}
-    else if(e.target.id==='clear-chat'){S.chatHistory=[];saveLS();rIA();}
-    else if(e.target.id==='send-chat')sendChat();
-  });
-  document.getElementById('panel-ia').addEventListener('keydown',e=>{
     if(e.target.id==='chat-in'&&e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
-  });
-
-  // Modal: livraison save
-  document.getElementById('liv-save').addEventListener('click',saveLiv);
-
-  // Modal: dépense
-  document.getElementById('dep-save').addEventListener('click',saveDep);
-  document.getElementById('dep-cat').addEventListener('change',updateDepCat);
-  document.getElementById('dep-kwh').addEventListener('input',updateKwh);
-  document.getElementById('dep-amt').addEventListener('input',updateKwh);
-  document.getElementById('dep-ratio-clear').addEventListener('click',()=>{document.getElementById('dep-ratio').value='';});
-
-  // Modal: quart summary
-  document.getElementById('quart-confirm').addEventListener('click',confirmQuart);
-
-  // Modal: settings
-  document.getElementById('settings-save').addEventListener('click',saveSettings);
-  document.getElementById('test-conn-btn').addEventListener('click',testConn);
-  document.getElementById('add-plat-btn').addEventListener('click',()=>{
-    const v=document.getElementById('new-plat').value.trim();
-    if(!v)return;
-    if(S.cfg.platforms.includes(v)){toast('Plateforme existante');return;}
-    S.cfg.platforms.push(v);document.getElementById('new-plat').value='';renderPlatList();
-  });
-  document.getElementById('plat-list').addEventListener('click',e=>{
-    const btn=e.target.closest('[data-action]');
-    if(btn&&btn.dataset.action==='rm-plat'){S.cfg.platforms.splice(+btn.dataset.idx,1);renderPlatList();}
-  });
-  document.getElementById('clear-all-btn').addEventListener('click',()=>{
-    if(!confirm('⚠️ Supprimer TOUTES les données localement ?'))return;
-    S.deliveries=[];S.expenses=[];S.quarts=[];S.aiReport='';S.chatHistory=[];
-    saveLS();closeM('m-settings');render();toast('🗑️ Données effacées');
   });
 }
 
