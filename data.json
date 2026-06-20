@@ -1,19 +1,5 @@
 {
-  "deliveries": [
-    {
-      "id": "mqln7xzeqb2p",
-      "plat": "Instacart",
-      "rev": 20,
-      "tip": 10,
-      "km": 20,
-      "date": "2026-06-20",
-      "heure": "",
-      "debut": "2026-06-20T00:00",
-      "dureeMin": 20,
-      "notes": "",
-      "ts": "2026-06-20T00:52:22.346Z"
-    }
-  ],
+  "deliveries": [],
   "expenses": [
     {
       "id": "mqln8jkivpx2",
@@ -28,5 +14,5 @@
     }
   ],
   "quarts": [],
-  "lastSync": "2026-06-20T01:04:58.464Z"
+  "lastSync": "2026-06-20T01:15:52.269Z"
 }
