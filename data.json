@@ -1,6 +1,19 @@
 {
   "deliveries": [
     {
+      "id": "mqlo2vsjc3ng",
+      "plat": "DoorDash",
+      "rev": 20,
+      "tip": 20,
+      "km": 20,
+      "date": "2026-06-20",
+      "heure": "",
+      "debut": "2026-06-20T00:00",
+      "dureeMin": 0,
+      "notes": "",
+      "ts": "2026-06-20T01:16:25.843Z"
+    },
+    {
       "id": "mqlo2mq24u7s",
       "plat": "Instacart",
       "rev": 10,
@@ -28,5 +41,5 @@
     }
   ],
   "quarts": [],
-  "lastSync": "2026-06-20T01:16:14.352Z"
+  "lastSync": "2026-06-20T01:16:25.985Z"
 }
