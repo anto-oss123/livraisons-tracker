@@ -84,17 +84,6 @@
   ],
   "expenses": [
     {
-      "id": "mqlkycw8dafq",
-      "cat": "TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©lÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©phone",
-      "amt": 1500,
-      "date": "2026-06-19",
-      "desc": "",
-      "recu": "",
-      "kwh": 0,
-      "kwhRate": 0,
-      "proRatioOverride": null
-    },
-    {
       "id": "mqlkxujm4dw7",
       "cat": "Assurance auto",
       "amt": 1600,
@@ -183,5 +172,5 @@
       "notes": ""
     }
   ],
-  "lastSync": "2026-06-20T00:37:56.612Z"
+  "lastSync": "2026-06-20T00:41:02.893Z"
 }
