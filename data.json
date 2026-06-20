@@ -1,30 +1,6 @@
 {
   "deliveries": [
     {
-      "id": "mqlmcaiqwlob",
-      "plat": "Instacart",
-      "rev": 20,
-      "tip": 40,
-      "km": 300,
-      "date": "2026-06-20",
-      "heure": "",
-      "debut": "2026-06-20T00:00",
-      "dureeMin": 0,
-      "notes": "",
-      "ts": "2026-06-20T00:27:45.602Z"
-    },
-    {
-      "id": "mqll1ckknbrx",
-      "plat": "Instacart",
-      "rev": 120,
-      "tip": 50,
-      "km": 10,
-      "debut": "2026-06-19T19:51",
-      "fin": "2026-06-19T19:51:15.428Z",
-      "notes": "",
-      "ts": "2026-06-19T23:51:15.428Z"
-    },
-    {
       "id": "mqlkz8is9jcz",
       "plat": "Instacart",
       "rev": 45000,
@@ -136,5 +112,5 @@
       "notes": ""
     }
   ],
-  "lastSync": "2026-06-20T00:49:44.544Z"
+  "lastSync": "2026-06-20T00:49:46.027Z"
 }
