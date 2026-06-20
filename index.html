@@ -15,13 +15,16 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#F2F2F7;--bg2:#FFFFFF;--bg3:#F2F2F7;--bg4:#E5E5EA;--bg5:#D1D1D6;
+  --bg:#eef1f8;--bg2:#FFFFFF;--bg3:#f0f2f8;--bg4:#E5E5EA;--bg5:#D1D1D6;
   --accent:#007AFF;--accent2:#0056CC;
   --text:#000000;--text2:#6E6E73;--text3:#AEAEB2;
   --ok:#34C759;--warn:#FF9500;--err:#FF3B30;--purple:#5856D6;
   --r:16px;
-  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.05);
-  --shadow-lg:0 4px 16px rgba(0,0,0,.12),0 8px 32px rgba(0,0,0,.08);
+  --glass-bg:rgba(255,255,255,0.72);
+  --glass-border:rgba(255,255,255,0.65);
+  --glass-shadow:0 2px 12px rgba(0,0,0,0.08),0 0 0 1px rgba(255,255,255,0.5) inset;
+  --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.04);
+  --shadow-lg:0 4px 16px rgba(0,0,0,.1),0 8px 32px rgba(0,0,0,.06);
   --st:env(safe-area-inset-top,0px);
   --sb:env(safe-area-inset-bottom,0px);
   --sl:env(safe-area-inset-left,0px);
@@ -30,54 +33,65 @@
   :root{
     --bg:#000000;--bg2:#1C1C1E;--bg3:#2C2C2E;--bg4:#3A3A3C;--bg5:#48484A;
     --text:#FFFFFF;--text2:#8E8E93;--text3:#636366;
+    --glass-bg:rgba(28,28,30,0.75);
+    --glass-border:rgba(255,255,255,0.1);
+    --glass-shadow:0 2px 12px rgba(0,0,0,0.4),0 0 0 1px rgba(255,255,255,0.06) inset;
     --shadow:0 1px 3px rgba(0,0,0,.3),0 4px 12px rgba(0,0,0,.2);
     --shadow-lg:0 4px 16px rgba(0,0,0,.4),0 8px 32px rgba(0,0,0,.3);
   }
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;font-size:16px;overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+/* ── BODY GRADIENT (for glass to show) ── */
+html{
+  height:100%;
+  background:linear-gradient(160deg,#dce8ff 0%,#ecdeff 55%,#ffd9ec 100%) fixed;
+}
+@media(prefers-color-scheme:dark){
+  html{background:#000 fixed;}
+}
+body{height:100%;background:transparent;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;font-size:16px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
 /* ── LAYOUT ── */
-#app{display:flex;height:100vh;height:100dvh}
-#sidebar{display:none;width:240px;background:var(--bg2);border-right:1px solid var(--bg4);flex-direction:column;flex-shrink:0;padding-top:var(--st);padding-left:var(--sl)}
+#app{display:flex;height:100vh;height:100dvh;overflow:hidden}
+#sidebar{display:none;width:240px;background:var(--glass-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-right:1px solid var(--glass-border);flex-direction:column;flex-shrink:0;padding-top:var(--st);padding-left:var(--sl)}
 .sidebar-logo{padding:24px 20px 8px;font-size:20px;font-weight:700;color:var(--accent);letter-spacing:-.3px}
 .sidebar-nav{flex:1;padding:6px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
 .snbtn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;background:none;border-radius:10px;color:var(--text2);font-size:15px;font-weight:500;cursor:pointer;text-align:left;transition:background .15s,color .15s;min-height:44px;width:100%;font-family:inherit}
 .snbtn .ico{font-size:18px;width:24px;text-align:center;flex-shrink:0}
-.snbtn:hover{background:var(--bg3)}
+.snbtn:hover{background:rgba(0,0,0,.05)}
 .snbtn.active{background:rgba(0,122,255,.1);color:var(--accent);font-weight:600}
-.sidebar-footer{padding:10px 10px calc(16px + var(--sb));border-top:1px solid var(--bg4)}
+.sidebar-footer{padding:10px 10px calc(16px + var(--sb));border-top:1px solid var(--glass-border)}
 #app-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
-/* ── HEADER (mobile) ── */
-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--bg4);flex-shrink:0;padding-top:calc(10px + var(--st))}
+/* ── HEADER (mobile, scrolls with content) ── */
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:calc(10px + var(--st));background:var(--glass-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--glass-border)}
 .hdr-title{font-size:17px;font-weight:600;color:var(--text)}
 .hdr-actions{display:flex;gap:8px}
-.icon-btn{width:36px;height:36px;border:none;border-radius:50%;background:var(--bg3);color:var(--accent);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
-.icon-btn:active{background:var(--bg4)}
+.icon-btn{width:36px;height:36px;border:none;border-radius:50%;background:var(--glass-bg);color:var(--accent);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;border:1px solid var(--glass-border)}
+.icon-btn:active{opacity:.7}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinning{animation:spin 1s linear infinite;display:inline-block}
 
 /* ── MAIN ── */
-main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(64px + var(--sb));background:var(--bg)}
+main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(64px + var(--sb));background:transparent}
 .tab-panel{display:none;padding:16px;min-height:100%}
 .tab-panel.active{display:block}
 
-/* ── BOTTOM NAV (mobile) ── */
-#bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bg4);display:flex;padding-bottom:var(--sb);z-index:100}
-@media(prefers-color-scheme:dark){#bnav{background:rgba(28,28,30,.85)}}
+/* ── BOTTOM NAV — Liquid Glass ── */
+#bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(242,242,247,0.75);backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);border-top:1px solid rgba(255,255,255,0.6);display:flex;padding-bottom:var(--sb);z-index:100;box-shadow:0 -1px 0 rgba(0,0,0,.06)}
+@media(prefers-color-scheme:dark){#bnav{background:rgba(0,0,0,0.78);border-top:1px solid rgba(255,255,255,0.12);box-shadow:0 -1px 0 rgba(255,255,255,.04)}}
 .nbtn{flex:1;border:none;background:none;color:var(--text3);padding:6px 2px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:48px;transition:color .15s;font-family:inherit}
 .nbtn.active{color:var(--accent)}
 .nb-ico{font-size:22px;line-height:1.1}
 .nb-lbl{font-size:9px;font-weight:500;letter-spacing:.1px}
 
-/* ── CARDS ── */
-.card{background:var(--bg2);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+/* ── CARDS — Liquid Glass ── */
+.card{background:var(--glass-bg);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid var(--glass-border);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--glass-shadow)}
 .card-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600}
 .card-value{font-size:28px;font-weight:700;letter-spacing:-.5px}
 .card-sub{font-size:12px;color:var(--text2);margin-top:4px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.scard{background:var(--bg2);border-radius:var(--r);padding:14px;box-shadow:var(--shadow)}
+.scard{background:var(--glass-bg);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid var(--glass-border);border-radius:var(--r);padding:14px;box-shadow:var(--glass-shadow)}
 .slabel{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500}
 .sval{font-size:20px;font-weight:700;letter-spacing:-.3px}
 .sval.g{color:var(--ok)}.sval.b{color:var(--accent)}.sval.y{color:var(--warn)}.sval.r{color:var(--err)}
@@ -87,7 +101,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 .btn:active{opacity:.8;transform:scale(.97)}
 .btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
 .btn-p{background:var(--accent);color:#fff}
-.btn-s{background:var(--bg3);color:var(--text)}
+.btn-s{background:rgba(120,120,128,0.16);color:var(--text)}
 .btn-d{background:var(--err);color:#fff}
 .btn-ok{background:var(--ok);color:#fff}
 .btn-warn{background:var(--warn);color:#fff}
@@ -99,14 +113,14 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 /* ── FORMS ── */
 .fg{margin-bottom:14px}
 .fl{display:block;font-size:13px;color:var(--text2);margin-bottom:5px;font-weight:500}
-.fi,.fs,.fta{width:100%;background:var(--bg3);border:1.5px solid transparent;border-radius:12px;color:var(--text);font-size:16px;padding:12px 14px;outline:none;-webkit-appearance:none;appearance:none;font-family:inherit;transition:border-color .2s,background .2s}
-.fi:focus,.fs:focus,.fta:focus{border-color:var(--accent);background:var(--bg2)}
+.fi,.fs,.fta{width:100%;background:rgba(120,120,128,0.12);border:1.5px solid transparent;border-radius:12px;color:var(--text);font-size:16px;padding:12px 14px;outline:none;-webkit-appearance:none;appearance:none;font-family:inherit;transition:border-color .2s,background .2s}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--accent);background:var(--glass-bg)}
 .fs{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%238E8E93' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-/* ── LIST ITEMS ── */
-.li{background:var(--bg2);border-radius:var(--r);padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--shadow)}
-.li-icon{width:42px;height:42px;border-radius:12px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+/* ── LIST ITEMS — Glass ── */
+.li{background:var(--glass-bg);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);border:1px solid var(--glass-border);border-radius:var(--r);padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--glass-shadow)}
+.li-icon{width:42px;height:42px;border-radius:12px;background:rgba(120,120,128,0.12);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .li-body{flex:1;min-width:0}
 .li-title{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .li-sub{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4}
@@ -131,31 +145,31 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 .alert p{font-size:13px;line-height:1.55;color:var(--text2)}
 
 /* ── MODALS ── */
-.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px)}
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px)}
 .moverlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding:12px 16px calc(24px + var(--sb));transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1)}
+.modal{background:var(--glass-bg);backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);border:1px solid var(--glass-border);border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding:12px 16px calc(24px + var(--sb));transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1)}
 .moverlay.open .modal{transform:translateY(0)}
 .mhandle{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 16px}
 .mtitle{font-size:18px;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
-.mclose{background:var(--bg3);border:none;color:var(--text2);font-size:15px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.mclose{background:rgba(120,120,128,0.16);border:none;color:var(--text2);font-size:15px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 
 /* ── SECTION TITLES ── */
 .stitle{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin:20px 0 10px}
 .stitle:first-child{margin-top:0}
 
 /* ── SUBTABS ── */
-.subtabs{display:flex;background:var(--bg3);border-radius:10px;padding:3px;margin-bottom:16px;gap:2px}
+.subtabs{display:flex;background:rgba(120,120,128,0.12);border-radius:10px;padding:3px;margin-bottom:16px;gap:2px}
 .stab{flex:1;padding:8px 4px;border:none;border-radius:8px;background:none;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;font-family:inherit}
-.stab.active{background:var(--bg2);color:var(--text);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.stab.active{background:var(--glass-bg);color:var(--text);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.1)}
 
 /* ── PROGRESS ── */
-.pbar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:6px 0}
+.pbar{height:6px;background:rgba(120,120,128,0.16);border-radius:3px;overflow:hidden;margin:6px 0}
 .pfill{height:100%;background:var(--accent);border-radius:3px;transition:width .5s ease}
 
 /* ── TABLE ── */
 .dtable{width:100%;border-collapse:collapse}
-.dtable th{text-align:left;font-size:11px;color:var(--text2);text-transform:uppercase;padding:7px 0;border-bottom:1px solid var(--bg3);font-weight:600}
-.dtable td{padding:10px 0;font-size:13px;border-bottom:1px solid var(--bg3);vertical-align:middle}
+.dtable th{text-align:left;font-size:11px;color:var(--text2);text-transform:uppercase;padding:7px 0;border-bottom:1px solid var(--bg4);font-weight:600}
+.dtable td{padding:10px 0;font-size:13px;border-bottom:1px solid var(--bg4);vertical-align:middle}
 .dtable tr:last-child td{border-bottom:none}
 .dtable td:last-child{text-align:right;font-weight:600}
 
@@ -163,9 +177,8 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 .quart-hero{background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:var(--r);padding:24px 20px 20px;color:#fff;box-shadow:0 4px 20px rgba(0,122,255,.3);margin-bottom:12px}
 .quart-timer{font-size:52px;font-weight:700;letter-spacing:-2px;font-variant-numeric:tabular-nums;line-height:1;margin-bottom:4px}
 .quart-km{font-size:22px;font-weight:600;opacity:.9}
-.quart-status{font-size:13px;opacity:.75;margin-top:6px}
-#quart-map{height:200px;border-radius:12px;overflow:hidden;margin-top:14px;background:var(--bg3)}
-#summary-map{height:180px;border-radius:12px;overflow:hidden;margin-bottom:14px;background:var(--bg3)}
+#quart-map{height:200px;border-radius:12px;overflow:hidden;margin-top:14px;background:rgba(120,120,128,0.12)}
+#summary-map{height:180px;border-radius:12px;overflow:hidden;margin-bottom:14px;background:rgba(120,120,128,0.12)}
 
 /* ── RATIO BAR ── */
 .ratio-row{display:flex;gap:3px;height:8px;border-radius:4px;overflow:hidden;margin:6px 0}
@@ -175,8 +188,8 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 /* ── FILTER CHIPS ── */
 .chips{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{border:none;padding:8px 16px;border-radius:20px;background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;white-space:nowrap;min-height:36px;font-weight:500;box-shadow:var(--shadow);font-family:inherit;transition:all .15s}
-.chip.active{background:var(--accent);color:#fff;font-weight:600}
+.chip{border:1px solid var(--glass-border);padding:8px 16px;border-radius:20px;background:var(--glass-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text2);font-size:13px;cursor:pointer;white-space:nowrap;min-height:36px;font-weight:500;font-family:inherit;transition:all .15s}
+.chip.active{background:var(--accent);color:#fff;font-weight:600;border-color:var(--accent)}
 
 /* ── EMPTY ── */
 .empty{text-align:center;padding:48px 20px;color:var(--text2)}
@@ -191,33 +204,32 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 .chat-msgs{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;min-height:60px}
 .chat-msg{max-width:85%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.55;word-break:break-word}
 .chat-user{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
-.chat-ai{background:var(--bg2);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px;box-shadow:var(--shadow)}
+.chat-ai{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px;box-shadow:var(--glass-shadow)}
 .chat-typing{display:flex;gap:4px;padding:12px 14px;align-items:center}
 .chat-typing span{width:7px;height:7px;background:var(--text3);border-radius:50%;animation:bounce .9s infinite}
 .chat-typing span:nth-child(2){animation-delay:.15s}
 .chat-typing span:nth-child(3){animation-delay:.3s}
 @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
-.chat-row{display:flex;gap:8px;align-items:flex-end;padding:8px 0 2px;background:var(--bg);position:sticky;bottom:0}
-.chat-in{flex:1;background:var(--bg2);border:1.5px solid var(--bg4);border-radius:20px;color:var(--text);font-size:15px;padding:10px 16px;outline:none;font-family:inherit;resize:none;max-height:100px;line-height:1.4;transition:border-color .2s}
+.chat-row{display:flex;gap:8px;align-items:flex-end;padding:8px 0 2px;background:transparent;position:sticky;bottom:0}
+.chat-in{flex:1;background:rgba(120,120,128,0.12);border:1.5px solid var(--bg4);border-radius:20px;color:var(--text);font-size:15px;padding:10px 16px;outline:none;font-family:inherit;resize:none;max-height:100px;line-height:1.4;transition:border-color .2s}
 .chat-in:focus{border-color:var(--accent)}
 
 /* ── AI REPORT ── */
-.ai-report{background:var(--bg2);border-radius:var(--r);padding:16px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;box-shadow:var(--shadow)}
+.ai-report{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:var(--r);padding:16px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;box-shadow:var(--glass-shadow)}
 
 /* ── DIVIDER ── */
 .div{height:1px;background:var(--bg4);margin:14px 0}
 
 /* ── TOAST ── */
-#toast{position:fixed;bottom:calc(72px + var(--sb));left:50%;transform:translateX(-50%) translateY(10px);background:rgba(50,50,50,.95);color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;font-weight:500;z-index:300;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;max-width:90vw;backdrop-filter:blur(8px)}
+#toast{position:fixed;bottom:calc(72px + var(--sb));left:50%;transform:translateX(-50%) translateY(10px);background:rgba(30,30,30,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;font-weight:500;z-index:300;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;max-width:90vw}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(prefers-color-scheme:light){#toast{background:rgba(30,30,30,.92)}}
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
 
-/* ── LEAFLET OVERRIDES ── */
-.leaflet-container{background:var(--bg3)}
+/* ── LEAFLET ── */
+.leaflet-container{background:rgba(120,120,128,0.12)}
 .leaflet-control-attribution{display:none}
 
 /* ── DESKTOP ── */
@@ -256,15 +268,16 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
 
 <!-- ── APP MAIN ── -->
 <div id="app-main">
-  <header>
-    <span style="font-size:22px;font-weight:700;color:var(--accent)">🚚</span>
-    <span class="hdr-title" id="hdr-title">Tableau de bord</span>
-    <div class="hdr-actions">
-      <button class="icon-btn" id="sync-mob" onclick="doSync()">⟳</button>
-      <button class="icon-btn" onclick="openSettings()">⚙️</button>
-    </div>
-  </header>
   <main>
+    <!-- Header scrolls with content on mobile -->
+    <header>
+      <span style="font-size:22px;font-weight:700;color:var(--accent)">🚚</span>
+      <span class="hdr-title" id="hdr-title">Tableau de bord</span>
+      <div class="hdr-actions">
+        <button class="icon-btn" id="sync-mob" onclick="doSync()">⟳</button>
+        <button class="icon-btn" onclick="openSettings()">⚙️</button>
+      </div>
+    </header>
     <div id="tab-dashboard" class="tab-panel active"></div>
     <div id="tab-quart" class="tab-panel"></div>
     <div id="tab-livraisons" class="tab-panel"></div>
@@ -296,16 +309,17 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
     <input type="hidden" id="liv-id">
     <div class="fg"><label class="fl">Plateforme</label><select class="fs" id="liv-plat"></select></div>
     <div class="frow">
-      <div class="fg"><label class="fl">Revenu ($)</label><input type="number" class="fi" id="liv-rev" step="0.01" min="0" placeholder="0.00" required></div>
-      <div class="fg"><label class="fl">Pourboire ($)</label><input type="number" class="fi" id="liv-tip" step="0.01" min="0" placeholder="0.00"></div>
+      <div class="fg"><label class="fl">Revenu ($)</label><input type="number" inputmode="decimal" class="fi" id="liv-rev" step="0.01" min="0" placeholder="0.00" required></div>
+      <div class="fg"><label class="fl">Pourboire ($)</label><input type="number" inputmode="decimal" class="fi" id="liv-tip" step="0.01" min="0" placeholder="0.00"></div>
     </div>
     <div class="fg">
       <label class="fl">Distance (km) <span id="liv-km-hint" style="color:var(--accent);font-size:11px"></span></label>
-      <input type="number" class="fi" id="liv-km" step="0.1" min="0" placeholder="0.0">
+      <input type="number" inputmode="decimal" class="fi" id="liv-km" step="0.1" min="0" placeholder="0.0">
     </div>
+    <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="liv-date" required></div>
     <div class="frow">
-      <div class="fg"><label class="fl">Début</label><input type="datetime-local" class="fi" id="liv-debut" required></div>
-      <div class="fg"><label class="fl">Fin</label><input type="datetime-local" class="fi" id="liv-fin"></div>
+      <div class="fg"><label class="fl">Heure début <span style="color:var(--text3);font-size:11px">(optionnel)</span></label><input type="time" class="fi" id="liv-heure"></div>
+      <div class="fg"><label class="fl">Durée (minutes)</label><input type="number" inputmode="numeric" class="fi" id="liv-duree" step="1" min="0" placeholder="45"></div>
     </div>
     <div class="fg"><label class="fl">Notes</label><input type="text" class="fi" id="liv-notes" placeholder="Optionnel…"></div>
     <button type="submit" class="btn btn-p btn-w">Enregistrer</button>
@@ -331,7 +345,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
     </div>
     <div id="ev-fields" style="display:none">
       <div class="frow">
-        <div class="fg"><label class="fl">kWh rechargés</label><input type="number" class="fi" id="dep-kwh" step="0.1" min="0" placeholder="0.0" oninput="recalcKwh()"></div>
+        <div class="fg"><label class="fl">kWh rechargés</label><input type="number" inputmode="decimal" class="fi" id="dep-kwh" step="0.1" min="0" placeholder="0.0" oninput="recalcKwh()"></div>
         <div class="fg"><label class="fl">Coût/kWh ($)</label><input type="number" class="fi" id="dep-kwh-rate" step="0.0001" readonly style="opacity:.6"></div>
       </div>
     </div>
@@ -339,7 +353,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
       <div class="fg">
         <label class="fl">Ratio professionnel <span id="auto-ratio-hint" style="color:var(--accent);font-size:11px"></span></label>
         <div style="display:flex;gap:8px;align-items:center">
-          <input type="number" class="fi" id="dep-ratio" step="1" min="0" max="100" placeholder="Auto" style="max-width:100px" oninput="updateRatioPreview()">
+          <input type="number" inputmode="numeric" class="fi" id="dep-ratio" step="1" min="0" max="100" placeholder="Auto" style="max-width:100px" oninput="updateRatioPreview()">
           <span style="color:var(--text2);font-size:14px">%</span>
           <button type="button" class="btn btn-xs btn-s" onclick="clearRatioOverride()">Auto</button>
         </div>
@@ -347,7 +361,11 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
       </div>
     </div>
     <div class="frow">
-      <div class="fg"><label class="fl">Montant ($)</label><input type="number" class="fi" id="dep-amt" step="0.01" min="0" placeholder="0.00" required oninput="recalcKwh();updateRatioPreview()"></div>
+      <div class="fg">
+        <label class="fl" id="dep-amt-label">Montant ($)</label>
+        <input type="number" inputmode="decimal" class="fi" id="dep-amt" step="0.01" min="0" placeholder="0.00" required oninput="recalcKwh();updateRatioPreview();updateAmtHint()">
+        <div id="dep-amt-hint" style="font-size:12px;color:var(--accent);margin-top:4px"></div>
+      </div>
       <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="dep-date" required></div>
     </div>
     <div class="fg"><label class="fl">Description</label><input type="text" class="fi" id="dep-desc" placeholder="Ex : Brossard Circuit électrique…"></div>
@@ -366,7 +384,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;p
     <div class="scard"><div class="slabel">Durée</div><div class="sval b" id="sum-dur">—</div></div>
     <div class="scard"><div class="slabel">GPS km</div><div class="sval" id="sum-gps-km">—</div></div>
   </div>
-  <div class="fg"><label class="fl">Distance (km) — modifiable</label><input type="number" class="fi" id="sum-km" step="0.1" min="0"></div>
+  <div class="fg"><label class="fl">Distance (km) — modifiable</label><input type="number" inputmode="decimal" class="fi" id="sum-km" step="0.1" min="0"></div>
   <div class="fg"><label class="fl">Notes</label><input type="text" class="fi" id="sum-notes" placeholder="Optionnel…"></div>
   <div style="display:flex;gap:10px">
     <button class="btn btn-p" style="flex:1" onclick="confirmQuartSave()">Sauvegarder</button>
@@ -413,6 +431,7 @@ const FED_BRACKETS=[{max:57375,rate:.15},{max:114750,rate:.205},{max:158519,rate
 const QC_BRACKETS=[{max:51780,rate:.14},{max:103545,rate:.19},{max:126000,rate:.24},{max:Infinity,rate:.2575}];
 const KM_R1=0.70,KM_R2=0.64,KM_THRESH=5000;
 const TPS=0.05,TVQ=0.09975,TPS_SEUIL=30000;
+const FED_BASIC=15705,QC_BASIC=17183;
 const CAT_ICONS={'Recharge VE':'🔋','Téléphone':'📱','Assurance auto':'🛡️','Entretien véhicule':'🔧','Équipement':'🛠️','Autre':'📦'};
 const PLAT_ICONS={'Instacart':'🛒','DoorDash':'🔴','Uber Eats':'🟢','SkipTheDishes':'🟡','Cornershop':'🟣'};
 const MIXED_CATS=['Téléphone','Assurance auto','Entretien véhicule'];
@@ -511,24 +530,14 @@ function setSyncSpinner(on){
   const html=on?'<span class="spinning">⟳</span>':'⟳';
   const m=document.getElementById('sync-mob'), d=document.getElementById('sync-desk');
   if(m) m.innerHTML=html;
-  if(d){
-    const ico=document.getElementById('sync-ico-desk');
-    if(ico) ico.innerHTML=on?'<span class="spinning">⟳</span>':'⟳';
-  }
+  if(d){const ico=document.getElementById('sync-ico-desk');if(ico) ico.innerHTML=on?'<span class="spinning">⟳</span>':'⟳';}
 }
 
 // ─── QUART ───────────────────────────────────────────────────────────────────
 function startQuart(){
-  S.currentQuart={
-    startTs:new Date().toISOString(),
-    elapsedMs:0, paused:false,
-    km:0, path:[],
-    gpsWatchId:null, wakeLock:null
-  };
+  S.currentQuart={startTs:new Date().toISOString(),elapsedMs:0,paused:false,km:0,path:[],gpsWatchId:null,wakeLock:null};
   S.quartInterval=setInterval(tickQuart,1000);
-  startQuartGPS();
-  requestWakeLock();
-  renderQuart();
+  startQuartGPS();requestWakeLock();renderQuart();
   setTimeout(initQuartMap,80);
   toast('🟢 Quart démarré !');
 }
@@ -536,16 +545,10 @@ function startQuart(){
 function togglePauseQuart(){
   if(!S.currentQuart) return;
   if(S.currentQuart.paused){
-    S.currentQuart.startTs=new Date().toISOString();
-    S.currentQuart.paused=false;
-    requestWakeLock();
-    toast('▶ Quart repris');
+    S.currentQuart.startTs=new Date().toISOString();S.currentQuart.paused=false;requestWakeLock();toast('▶ Quart repris');
   }else{
-    S.currentQuart.elapsedMs+=Date.now()-new Date(S.currentQuart.startTs).getTime();
-    S.currentQuart.startTs=null;
-    S.currentQuart.paused=true;
-    if(S.currentQuart.wakeLock) S.currentQuart.wakeLock.release().catch(()=>{});
-    toast('⏸ Quart en pause');
+    S.currentQuart.elapsedMs+=Date.now()-new Date(S.currentQuart.startTs).getTime();S.currentQuart.startTs=null;S.currentQuart.paused=true;
+    if(S.currentQuart.wakeLock) S.currentQuart.wakeLock.release().catch(()=>{});toast('⏸ Quart en pause');
   }
   const btn=document.getElementById('pause-btn');
   if(btn) btn.textContent=S.currentQuart.paused?'▶ Reprendre':'⏸ Pause';
@@ -555,26 +558,17 @@ function stopQuart(){
   if(!S.currentQuart) return;
   if(!S.currentQuart.paused&&S.currentQuart.startTs)
     S.currentQuart.elapsedMs+=Date.now()-new Date(S.currentQuart.startTs).getTime();
-  clearInterval(S.quartInterval); S.quartInterval=null;
+  clearInterval(S.quartInterval);S.quartInterval=null;
   if(S.currentQuart.gpsWatchId) navigator.geolocation.clearWatch(S.currentQuart.gpsWatchId);
   if(S.currentQuart.wakeLock) S.currentQuart.wakeLock.release().catch(()=>{});
-  S.pendingQ={
-    startTs:S.currentQuart.startTs||new Date().toISOString(),
-    endTs:new Date().toISOString(),
-    durationMs:S.currentQuart.elapsedMs,
-    km:S.currentQuart.km,
-    path:[...S.currentQuart.path],
-    notes:''
-  };
+  S.pendingQ={startTs:S.currentQuart.startTs||new Date().toISOString(),endTs:new Date().toISOString(),durationMs:S.currentQuart.elapsedMs,km:S.currentQuart.km,path:[...S.currentQuart.path],notes:''};
   S.currentQuart=null;
   if(S.quartMap){try{S.quartMap.remove();}catch(e){} S.quartMap=null;S.quartPoly=null;}
-  renderQuart();
-  openQuartSummaryModal();
+  renderQuart();openQuartSummaryModal();
 }
 
 function tickQuart(){
-  const te=document.getElementById('q-timer');
-  const ke=document.getElementById('q-km');
+  const te=document.getElementById('q-timer'),ke=document.getElementById('q-km');
   if(te) te.textContent=formatMs(getElapsedMs());
   if(ke&&S.currentQuart) ke.textContent=(S.currentQuart.km||0).toFixed(2)+' km';
 }
@@ -582,8 +576,7 @@ function tickQuart(){
 function getElapsedMs(){
   if(!S.currentQuart) return 0;
   let ms=S.currentQuart.elapsedMs;
-  if(!S.currentQuart.paused&&S.currentQuart.startTs)
-    ms+=Date.now()-new Date(S.currentQuart.startTs).getTime();
+  if(!S.currentQuart.paused&&S.currentQuart.startTs) ms+=Date.now()-new Date(S.currentQuart.startTs).getTime();
   return ms;
 }
 
@@ -591,18 +584,11 @@ function startQuartGPS(){
   if(!navigator.geolocation){toast('⚠️ GPS non disponible — km à saisir manuellement');return;}
   S.currentQuart.gpsWatchId=navigator.geolocation.watchPosition(pos=>{
     if(!S.currentQuart||S.currentQuart.paused) return;
-    const {latitude:la,longitude:lo}=pos.coords;
+    const{latitude:la,longitude:lo}=pos.coords;
     const path=S.currentQuart.path;
-    if(path.length){
-      const last=path[path.length-1];
-      const d=haversine(last[0],last[1],la,lo);
-      if(d>0.01) S.currentQuart.km+=d;
-    }
+    if(path.length){const last=path[path.length-1];const d=haversine(last[0],last[1],la,lo);if(d>0.01) S.currentQuart.km+=d;}
     path.push([la,lo]);
-    if(S.quartMap&&S.quartPoly){
-      S.quartPoly.addLatLng([la,lo]);
-      S.quartMap.panTo([la,lo]);
-    }
+    if(S.quartMap&&S.quartPoly){S.quartPoly.addLatLng([la,lo]);S.quartMap.panTo([la,lo]);}
   },e=>toast('⚠️ GPS: '+e.message),{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
 }
 
@@ -623,17 +609,12 @@ function initQuartMap(){
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(S.quartMap);
   S.quartPoly=L.polyline([],{color:'#007AFF',weight:4,opacity:.9}).addTo(S.quartMap);
   if(S.currentQuart&&S.currentQuart.path.length){
-    S.quartPoly.setLatLngs(S.currentQuart.path);
-    const last=S.currentQuart.path[S.currentQuart.path.length-1];
-    S.quartMap.setView(last,14);
-  }else{
-    S.quartMap.setView([45.5088,-73.5878],12);
-  }
+    S.quartPoly.setLatLngs(S.currentQuart.path);S.quartMap.setView(S.currentQuart.path[S.currentQuart.path.length-1],14);
+  }else{S.quartMap.setView([45.5088,-73.5878],12);}
 }
 
 function openQuartSummaryModal(){
-  const q=S.pendingQ;
-  if(!q) return;
+  const q=S.pendingQ;if(!q) return;
   document.getElementById('sum-dur').textContent=formatMs(q.durationMs,true);
   document.getElementById('sum-gps-km').textContent=q.km.toFixed(2)+' km';
   document.getElementById('sum-km').value=q.km.toFixed(1);
@@ -660,8 +641,7 @@ function confirmQuartSave(){
   S.quarts.unshift({id:uid(),startTs:S.pendingQ.startTs,endTs:S.pendingQ.endTs,durationMs:S.pendingQ.durationMs,km,path:S.pendingQ.path,notes});
   S.pendingQ=null;
   if(S.summaryMap){try{S.summaryMap.remove();}catch(e){} S.summaryMap=null;}
-  save(); closeM('m-quart-summary'); toast('✅ Quart sauvegardé !');
-  renderTab('quart');
+  save();closeM('m-quart-summary');toast('✅ Quart sauvegardé !');renderTab('quart');
 }
 
 function cancelQuartSave(){
@@ -673,7 +653,7 @@ function cancelQuartSave(){
 function delQuart(id){
   if(!confirm('Supprimer ce quart ?')) return;
   S.quarts=S.quarts.filter(q=>q.id!==id);
-  save(); renderTab('quart'); toast('🗑️ Quart supprimé');
+  save();renderTab('quart');toast('🗑️ Quart supprimé');
 }
 
 // ─── TAXES ───────────────────────────────────────────────────────────────────
@@ -685,16 +665,27 @@ function haversine(a,b,c,d){
 
 function calcProRatio(){
   const yr=S.cfg.year;
-  const kmPro=S.quarts.filter(q=>new Date(q.startTs).getFullYear()===yr).reduce((s,q)=>s+(q.km||0),0);
+  // km pro = quarts km + livraisons km
+  const kmQuarts=S.quarts.filter(q=>new Date(q.startTs).getFullYear()===yr).reduce((s,q)=>s+(q.km||0),0);
+  const kmLivs=S.deliveries.filter(d=>new Date(d.debut).getFullYear()===yr).reduce((s,d)=>s+(d.km||0),0);
+  const kmPro=kmQuarts+kmLivs;
   const kmTotal=(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0);
   if(kmTotal<=0||kmPro<=0) return null;
   return Math.min(1,kmPro/kmTotal);
 }
 
+// Annual deductible amount for an expense
+function getExpAnnual(e){
+  const amt=e.amt||0;
+  if(e.cat==='Téléphone') return amt*12; // stored as monthly
+  return amt; // all others stored as annual/actual amount
+}
+
 function getExpDeductible(e,proRatio){
-  if(!MIXED_CATS.includes(e.cat)) return e.amt||0;
+  if(!MIXED_CATS.includes(e.cat)) return getExpAnnual(e);
+  const annual=getExpAnnual(e);
   const ratio=e.proRatioOverride!=null?e.proRatioOverride/100:(proRatio??1);
-  return (e.amt||0)*ratio;
+  return annual*ratio;
 }
 
 function calcKmDed(km){
@@ -708,44 +699,37 @@ function calcFiscal(){
   const quartsYr=S.quarts.filter(q=>new Date(q.startTs).getFullYear()===yr);
   const gross=divs.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
   const km=divs.reduce((s,d)=>s+(d.km||0),0);
-  const kmPro=quartsYr.reduce((s,q)=>s+(q.km||0),0);
+  const kmQuarts=quartsYr.reduce((s,q)=>s+(q.km||0),0);
+  const kmPro=kmQuarts+km; // quarts km + livraisons km
   const proRatio=calcProRatio();
 
   const kmDed_cra=calcKmDed(km);
-  const vehDed_detailed=exps.filter(e=>VEHICLE_CATS.includes(e.cat))
-    .reduce((s,e)=>s+getExpDeductible(e,proRatio),0);
-  const otherExpDed=exps.filter(e=>!VEHICLE_CATS.includes(e.cat)&&!MIXED_CATS.includes(e.cat))
-    .reduce((s,e)=>s+(e.amt||0),0);
-  const mixedNonVehDed=exps.filter(e=>MIXED_CATS.includes(e.cat)&&!VEHICLE_CATS.includes(e.cat))
-    .reduce((s,e)=>s+getExpDeductible(e,proRatio),0);
+  const vehDed_detailed=exps.filter(e=>VEHICLE_CATS.includes(e.cat)).reduce((s,e)=>s+getExpDeductible(e,proRatio),0);
+  const otherExpDed=exps.filter(e=>!VEHICLE_CATS.includes(e.cat)&&!MIXED_CATS.includes(e.cat)).reduce((s,e)=>s+(getExpAnnual(e)),0);
+  const mixedNonVehDed=exps.filter(e=>MIXED_CATS.includes(e.cat)&&!VEHICLE_CATS.includes(e.cat)).reduce((s,e)=>s+getExpDeductible(e,proRatio),0);
 
   const method=S.cfg.deductionMethod||'cra';
   let totDed;
   if(method==='detailed'){
     totDed=vehDed_detailed+mixedNonVehDed+otherExpDed;
   }else{
-    const nonVehExpDed=exps.filter(e=>!VEHICLE_CATS.includes(e.cat))
-      .reduce((s,e)=>s+getExpDeductible(e,proRatio),0);
+    const nonVehExpDed=exps.filter(e=>!VEHICLE_CATS.includes(e.cat)).reduce((s,e)=>s+getExpDeductible(e,proRatio),0);
     totDed=kmDed_cra+nonVehExpDed;
   }
 
   const net=Math.max(0,gross-totDed);
-  const fedOwed=Math.max(0,calcBracket(net,FED_BRACKETS)-15705*.15);
-  const qcOwed=Math.max(0,calcBracket(net,QC_BRACKETS)-17183*.14);
-  const rrq=Math.min(Math.max(0,Math.min(net,73200)-3500)*0.119,8316.05);
+  const fedOwed=Math.max(0,calcBracket(net,FED_BRACKETS)-FED_BASIC*.15);
+  const qcOwed=Math.max(0,calcBracket(net,QC_BRACKETS)-QC_BASIC*.14);
+  const rrq=net>3500?Math.min(Math.max(0,Math.min(net,73200)-3500)*0.119,8316.05):0;
   const total=fedOwed+qcOwed+rrq;
   const rate=gross>0?total/gross:0;
   return{gross,km,kmPro,kmDed_cra,vehDed_detailed,totDed,net,fedOwed,qcOwed,rrq,total,rate,
-    divs,exps,quartsYr,proRatio,needsTPS:gross>=TPS_SEUIL,tps:gross*TPS,tvq:gross*TVQ};
+    divs,exps,quartsYr,proRatio,needsTPS:gross>=TPS_SEUIL,tps:gross*TPS,tvq:gross*TVQ,taxOwed:total>0};
 }
 
 function calcBracket(inc,brackets){
   let tax=0,prev=0;
-  for(const b of brackets){
-    if(inc<=prev) break;
-    tax+=(Math.min(inc,b.max)-prev)*b.rate;
-    prev=b.max;
-  }
+  for(const b of brackets){if(inc<=prev) break;tax+=(Math.min(inc,b.max)-prev)*b.rate;prev=b.max;}
   return tax;
 }
 
@@ -757,10 +741,9 @@ const platIcon=p=>PLAT_ICONS[p]||'🚚';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-function fdur(a,b){
-  if(!a||!b) return '';
-  const ms=new Date(b)-new Date(a),h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);
-  return h>0?`${h}h${String(m).padStart(2,'0')}`:`${m}min`;
+function fmtDuree(min){
+  if(!min||min<=0) return '';
+  return min>=60?`${Math.floor(min/60)}h${String(min%60).padStart(2,'0')}`:`${min}min`;
 }
 
 function formatMs(ms,short=false){
@@ -775,10 +758,11 @@ function goTab(tab){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
   document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
-  const hdr=document.getElementById('hdr-title');
-  if(hdr) hdr.textContent=TAB_TITLES[tab]||tab;
+  const hdr=document.getElementById('hdr-title');if(hdr) hdr.textContent=TAB_TITLES[tab]||tab;
   renderTab(tab);
   if(tab==='quart'&&S.currentQuart) setTimeout(initQuartMap,80);
+  // Scroll to top on tab change
+  document.querySelector('main').scrollTop=0;
 }
 
 function renderTab(t){
@@ -804,20 +788,20 @@ function renderDash(){
   const recent=[...S.deliveries].sort((a,b)=>new Date(b.debut)-new Date(a.debut)).slice(0,5);
   const alerts=[];
   if(fisc.needsTPS) alerts.push({t:'w',i:'⚠️',m:`Tu as dépassé ${$f(30000)} — inscription TPS/TVQ obligatoire !`});
-  else if(fisc.gross>24000) alerts.push({t:'w',i:'⚡',m:`À ${$f(30000-fisc.gross)} du seuil TPS/TVQ (${$f(fisc.gross)}/${$f(30000)})`});
-  if(fisc.rate>0) alerts.push({t:'i',i:'💡',m:`Mets ~${Math.ceil(Math.max(fisc.rate,.25)*100)}% de côté pour l'impôt (~${$f(fisc.gross*Math.max(fisc.rate,.25))} cette année)`});
+  else if(fisc.gross>24000) alerts.push({t:'w',i:'⚡',m:`À ${$f(30000-fisc.gross)} du seuil TPS/TVQ`});
+  if(fisc.rate>0) alerts.push({t:'i',i:'💡',m:`Mets ~${Math.ceil(Math.max(fisc.rate,.25)*100)}% de côté pour l'impôt (~${$f(fisc.gross*Math.max(fisc.rate,.25))})`});
   const activeQ=S.currentQuart?`<div class="alert alert-g" style="margin-bottom:12px"><em>⏱</em><p>Quart en cours — ${formatMs(getElapsedMs())} · ${(S.currentQuart.km||0).toFixed(1)} km</p></div>`:'';
   document.getElementById('tab-dashboard').innerHTML=`
     ${activeQ}
-    <div class="grid3">
-      <div class="scard"><div class="slabel">Aujourd'hui</div><div class="sval g">${$f(sum(tod))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${tod.length} liv.</div></div>
-      <div class="scard"><div class="slabel">Cette semaine</div><div class="sval b">${$f(sum(wk))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${wk.length} liv.</div></div>
-      <div class="scard"><div class="slabel">Ce mois</div><div class="sval">${$f(sum(mo))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${mo.length} liv.</div></div>
+    <div class="grid2">
+      <div class="scard"><div class="slabel">Aujourd'hui</div><div class="sval g">${$f(sum(tod))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${tod.length} livraison${tod.length!==1?'s':''}</div></div>
+      <div class="scard"><div class="slabel">Cette semaine</div><div class="sval b">${$f(sum(wk))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${wk.length} livraison${wk.length!==1?'s':''}</div></div>
     </div>
     <div class="grid2">
-      <div class="scard"><div class="slabel">Km total livraisons</div><div class="sval">${allKm.toFixed(0)}<span style="font-size:14px"> km</span></div></div>
+      <div class="scard"><div class="slabel">Ce mois</div><div class="sval">${$f(sum(mo))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${mo.length} livraison${mo.length!==1?'s':''}</div></div>
       <div class="scard"><div class="slabel">Meilleure heure</div><div class="sval y">${bestH!==null?`${bestH}h00`:'—'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${bestH!==null?`~${$f(bestAvg)}/liv`:'Besoin de données'}</div></div>
     </div>
+    <div class="scard" style="margin-bottom:12px"><div class="slabel">Km total livraisons</div><div class="sval">${allKm.toFixed(0)}<span style="font-size:14px"> km</span></div></div>
     ${alerts.map(a=>`<div class="alert alert-${a.t}"><em>${a.i}</em><p>${a.m}</p></div>`).join('')}
     <div class="stitle">Dernières livraisons</div>
     ${recent.length===0?`<div class="empty"><div class="empty-ico">🚚</div><p>Aucune livraison encore.<br>Va dans Livraisons pour commencer !</p></div>`:recent.map(d=>liCard(d,false)).join('')}
@@ -857,9 +841,7 @@ function renderQuart(){
         <div class="li-title">${fdate(q.startTs)}</div>
         <div class="li-sub">${formatMs(q.durationMs,true)} · ${q.km.toFixed(1)} km${q.notes?` · ${q.notes}`:''}</div>
       </div>
-      <div class="li-right">
-        <div class="li-acts"><button class="btn btn-xs btn-d" onclick="delQuart('${q.id}')">🗑️</button></div>
-      </div>
+      <div class="li-right"><div class="li-acts"><button class="btn btn-xs btn-d" onclick="delQuart('${q.id}')">🗑️</button></div></div>
     </div>`).join('');
   document.getElementById('tab-quart').innerHTML=`
     ${heroHtml}
@@ -868,8 +850,7 @@ function renderQuart(){
 }
 
 function useLastQuartKm(){
-  const q=S.quarts[0];
-  if(!q) return;
+  const q=S.quarts[0];if(!q) return;
   openLivModal();
   setTimeout(()=>{const f=document.getElementById('liv-km');if(f) f.value=q.km.toFixed(1);},80);
 }
@@ -890,14 +871,13 @@ function renderLiv(){
 
 function liCard(d,acts=false){
   const tot=(d.rev||0)+(d.tip||0);
-  const dur=fdur(d.debut,d.fin);
-  const hrs=d.fin&&d.debut?(new Date(d.fin)-new Date(d.debut))/3600000:0;
-  const hr=hrs>0?tot/hrs:0;
+  const dur=fmtDuree(d.dureeMin);
+  const hr=d.dureeMin>0?tot/(d.dureeMin/60):0;
   return`<div class="li">
     <div class="li-icon">${platIcon(d.plat)}</div>
     <div class="li-body">
       <div class="li-title">${d.plat}</div>
-      <div class="li-sub">${fdtm(d.debut)}${dur?` · ${dur}`:''}${d.km?` · ${d.km} km`:''}${hr>0?` · ${$f(hr)}/h`:''}</div>
+      <div class="li-sub">${fdate(d.debut)}${d.heure?` à ${d.heure}`:''}${dur?` · ${dur}`:''}${d.km?` · ${d.km} km`:''}${hr>0?` · ${$f(hr)}/h`:''}</div>
       ${d.notes?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(d.notes)}</div>`:''}
     </div>
     <div class="li-right">
@@ -911,8 +891,7 @@ function liCard(d,acts=false){
 function setDF(k,v){S.dFilt[k]=v;renderLiv();}
 
 function openLivModal(id=null){
-  const now=new Date();
-  const loc=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  const today=new Date().toISOString().split('T')[0];
   const sel=document.getElementById('liv-plat');
   sel.innerHTML=S.cfg.platforms.map(p=>`<option value="${p}">${platIcon(p)} ${p}</option>`).join('');
   if(id){
@@ -923,8 +902,11 @@ function openLivModal(id=null){
     document.getElementById('liv-rev').value=d.rev||'';
     document.getElementById('liv-tip').value=d.tip||'';
     document.getElementById('liv-km').value=d.km||'';
-    document.getElementById('liv-debut').value=d.debut?d.debut.slice(0,16):'';
-    document.getElementById('liv-fin').value=d.fin?d.fin.slice(0,16):'';
+    // Extract date from debut
+    const dateStr=d.date||(d.debut?d.debut.split('T')[0]:today);
+    document.getElementById('liv-date').value=dateStr;
+    document.getElementById('liv-heure').value=d.heure||'';
+    document.getElementById('liv-duree').value=d.dureeMin||'';
     document.getElementById('liv-notes').value=d.notes||'';
   }else{
     document.getElementById('liv-modal-title').textContent='Nouvelle livraison';
@@ -934,8 +916,9 @@ function openLivModal(id=null){
     document.getElementById('liv-tip').value='';
     const lastQ=S.quarts[0];
     document.getElementById('liv-km').value='';
-    document.getElementById('liv-debut').value=loc;
-    document.getElementById('liv-fin').value='';
+    document.getElementById('liv-date').value=today;
+    document.getElementById('liv-heure').value='';
+    document.getElementById('liv-duree').value='';
     document.getElementById('liv-notes').value='';
     const hint=document.getElementById('liv-km-hint');
     if(hint&&lastQ) hint.textContent=`Dernier quart: ${lastQ.km.toFixed(1)} km`;
@@ -947,18 +930,20 @@ function editLiv(id){openLivModal(id);}
 
 function saveLiv(e){
   e.preventDefault();
-  const now=new Date();
-  const loc=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString();
   const id=document.getElementById('liv-id').value||uid();
-  const fin=document.getElementById('liv-fin').value||loc;
+  const dateVal=document.getElementById('liv-date').value;
+  const heureVal=document.getElementById('liv-heure').value;
+  const debut=dateVal+'T'+(heureVal||'00:00');
   const d={id,
     plat:document.getElementById('liv-plat').value,
     rev:parseFloat(document.getElementById('liv-rev').value)||0,
     tip:parseFloat(document.getElementById('liv-tip').value)||0,
     km:parseFloat(document.getElementById('liv-km').value)||0,
-    debut:document.getElementById('liv-debut').value||loc,
-    fin,notes:document.getElementById('liv-notes').value,
-    ts:now.toISOString()
+    date:dateVal, heure:heureVal||'',
+    debut, // keep for backward compat & date filtering
+    dureeMin:parseInt(document.getElementById('liv-duree').value)||0,
+    notes:document.getElementById('liv-notes').value,
+    ts:new Date().toISOString()
   };
   const i=S.deliveries.findIndex(x=>x.id===id);
   if(i>=0) S.deliveries[i]=d; else S.deliveries.unshift(d);
@@ -977,15 +962,15 @@ function renderDep(){
   let filt=[...S.expenses].sort((a,b)=>new Date(b.date)-new Date(a.date));
   if(S.eFilt&&S.eFilt!=='Toutes') filt=filt.filter(e=>e.cat===S.eFilt);
   const totals={};
-  cats.forEach(c=>{totals[c]=S.expenses.filter(e=>e.cat===c).reduce((s,e)=>s+(e.amt||0),0);});
-  const grand=S.expenses.reduce((s,e)=>s+(e.amt||0),0);
+  cats.forEach(c=>{totals[c]=S.expenses.filter(e=>e.cat===c).reduce((s,e)=>s+getExpAnnual(e),0);});
+  const grand=S.expenses.reduce((s,e)=>s+getExpAnnual(e),0);
   const proRatio=calcProRatio();
-  const ratioInfo=proRatio!=null?`<div class="alert alert-i" style="margin-bottom:12px"><em>🚗</em><p>Ratio pro/perso : <strong>${Math.round(proRatio*100)}% pro · ${Math.round((1-proRatio)*100)}% perso</strong><br><span style="font-size:11px">Calculé depuis les km de quarts vs km totaux véhicule</span></p></div>`:'';
+  const ratioInfo=proRatio!=null?`<div class="alert alert-i" style="margin-bottom:12px"><em>🚗</em><p>Ratio pro/perso : <strong>${Math.round(proRatio*100)}% pro · ${Math.round((1-proRatio)*100)}% perso</strong><br><span style="font-size:11px">Quarts + livraisons vs km totaux véhicule</span></p></div>`:'';
   document.getElementById('tab-depenses').innerHTML=`
     ${ratioInfo}
-    <div class="grid2" style="grid-template-columns:repeat(2,1fr)">${cats.slice(0,4).map(c=>`<div class="scard"><div class="slabel">${CAT_ICONS[c]} ${c}</div><div class="sval" style="font-size:17px">${$f(totals[c])}</div></div>`).join('')}</div>
+    <div class="grid2">${cats.slice(0,4).map(c=>`<div class="scard"><div class="slabel">${CAT_ICONS[c]} ${c}</div><div class="sval" style="font-size:17px">${$f(totals[c])}</div></div>`).join('')}</div>
     <div class="grid2">${cats.slice(4).map(c=>`<div class="scard"><div class="slabel">${CAT_ICONS[c]} ${c}</div><div class="sval" style="font-size:17px">${$f(totals[c])}</div></div>`).join('')}</div>
-    <div class="card"><div class="card-title">Total dépenses</div><div class="card-value">${$f(grand)}</div></div>
+    <div class="card"><div class="card-title">Total dépenses annualisées</div><div class="card-value">${$f(grand)}</div></div>
     <div class="chips">${['Toutes',...cats].map(c=>`<button class="chip ${(S.eFilt||'Toutes')===c?'active':''}" onclick="setEF('${c}')">${CAT_ICONS[c]||''} ${c}</button>`).join('')}</div>
     ${filt.length===0?`<div class="empty"><div class="empty-ico">💰</div><p>Aucune dépense enregistrée.</p></div>`:filt.map(e=>depCard(e,proRatio)).join('')}
     <button class="fab" onclick="openDepModal()">+</button>
@@ -993,20 +978,23 @@ function renderDep(){
 }
 
 function depCard(e,proRatio){
+  const annual=getExpAnnual(e);
   const ded=getExpDeductible(e,proRatio);
   const isMixed=MIXED_CATS.includes(e.cat);
   const ratio=isMixed?(e.proRatioOverride!=null?e.proRatioOverride/100:(proRatio??1)):1;
   const pct=Math.round(ratio*100);
+  let subAmt='';
+  if(e.cat==='Téléphone') subAmt=`${$f(e.amt)}/mois → ${$f(annual)}/an`;
+  else if(e.cat==='Assurance auto') subAmt=`${$f(e.amt)}/an · ${$f(e.amt/12)}/mois`;
   return`<div class="li">
     <div class="li-icon">${CAT_ICONS[e.cat]||'📦'}</div>
     <div class="li-body">
       <div class="li-title">${esc(e.desc||e.cat)}</div>
-      <div class="li-sub">${fdate(e.date)} · ${e.cat}${e.kwh?` · ${e.kwh} kWh`:''}${isMixed?` · ${pct}% pro`:''}</div>
-      ${isMixed?`<div class="ratio-row" style="max-width:120px"><div class="ratio-pro" style="width:${pct}%"></div><div class="ratio-perso" style="width:${100-pct}%"></div></div>`:''}
-    </div>
+      <div class="li-sub">${fdate(e.date)} · ${e.cat}${subAmt?` · ${subAmt}`:''}${e.kwh?` · ${e.kwh} kWh`:''}${isMixed?` · ${pct}% pro`:''}</div>
+      ${isMixed?`<div class="ratio-row" style="max-width:120px"><div class="ratio-pro" style="width:${pct}%"></div><div class="ratio-perso" style="width:${100-pct}%"></div></div>`:''}</div>
     <div class="li-right">
-      <div class="li-amt" style="color:var(--warn)">${$f(e.amt)}</div>
-      ${isMixed&&ded<e.amt?`<div style="font-size:11px;color:var(--ok)">✓ ${$f(ded)} déduc.</div>`:''}
+      <div class="li-amt" style="color:var(--warn)">${$f(annual)}</div>
+      ${isMixed&&ded<annual?`<div style="font-size:11px;color:var(--ok)">✓ ${$f(ded)} déduc.</div>`:''}
       <div class="li-acts"><button class="btn btn-xs btn-s" onclick="editDep('${e.id}')">✏️</button><button class="btn btn-xs btn-d" onclick="delDep('${e.id}')">🗑️</button></div>
     </div>
   </div>`;
@@ -1052,24 +1040,40 @@ function depCatChanged(){
   const isMixed=MIXED_CATS.includes(cat);
   document.getElementById('ev-fields').style.display=isEV?'block':'none';
   document.getElementById('ratio-fields').style.display=isMixed?'block':'none';
-  updateAutoRatioHint();
-  updateRatioPreview();
+  // Update amt label based on category
+  const lbl=document.getElementById('dep-amt-label');
+  if(cat==='Téléphone') lbl.textContent='Montant mensuel ($)';
+  else if(cat==='Assurance auto') lbl.textContent='Montant annuel ($)';
+  else lbl.textContent='Montant ($)';
+  updateAutoRatioHint();updateRatioPreview();updateAmtHint();
+}
+
+function updateAmtHint(){
+  const cat=document.getElementById('dep-cat').value;
+  const amt=parseFloat(document.getElementById('dep-amt').value)||0;
+  const hint=document.getElementById('dep-amt-hint');
+  if(!hint) return;
+  if(cat==='Téléphone'&&amt>0) hint.textContent=`→ ${$f(amt*12)}/an`;
+  else if(cat==='Assurance auto'&&amt>0) hint.textContent=`→ ${$f(amt/12)}/mois`;
+  else hint.textContent='';
 }
 
 function updateAutoRatioHint(){
   const proRatio=calcProRatio();
   const hint=document.getElementById('auto-ratio-hint');
-  if(hint) hint.textContent=proRatio!=null?`Auto: ${Math.round(proRatio*100)}% (calculé depuis les quarts)`:'';
+  if(hint) hint.textContent=proRatio!=null?`Auto: ${Math.round(proRatio*100)}%`:'';
 }
 
 function updateRatioPreview(){
+  const cat=document.getElementById('dep-cat').value;
   const amt=parseFloat(document.getElementById('dep-amt').value)||0;
+  const annual=cat==='Téléphone'?amt*12:amt;
   const override=document.getElementById('dep-ratio').value;
   const proRatio=calcProRatio();
   const ratio=override!==''?parseFloat(override)/100:(proRatio??1);
-  const ded=amt*ratio;
+  const ded=annual*ratio;
   const prev=document.getElementById('ratio-preview');
-  if(prev&&amt>0) prev.textContent=`Montant déductible : ${$f(ded)} (${Math.round(ratio*100)}% de ${$f(amt)})`;
+  if(prev&&annual>0) prev.textContent=`Montant déductible : ${$f(ded)} (${Math.round(ratio*100)}% de ${$f(annual)})`;
   else if(prev) prev.textContent='';
 }
 
@@ -1133,9 +1137,10 @@ function renderFsub(){
   const f=calcFiscal(),yr=S.cfg.year;
   const el=document.getElementById('fsub');if(!el) return;
   if(S.fsub==='revenus'){
+    const hasTax=f.total>0;
     const setA=f.gross*Math.max(f.rate,.25);
     el.innerHTML=`
-      <div class="card"><div class="card-title">Revenus bruts ${yr}</div><div class="card-value">${$f(f.gross)}</div><div class="card-sub">${f.divs.length} livraisons</div></div>
+      <div class="card"><div class="card-title">Revenus bruts ${yr}</div><div class="card-value">${$f(f.gross)}</div><div class="card-sub">${f.divs.length} livraison${f.divs.length!==1?'s':''}</div></div>
       ${f.needsTPS?`
         <div class="alert alert-w"><em>⚠️</em><p>Tu dois percevoir et remettre la TPS/TVQ. Inscris-toi auprès de l'ARC et Revenu Québec.</p></div>
         <div class="grid2">
@@ -1144,19 +1149,21 @@ function renderFsub(){
         </div>`:`
         <div class="alert alert-i"><em>ℹ️</em><p>Seuil TPS/TVQ : ${$f(f.gross)} / ${$f(30000)} (${$f(Math.max(0,30000-f.gross))} restant)</p></div>
         <div class="pbar"><div class="pfill" style="width:${Math.min(100,f.gross/300).toFixed(1)}%"></div></div>`}
-      <div class="stitle">Estimation impôt — revenu net ${$f(f.net)}</div>
-      <div class="card"><table class="dtable">
-        <tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr>
-        <tr><td>Impôt provincial (Québec)</td><td>${$f(f.qcOwed)}</td></tr>
-        <tr><td>Cotisation RRQ (autonome)</td><td>${$f(f.rrq)}</td></tr>
-        <tr><td style="font-weight:700">Total estimé</td><td style="color:var(--err);font-weight:700">${$f(f.total)}</td></tr>
-      </table></div>
-      <div class="card" style="background:linear-gradient(135deg,rgba(0,122,255,.08),rgba(88,86,214,.08));border:1px solid rgba(0,122,255,.2)">
-        <div class="card-title">💰 Mise de côté recommandée</div>
-        <div class="card-value" style="color:var(--accent)">${$f(setA)}</div>
-        <div class="card-sub">${Math.ceil(Math.max(f.rate,.25)*100)}% de tes revenus bruts</div>
-      </div>
-      <div class="alert alert-i"><em>⚠️</em><p style="font-size:12px">Estimations à titre indicatif — consulte un comptable. Taux ${yr}.</p></div>
+      ${hasTax?`
+        <div class="stitle">Estimation impôt — revenu net ${$f(f.net)}</div>
+        <div class="card"><table class="dtable">
+          <tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr>
+          <tr><td>Impôt provincial (Québec)</td><td>${$f(f.qcOwed)}</td></tr>
+          <tr><td>Cotisation RRQ (autonome)</td><td>${$f(f.rrq)}</td></tr>
+          <tr><td style="font-weight:700">Total estimé</td><td style="color:var(--err);font-weight:700">${$f(f.total)}</td></tr>
+        </table></div>
+        <div class="card" style="background:linear-gradient(135deg,rgba(0,122,255,.08),rgba(88,86,214,.08));border:1px solid rgba(0,122,255,.2)">
+          <div class="card-title">💰 Mise de côté recommandée</div>
+          <div class="card-value" style="color:var(--accent)">${$f(setA)}</div>
+          <div class="card-sub">${Math.ceil(Math.max(f.rate,.25)*100)}% de tes revenus bruts</div>
+        </div>
+        <div class="alert alert-i"><em>⚠️</em><p style="font-size:12px">Estimations à titre indicatif — consulte un comptable. Taux ${yr}.</p></div>
+      `:`<div class="alert alert-i"><em>📊</em><p>Continue à tracker tes revenus — les estimations d'impôt s'afficheront automatiquement.</p></div>`}
     `;
   }else if(S.fsub==='deductions'){
     el.innerHTML=`
@@ -1179,7 +1186,7 @@ function renderFsub(){
           <thead><tr><th>Catégorie</th><th>Total</th><th>Déductible</th></tr></thead>
           <tbody>${f.exps.map(e=>`<tr>
             <td>${CAT_ICONS[e.cat]||''} ${e.cat}</td>
-            <td style="text-align:right">${$f(e.amt)}</td>
+            <td style="text-align:right">${$f(getExpAnnual(e))}</td>
             <td style="color:var(--ok)">${$f(getExpDeductible(e,f.proRatio))}</td>
           </tr>`).join('')}</tbody>
         </table></div>`}
@@ -1198,12 +1205,12 @@ function renderFsub(){
       <div class="stitle">Kilométrage véhicule ${yr}</div>
       <div class="card">
         <div class="frow" style="margin-bottom:12px">
-          <div class="fg"><label class="fl">Km compteur — 1er janv.</label><input type="number" class="fi" id="v-km-jan" value="${S.cfg.vehicleKmJan||''}" placeholder="ex: 45000" oninput="saveVehicleKm()"></div>
-          <div class="fg"><label class="fl">Km compteur — maintenant</label><input type="number" class="fi" id="v-km-now" value="${S.cfg.vehicleKmNow||''}" placeholder="ex: 62000" oninput="saveVehicleKm()"></div>
+          <div class="fg"><label class="fl">Km compteur — 1er janv.</label><input type="number" inputmode="numeric" class="fi" id="v-km-jan" value="${S.cfg.vehicleKmJan||''}" placeholder="ex: 45000" onchange="saveVehicleKm()"></div>
+          <div class="fg"><label class="fl">Km compteur — maintenant</label><input type="number" inputmode="numeric" class="fi" id="v-km-now" value="${S.cfg.vehicleKmNow||''}" placeholder="ex: 62000" onchange="saveVehicleKm()"></div>
         </div>
         <div class="grid2">
           <div class="scard"><div class="slabel">Km totaux parcourus</div><div class="sval">${kmTotal.toFixed(0)}</div></div>
-          <div class="scard"><div class="slabel">Km professionnels (quarts)</div><div class="sval b">${f.kmPro.toFixed(0)}</div></div>
+          <div class="scard"><div class="slabel">Km pro (quarts + livraisons)</div><div class="sval b">${f.kmPro.toFixed(0)}</div></div>
         </div>
         ${pct!=null?`
           <div style="font-size:14px;font-weight:600;margin:8px 0 4px">Ratio pro — ${pct}%</div>
@@ -1224,7 +1231,7 @@ function renderFsub(){
           <div style="font-size:11px;color:var(--text2);margin-top:4px">Recharge + assurance + entretien</div>
         </div>
       </div>
-      <div class="alert alert-${craWins?'g':'i'}"><em>${craWins?'✅':'💡'}</em><p>La méthode <strong>${craWins?'taux CRA':'frais réels'}</strong> est plus avantageuse pour toi cette année (${$f(Math.abs(f.kmDed_cra-f.vehDed_detailed))} de différence).</p></div>
+      <div class="alert alert-${craWins?'g':'i'}"><em>${craWins?'✅':'💡'}</em><p>La méthode <strong>${craWins?'taux CRA':'frais réels'}</strong> est plus avantageuse (${$f(Math.abs(f.kmDed_cra-f.vehDed_detailed))} de différence).</p></div>
       <button class="btn btn-p btn-w" onclick="setDeductionMethod('${craWins?'cra':'detailed'}')">Utiliser la méthode ${craWins?'taux CRA':'frais réels'}</button>
     `;
   }
@@ -1234,12 +1241,13 @@ function saveVehicleKm(){
   const j=parseFloat(document.getElementById('v-km-jan')?.value)||0;
   const n=parseFloat(document.getElementById('v-km-now')?.value)||0;
   S.cfg.vehicleKmJan=j;S.cfg.vehicleKmNow=n;
-  save(false);renderFsub();
+  save(false);
+  // Re-render only the computed sub-sections, not the input fields
+  // We do a full fsub re-render here; onchange (not oninput) avoids focus loss
+  renderFsub();
 }
 
-function setDeductionMethod(m){
-  S.cfg.deductionMethod=m;save(false);renderFsub();
-}
+function setDeductionMethod(m){S.cfg.deductionMethod=m;save(false);renderFsub();}
 
 // ─── IA ──────────────────────────────────────────────────────────────────────
 function renderIA(){
@@ -1274,19 +1282,16 @@ function renderIA(){
       ${S.chatHistory.length>0?`<button class="btn btn-s btn-xs btn-w" style="margin-top:8px" onclick="clearChat()">Effacer la conversation</button>`:''}
     </div>
   `;
-  // Auto-scroll chat
   setTimeout(()=>{const c=document.getElementById('chat-messages');if(c) c.scrollTop=c.scrollHeight;},50);
 }
 
-function chatKeydown(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
-}
+function chatKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
 
 async function runAI(){
   if(!S.cfg.geminiKey||S.aiLoading) return;
   S.aiLoading=true;renderIA();
   const f=calcFiscal();
-  const anon=S.deliveries.map(d=>({plat:d.plat,rev:d.rev,tip:d.tip,km:d.km,h:new Date(d.debut).getHours(),j:new Date(d.debut).getDay(),dur:d.fin?Math.round((new Date(d.fin)-new Date(d.debut))/60000):null}));
+  const anon=S.deliveries.map(d=>({plat:d.plat,rev:d.rev,tip:d.tip,km:d.km,h:new Date(d.debut).getHours(),j:new Date(d.debut).getDay(),dur:d.dureeMin||null}));
   const prompt=`Tu es un assistant financier pour travailleurs autonomes en gig economy au Québec. Réponds en français québécois, directement et amicalement.
 
 DONNÉES (${anon.length} livraisons): ${JSON.stringify(anon)}
@@ -1318,8 +1323,7 @@ async function sendChat(){
   const msg=input?.value.trim();
   if(!msg||S.chatLoading||!S.cfg.geminiKey) return;
   S.chatHistory.push({role:'user',text:msg});
-  input.value='';
-  S.chatLoading=true;renderIA();
+  input.value='';S.chatLoading=true;renderIA();
   const f=calcFiscal();
   const ctx=`Tu es un assistant financier pour livreurs gig economy au Québec. Réponds en français québécois, de façon concise et directe.
 Contexte: ${S.deliveries.length} livraisons, revenus bruts ${$f(f.gross)}, revenu net estimé ${$f(f.net)}, ${f.km.toFixed(0)} km.
@@ -1337,8 +1341,7 @@ Dernières livraisons: ${JSON.stringify(S.deliveries.slice(0,15).map(d=>({plat:d
     });
     if(!r.ok) throw new Error('Erreur API');
     const data=await r.json();
-    const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'Pas de réponse';
-    S.chatHistory.push({role:'ai',text:reply});
+    S.chatHistory.push({role:'ai',text:data.candidates?.[0]?.content?.parts?.[0]?.text||'Pas de réponse'});
     save(false);
   }catch(e){S.chatHistory.push({role:'ai',text:'❌ '+e.message});}
   S.chatLoading=false;renderIA();
@@ -1361,15 +1364,14 @@ function renderPlatList(){
   const sel=document.getElementById('default-plat');
   document.getElementById('plat-list').innerHTML=S.cfg.platforms.map((p,i)=>`
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
-      <div style="flex:1;background:var(--bg3);padding:10px 13px;border-radius:12px;font-size:14px">${platIcon(p)} ${p}</div>
+      <div style="flex:1;background:rgba(120,120,128,0.12);padding:10px 13px;border-radius:12px;font-size:14px">${platIcon(p)} ${p}</div>
       ${i>0?`<button class="btn btn-xs btn-d" onclick="rmPlat(${i})">✕</button>`:`<div style="width:30px"></div>`}
     </div>`).join('');
   sel.innerHTML=S.cfg.platforms.map(p=>`<option value="${p}" ${p===S.cfg.defaultPlat?'selected':''}>${p}</option>`).join('');
 }
 
 function addPlat(){
-  const v=document.getElementById('new-plat').value.trim();
-  if(!v) return;
+  const v=document.getElementById('new-plat').value.trim();if(!v) return;
   if(S.cfg.platforms.includes(v)){toast('Cette plateforme existe déjà');return;}
   S.cfg.platforms.push(v);document.getElementById('new-plat').value='';renderPlatList();
 }
@@ -1408,11 +1410,11 @@ function toast(msg){
 
 // ─── PWA ─────────────────────────────────────────────────────────────────────
 function setupPWA(){
-  const manifest={name:'Livraisons Tracker',short_name:'Livraisons',description:'Suivi livraisons gig economy — Québec',start_url:'.',display:'standalone',background_color:'#F2F2F7',theme_color:'#007AFF',orientation:'portrait',icons:[{src:"data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#007AFF"/><text x="50%" y="57%" font-size="110" text-anchor="middle" dominant-baseline="middle">🚚</text></svg>'),sizes:'192x192',type:'image/svg+xml'}]};
+  const manifest={name:'Livraisons Tracker',short_name:'Livraisons',description:'Suivi livraisons gig economy — Québec',start_url:'.',display:'standalone',background_color:'#eef1f8',theme_color:'#007AFF',orientation:'portrait',icons:[{src:"data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#007AFF"/><text x="50%" y="57%" font-size="110" text-anchor="middle" dominant-baseline="middle">🚚</text></svg>'),sizes:'192x192',type:'image/svg+xml'}]};
   const mb=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
   document.getElementById('pwa-manifest').href=URL.createObjectURL(mb);
   if(!('serviceWorker' in navigator)) return;
-  const sw=`const C='lt-sw-v2';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.add('/')));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).catch(()=>caches.match('/')));return;}e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});`;
+  const sw=`const C='lt-sw-v3';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.add('/')));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).catch(()=>caches.match('/')));return;}e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});`;
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
 }
 
@@ -1420,8 +1422,7 @@ function setupPWA(){
 load();
 setupPWA();
 renderDash();
-// Sync from GitHub on startup (async, non-blocking)
-loadFromGH();
+loadFromGH(); // async, non-blocking — syncs data from GitHub on startup
 </script>
 </body>
 </html>
