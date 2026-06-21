@@ -135,7 +135,6 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
 @media(prefers-color-scheme:dark){.modal{background:#1c1c1e;}}
 @media(prefers-color-scheme:dark){#quart-modal-inner{background:#1c1c1e!important;}}
 @media(prefers-color-scheme:dark){#dn-import-modal-inner{background:#1c1c1e!important;}}
-@media(prefers-color-scheme:dark){#m-trajet-edit-inner{background:#1c1c1e!important;}}
 .mhandle{width:36px;height:4px;background:var(--card2);border-radius:2px;margin:0 auto 16px}
 .mtitle{font-size:18px;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
 .mclose{background:var(--card2);border:none;color:var(--text2);font-size:15px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
@@ -274,13 +273,13 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>
     Quart
   </button>
+  <button class="drawer-btn" id="drawer-trajets">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l3-10h12l3 10"/><path d="M3 17h18"/><path d="M9 17V9m6 8V9"/></svg>
+    Trajets
+  </button>
   <button class="drawer-btn" id="drawer-dn-import">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     Importer trajets Driversnote
-  </button>
-  <button class="drawer-btn" id="drawer-trajets">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>
-    Trajets
   </button>
 </div>
 
@@ -296,7 +295,6 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
     <div class="fg"><label class="fl">Pourboire ($)</label><input type="number" inputmode="decimal" class="fi" id="liv-tip" step="0.01" min="0" placeholder="0.00"></div>
   </div>
   <div class="fg"><label class="fl">Distance (km)</label><input type="number" inputmode="decimal" class="fi" id="liv-km" step="0.1" min="0" placeholder="0.0"></div>
-  <div id="liv-trajet-banner" style="display:none"></div>
   <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="liv-date"></div>
   <div class="fg"><label class="fl">Durée (min)</label><input type="number" inputmode="numeric" class="fi" id="liv-duree" step="1" min="0" placeholder="45"></div>
   <div class="fg"><label class="fl">Notes</label><input type="text" class="fi" id="liv-notes" placeholder="Optionnel…"></div>
@@ -460,26 +458,6 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
   <div id="dn-import-result" style="display:none;margin-top:12px"></div>
 </div></div>
 
-<!-- MODAL TRAJET EDIT -->
-<div class="moverlay" id="m-trajet-edit" style="background:rgba(0,0,0,.5)">
-<div class="modal" style="background:#ffffff;-webkit-backdrop-filter:none;backdrop-filter:none" id="m-trajet-edit-inner">
-  <div class="mhandle"></div>
-  <div class="mtitle"><span>Modifier le trajet</span><button class="mclose" id="trajet-edit-close">✕</button></div>
-  <input type="hidden" id="trajet-edit-id">
-  <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="trajet-edit-date"></div>
-  <div class="frow">
-    <div class="fg"><label class="fl">Heure début</label><input type="time" class="fi" id="trajet-edit-hdebut"></div>
-    <div class="fg"><label class="fl">Heure fin</label><input type="time" class="fi" id="trajet-edit-hfin"></div>
-  </div>
-  <div class="fg"><label class="fl">Distance (km)</label><input type="number" inputmode="decimal" class="fi" id="trajet-edit-dist" step="0.1" min="0" placeholder="0.0"></div>
-  <div class="fg"><label class="fl">Départ</label><input type="text" class="fi" id="trajet-edit-dep" placeholder="Adresse départ…"></div>
-  <div class="fg"><label class="fl">Arrivée</label><input type="text" class="fi" id="trajet-edit-arr" placeholder="Adresse arrivée…"></div>
-  <div style="display:flex;gap:10px;margin-top:4px">
-    <button class="btn btn-p" style="flex:1" id="trajet-edit-save">Sauvegarder</button>
-    <button class="btn btn-s" id="trajet-edit-cancel">Annuler</button>
-  </div>
-</div></div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="console.warn('[LT] Supabase CDN indisponible')"></script>
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" onerror="console.warn('[LT] SheetJS CDN indisponible')"></script>
 <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js" onerror="console.warn('[LT] jsPDF CDN indisponible')"></script>
@@ -516,7 +494,6 @@ const LS_KEY='lt_v4';
 const S={
   tab:'dashboard', fsub:'revenus',
   deliveries:[], expenses:[],
-  trajetsKmPro: null,
   cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra'},
   dFilt:{plat:'',date:''}, eFilt:'', eShowFilt:false,
   dedDetailOpen:false,
@@ -570,20 +547,8 @@ async function sbLoad(){
     if(d.error)throw d.error;
     S.deliveries=l.data.map(dFromDB);
     S.expenses=d.data.map(eFromDB);
-    saveLS(); connDot(true);
-    // Charger le total km pro depuis la table trajets (fire-and-forget)
-    _loadTrajetsKmPro(sb);
-    return true;
+    saveLS(); connDot(true); return true;
   }catch(e){console.error('[SB load]',e.message); connDot(false); return false;}
-}
-
-async function _loadTrajetsKmPro(sbArg){
-  const sb=sbArg||sbClient();if(!sb)return;
-  try{
-    const{data,error}=await sb.from('trajets').select('distance').eq('type','pro');
-    if(error||!data)return;
-    S.trajetsKmPro=data.reduce((s,r)=>s+(parseFloat(r.distance)||0),0);
-  }catch(e){}
 }
 
 function sbSubscribe(){
@@ -646,7 +611,7 @@ function calcFiscal(){
   const exps=S.expenses.filter(e=>parseDate(e.date).getFullYear()===yr);
   const gross=divs.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
   const km=divs.reduce((s,d)=>s+(d.km||0),0);
-  const kmPro=S.trajetsKmPro!=null?S.trajetsKmPro:km;
+  const kmPro=km;
   const kmTotal=Math.max(0,(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0));
   const proRatio=kmTotal>0&&kmPro>0?Math.min(1,kmPro/kmTotal):null;
   const kmDed=km<=KM_THRESH?km*KM_R1:KM_THRESH*KM_R1+(km-KM_THRESH)*KM_R2;
@@ -790,28 +755,18 @@ function openLivModal(id=null){
     sel.value=S.cfg.defaultPlat;
     ['liv-rev','liv-tip','liv-km','liv-duree','liv-notes'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('liv-date').value=today;
-    document.getElementById('liv-trajet-banner').style.display='none';
-    document.getElementById('liv-trajet-banner').innerHTML='';
-    _livSelectedTrajetId=null;
-    _livLoadTrajetSuggestions(today);
   }
   openM('m-liv');
 }
 
-async function saveLiv(){
+function saveLiv(){
   const id=document.getElementById('liv-id').value||uid();
   const dateVal=document.getElementById('liv-date').value;
   if(!dateVal){toast('Date requise');return;}
   const d={id,plat:document.getElementById('liv-plat').value,rev:parseFloat(document.getElementById('liv-rev').value)||0,tip:parseFloat(document.getElementById('liv-tip').value)||0,km:parseFloat(document.getElementById('liv-km').value)||0,date:dateVal,dureeMin:parseInt(document.getElementById('liv-duree').value)||0,notes:document.getElementById('liv-notes').value};
   const i=S.deliveries.findIndex(x=>x.id===id);
   if(i>=0)S.deliveries[i]=d;else S.deliveries.unshift(d);
-  saveLS(); await sbUpsert('livraisons',dToDB(d));
-  if(_livSelectedTrajetId){
-    const sb=sbClient();
-    if(sb)sb.from('trajets').update({livraison_id:id}).eq('id',_livSelectedTrajetId).then(()=>{});
-    _livSelectedTrajetId=null;
-  }
-  closeM('m-liv'); render(); toast('Livraison enregistrée');
+  saveLS(); sbUpsert('livraisons',dToDB(d)); closeM('m-liv'); render(); toast('Livraison enregistrée');
 }
 function delLiv(id){
   if(!confirm('Supprimer cette livraison ?'))return;
@@ -1044,9 +999,8 @@ function rFsub(){
         <button class="btn btn-s btn-sm btn-w" id="save-vkm">Enregistrer</button>
         <div class="grid2" style="margin-top:12px">
           <div class="scard"><div class="slabel">Km totaux</div><div class="sval">${f.kmTotal.toFixed(0)}</div></div>
-          <div class="scard"><div class="slabel">Km pro</div><div class="sval b">${f.kmPro.toFixed(0)}</div><div style="font-size:10px;color:var(--text2);margin-top:2px">${S.trajetsKmPro!=null?'Depuis trajets importés':'Depuis livraisons'}</div></div>
+          <div class="scard"><div class="slabel">Km pro</div><div class="sval b">${f.kmPro.toFixed(0)}</div></div>
         </div>
-        ${S.trajetsKmPro==null?`<p class="note-sm" style="margin-top:8px">Aucun trajet importé — importez un fichier Driversnote pour un calcul plus précis.</p>`:''}
         ${pct!=null?`<div style="font-size:14px;font-weight:600;margin:8px 0 4px">Ratio pro — ${pct}%</div><div class="ratio-row"><div class="ratio-pro" style="flex:${pct}"></div><div class="ratio-perso" style="flex:${100-pct}"></div></div>`:''}
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
           <div class="card-title">Coût moyen / km (calculé)</div>
@@ -1365,6 +1319,18 @@ function initEvents(){
       else if(a==='del-dep')delDep(dBtn.dataset.id);
       else if(a==='filt-dep'){S.eFilt=dBtn.dataset.val;rDep();}
       else if(a==='dep-toggle-filt'){S.eShowFilt=!S.eShowFilt;rDep();}
+      return;}
+
+    // Trajets
+    const tBtn=e.target.closest('#trajets-page [data-action]');
+    if(tBtn){const a=tBtn.dataset.action;
+      if(a==='del-trajet'){
+        if(!confirm('Supprimer ce trajet ?'))return;
+        const sb=sbClient();if(!sb){toast('Supabase non configuré');return;}
+        sb.from('trajets').delete().eq('id',tBtn.dataset.id).then(({error})=>{
+          if(error){toast('Erreur : '+error.message);}else{toast('Trajet supprimé');rTrajets();}
+        });
+      }
       return;}
 
     // Fiscal
@@ -1734,178 +1700,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ── TRAJETS PAGE ───────────────────────────────────────────────────────────────
-let _trajetsData = [];
-let _livSuggestedTrajets = [];
-let _livSelectedTrajetId = null;
-
-async function rTrajets(){
-  const el = document.getElementById('panel-trajets');
-  if (!el) return;
-  el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Chargement…</div>';
-  const sb = sbClient();
-  if (!sb) { el.innerHTML = '<div class="alert alert-w" style="margin:16px"><p>Supabase non configuré.</p></div>'; return; }
-  try {
-    const {data, error} = await sb.from('trajets').select('*').order('date',{ascending:false}).order('heure_debut',{ascending:false});
-    if (error) throw error;
-    _trajetsData = data || [];
-  } catch(e) {
-    el.innerHTML = `<div class="alert alert-w" style="margin:16px"><p>Erreur : ${esc(e.message)}</p></div>`;
-    return;
-  }
-  const totalKm = _trajetsData.filter(t=>t.type==='pro').reduce((s,t)=>s+(parseFloat(t.distance)||0),0);
-  if (!_trajetsData.length) {
-    el.innerHTML = '<div class="empty" style="padding:40px 16px"><div class="empty-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg></div><p>Aucun trajet importé.</p></div>';
-    return;
-  }
-  el.innerHTML = `
-    <div class="scard" style="margin:16px 16px 0"><div class="slabel">Total km pro</div><div class="sval b">${totalKm.toFixed(1)} km</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${_trajetsData.filter(t=>t.type==='pro').length} trajet${_trajetsData.filter(t=>t.type==='pro').length!==1?'s':''}</div></div>
-    <div id="trajets-page" style="padding:8px 0 16px">
-      ${_trajetsData.map(t => {
-        const h = iso => { if(!iso)return ''; try{const d=new Date(iso);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}catch(e){return iso.slice(11,16)||'';}};
-        const heures = (h(t.heure_debut)||'—') + (t.heure_fin?'→'+h(t.heure_fin):'');
-        const dist = t.distance!=null?(+t.distance).toFixed(1)+' km':'—';
-        const assigned = t.livraison_id ? `<span style="font-size:10px;color:var(--ok);font-weight:600">● Assigné</span>` : `<span style="font-size:10px;color:var(--text3)">Non assigné</span>`;
-        return `<div class="li">
-          <div class="li-ico" style="color:var(--accent)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg></div>
-          <div class="li-body">
-            <div class="li-title">${esc(t.date||'—')} · ${dist}</div>
-            <div class="li-sub">${heures}${t.depart||t.arrivee?' · '+esc((t.depart||'')+(t.arrivee?' → '+t.arrivee:''))':''}</div>
-            <div style="margin-top:2px">${assigned}</div>
-          </div>
-          <div class="li-right"><div class="li-acts">
-            <button class="btn btn-xs btn-s" data-tj-action="edit" data-tjid="${esc(String(t.id))}">${_SVG_EDIT}</button>
-            <button class="btn btn-xs btn-d" data-tj-action="del" data-tjid="${esc(String(t.id))}">${_SVG_TRASH}</button>
-          </div></div>
-        </div>`;
-      }).join('')}
-    </div>
-  `;
-}
-
-async function _livLoadTrajetSuggestions(dateStr) {
-  const sb = sbClient(); if (!sb) return;
-  try {
-    const {data} = await sb.from('trajets').select('*').eq('type','pro').is('livraison_id',null).eq('date',dateStr);
-    _livSuggestedTrajets = data || [];
-    _renderLivTrajetBanner();
-  } catch(e) { _livSuggestedTrajets = []; }
-}
-
-function _renderLivTrajetBanner() {
-  const banner = document.getElementById('liv-trajet-banner');
-  if (!banner) return;
-  if (!_livSuggestedTrajets.length) { banner.style.display = 'none'; banner.innerHTML = ''; return; }
-  const h = iso => { if(!iso)return ''; try{const d=new Date(iso);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}catch(e){return iso.slice(11,16)||'';}};
-  banner.style.display = 'block';
-  banner.innerHTML = `
-    <div class="alert alert-i" style="flex-direction:column;align-items:stretch">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>
-        <span style="font-size:13px;font-weight:600">${_livSuggestedTrajets.length} trajet${_livSuggestedTrajets.length>1?'s':''} disponible${_livSuggestedTrajets.length>1?'s':''} pour cette date</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        ${_livSuggestedTrajets.map((t,i) => {
-          const dist = t.distance!=null?(+t.distance).toFixed(1)+' km':'—';
-          const heures = h(t.heure_debut)+(t.heure_fin?'→'+h(t.heure_fin):'');
-          const sel = _livSelectedTrajetId===t.id;
-          return `<button class="btn btn-s" style="font-size:12px;text-align:left;padding:8px 10px;${sel?'border:2px solid var(--accent);':''}justify-content:flex-start" data-liv-trajet="${t.id}" data-liv-trajet-km="${t.distance||0}">
-            ${sel?'✓ ':''}${heures} · ${dist}${t.depart?' · '+esc(t.depart.slice(0,30)):''}
-          </button>`;
-        }).join('')}
-        ${_livSelectedTrajetId?`<button class="btn btn-s btn-sm" data-liv-trajet-clear style="font-size:11px">Désélectionner</button>`:''}
-      </div>
-    </div>
-  `;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Trajets page event delegation
-  document.addEventListener('click', async e => {
-    // Delegation sur panel-trajets
-    const tjBtn = e.target.closest('#trajets-page [data-tj-action]');
-    if (tjBtn) {
-      const action = tjBtn.dataset.tjAction;
-      const tjid = tjBtn.dataset.tjid;
-      if (action === 'del') {
-        if (!confirm('Supprimer ce trajet ?')) return;
-        const sb = sbClient(); if (!sb) { toast('Supabase non configuré'); return; }
-        try {
-          const {error} = await sb.from('trajets').delete().eq('id', tjid);
-          if (error) throw error;
-          toast('Trajet supprimé');
-          rTrajets();
-          _loadTrajetsKmPro();
-        } catch(err) { toast('Erreur : ' + err.message); }
-      } else if (action === 'edit') {
-        const t = _trajetsData.find(x => String(x.id) === tjid);
-        if (!t) return;
-        const toTime = iso => { if(!iso)return ''; try{const d=new Date(iso);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}catch(e){return iso.slice(11,16)||'';} };
-        document.getElementById('trajet-edit-id').value = tjid;
-        document.getElementById('trajet-edit-date').value = t.date || '';
-        document.getElementById('trajet-edit-hdebut').value = toTime(t.heure_debut);
-        document.getElementById('trajet-edit-hfin').value = toTime(t.heure_fin);
-        document.getElementById('trajet-edit-dist').value = t.distance != null ? t.distance : '';
-        document.getElementById('trajet-edit-dep').value = t.depart || '';
-        document.getElementById('trajet-edit-arr').value = t.arrivee || '';
-        openM('m-trajet-edit');
-      }
-      return;
-    }
-    // Trajet suggestion in livraison modal
-    const livTrajetBtn = e.target.closest('[data-liv-trajet]');
-    if (livTrajetBtn && document.getElementById('m-liv')?.classList.contains('open')) {
-      const id = livTrajetBtn.dataset.livTrajet;
-      const km = parseFloat(livTrajetBtn.dataset.livTrajetKm) || 0;
-      _livSelectedTrajetId = _livSelectedTrajetId === id ? null : id;
-      if (_livSelectedTrajetId) document.getElementById('liv-km').value = km || '';
-      _renderLivTrajetBanner();
-      return;
-    }
-    const clearBtn = e.target.closest('[data-liv-trajet-clear]');
-    if (clearBtn) { _livSelectedTrajetId = null; _renderLivTrajetBanner(); return; }
-  });
-
-  // Trajet edit modal
-  const trajetEditModal = document.getElementById('m-trajet-edit');
-  if (trajetEditModal) {
-    trajetEditModal.addEventListener('click', async e => {
-      if (e.target === trajetEditModal || e.target.closest('#trajet-edit-close,#trajet-edit-cancel')) { closeM('m-trajet-edit'); return; }
-      if (e.target.id === 'trajet-edit-save' || e.target.closest('#trajet-edit-save')) {
-        const sb = sbClient(); if (!sb) { toast('Supabase non configuré'); return; }
-        const tjid = document.getElementById('trajet-edit-id').value;
-        const dateVal = document.getElementById('trajet-edit-date').value;
-        const hdebut = document.getElementById('trajet-edit-hdebut').value;
-        const hfin = document.getElementById('trajet-edit-hfin').value;
-        const dist = parseFloat(document.getElementById('trajet-edit-dist').value);
-        const dep = document.getElementById('trajet-edit-dep').value.trim();
-        const arr = document.getElementById('trajet-edit-arr').value.trim();
-        const toISO = (date, time) => (date && time) ? new Date(date+'T'+time+':00').toISOString() : null;
-        const btn = document.getElementById('trajet-edit-save');
-        btn.disabled = true; btn.textContent = 'Sauvegarde…';
-        try {
-          const {error} = await sb.from('trajets').update({
-            date: dateVal || null,
-            heure_debut: toISO(dateVal, hdebut),
-            heure_fin: toISO(dateVal, hfin),
-            distance: isNaN(dist) ? null : dist,
-            depart: dep || null,
-            arrivee: arr || null
-          }).eq('id', tjid);
-          if (error) throw error;
-          closeM('m-trajet-edit');
-          toast('Trajet modifié ✓');
-          rTrajets();
-          _loadTrajetsKmPro();
-        } catch(err) {
-          toast('Erreur : ' + err.message);
-          btn.disabled = false; btn.textContent = 'Sauvegarder';
-        }
-      }
-    });
-  }
-});
-
 // ── IMPORT DRIVERSNOTE EXCEL ───────────────────────────────────────────────────
 let _dnTrajets = []; // {date, heure_debut, heure_fin, depart, arrivee, distance, selected}
 
@@ -2101,6 +1895,36 @@ function _qUpdateHeaderTimer() {
 
 function rQuart(){
   document.getElementById('panel-quart').innerHTML='';
+}
+
+// ── TRAJETS ────────────────────────────────────────────────────────────────────
+async function rTrajets(){
+  const el=document.getElementById('panel-trajets');
+  el.innerHTML=`<div id="trajets-page"><div class="card" style="margin-bottom:12px"><div class="card-title">Total km pro</div><div id="trajets-total-km" class="card-value">—</div><div class="card-sub">Tous les trajets professionnels</div></div><div id="trajets-list"><div class="empty"><p class="spin" style="font-size:24px">⏳</p><p>Chargement…</p></div></div></div>`;
+  const sb=sbClient();
+  if(!sb){document.getElementById('trajets-list').innerHTML='<div class="alert alert-w"><p>Supabase non configuré. Configure la connexion dans Paramètres.</p></div>';return;}
+  try{
+    const{data,error}=await sb.from('trajets').select('*').order('date',{ascending:false});
+    if(error)throw error;
+    const totalKm=data.reduce((s,t)=>s+(parseFloat(t.distance)||0),0);
+    document.getElementById('trajets-total-km').textContent=totalKm.toFixed(1)+' km';
+    if(!data.length){document.getElementById('trajets-list').innerHTML='<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M3 17l3-10h12l3 10"/><path d="M3 17h18"/></svg></div><p>Aucun trajet enregistré.</p></div>';return;}
+    document.getElementById('trajets-list').innerHTML=data.map(t=>{
+      const hDebut=t.heure_debut?new Date(t.heure_debut).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):'—';
+      const hFin=t.heure_fin?new Date(t.heure_fin).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):'—';
+      const km=t.distance!=null?(+t.distance).toFixed(1)+' km':'—';
+      const assigne=t.livraison_id?`<span class="badge bdg-g">Assigné</span>`:`<span class="badge bdg-y">Non assigné</span>`;
+      return`<div class="li">
+        <div class="li-ico" style="color:var(--accent)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l3-10h12l3 10"/><path d="M3 17h18"/><path d="M9 17V9m6 8V9"/></svg></div>
+        <div class="li-body">
+          <div class="li-title">${esc(t.date||'—')}</div>
+          <div class="li-sub">${hDebut}→${hFin} · ${km}</div>
+          <div style="margin-top:4px">${assigne}</div>
+        </div>
+        <div class="li-right"><button class="btn btn-xs btn-d" data-action="del-trajet" data-id="${esc(String(t.id))}">${_SVG_TRASH}</button></div>
+      </div>`;
+    }).join('');
+  }catch(e){document.getElementById('trajets-list').innerHTML=`<div class="alert alert-w"><p>Erreur : ${esc(e.message)}</p></div>`;}
 }
 
 
