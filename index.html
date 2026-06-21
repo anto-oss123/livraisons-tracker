@@ -435,7 +435,7 @@ const S={
   tab:'dashboard', fsub:'revenus',
   deliveries:[], expenses:[],
   cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra'},
-  dFilt:{plat:'',date:''}, eFilt:'', eShowFilt:false,
+  dFilt:{plat:'',dateFrom:'',dateTo:''}, eFilt:'', eShowFilt:false,
   dedDetailOpen:false,
   exportDateFrom:'', exportDateTo:'',
   proRatio:null,
@@ -521,7 +521,7 @@ function onRT(table,{eventType,new:nr,old:or}){
     if(eventType==='DELETE')S.expenses=S.expenses.filter(x=>x.id!==or.id);
     else{const v=eFromDB(nr);const i=S.expenses.findIndex(x=>x.id===v.id);if(i>=0)S.expenses[i]=v;else S.expenses.unshift(v);}
   }
-  saveLS(); render();
+  refreshProRatio(); saveLS(); render();
 }
 
 async function sbUpsert(table,row){
@@ -604,6 +604,7 @@ function fiscalFromSnap(snap){
 async function buildFiscalSnapshot(annee,mois,isAuto){
   const sb=sbClient();if(!sb)return false;
   try{
+    annee=parseInt(annee,10); mois=parseInt(mois,10);
     const pfx=`${annee}-${String(mois).padStart(2,'0')}`;
     const divs=S.deliveries.filter(d=>d.date&&d.date.startsWith(pfx));
     const exps=S.expenses.filter(e=>e.date&&e.date.startsWith(pfx));
@@ -619,11 +620,16 @@ async function buildFiscalSnapshot(annee,mois,isAuto){
     const totDed=r2(method==='cra'?(kmDed+otherDed):(vehDed+otherDed));
     const net=r2(Math.max(0,gross-totDed));
     const depensesDetail=exps.map(e=>({cat:e.cat,desc:e.desc||'',amt:e.amt,annual:expAnnual(e),ded:expDed(e,proRatio)}));
+    let userId=null;
+    try{const{data:au}=await sb.auth.getUser();userId=au?.user?.id||null;}catch(_){}
     const row={annee,mois,type_snapshot:'mensuel',revenu_brut:gross,total_pourboires:tips,nombre_livraisons:divs.length,km_pro:kmPro,km_total:kmTotal,ratio_pro:proRatio,odometer_start:S.cfg.vehicleKmJan||0,odometer_current:S.cfg.vehicleKmNow||0,deduction_km_cra:kmDed,autres_deductions:otherDed,total_deductions:totDed,revenu_net_imposable:net,depenses_detail:depensesDetail,methode_deduction:method,taux_km_cra:KM_R1,sauvegarde_auto:isAuto};
-    const{error}=await sb.from('fiscal_snapshots').upsert(row);
-    if(error)throw error;
+    if(userId) row.user_id=userId;
+    console.log('[LT] buildFiscalSnapshot payload',JSON.stringify(row));
+    const result=await sb.from('fiscal_snapshots').upsert(row);
+    console.log('[LT] buildFiscalSnapshot result',result);
+    if(result.error)throw result.error;
     return true;
-  }catch(e){console.error('[LT] snapshot',e.message);return false;}
+  }catch(e){console.error('[LT] snapshot error',e.message);return false;}
 }
 async function buildAnnualSnapshot(annee){
   const sb=sbClient();if(!sb)return false;
@@ -779,10 +785,11 @@ function rLiv(){
   const plats=['Toutes',...S.cfg.platforms];
   let filt=[...S.deliveries].sort((a,b)=>parseDate(b.date)-parseDate(a.date));
   if(S.dFilt.plat&&S.dFilt.plat!=='Toutes') filt=filt.filter(d=>d.plat===S.dFilt.plat);
-  if(S.dFilt.date) filt=filt.filter(d=>d.date===S.dFilt.date);
+  if(S.dFilt.dateFrom) filt=filt.filter(d=>d.date>=S.dFilt.dateFrom);
+  if(S.dFilt.dateTo) filt=filt.filter(d=>d.date<=S.dFilt.dateTo);
   document.getElementById('panel-livraisons').innerHTML=`
     <div class="chips">${plats.map(p=>`<button class="chip${(S.dFilt.plat||'Toutes')===p?' active':''}" data-action="filt-plat" data-val="${esc(p)}">${esc(p)}</button>`).join('')}</div>
-    <div class="fg"><input type="date" class="fi" value="${S.dFilt.date}" data-action="filt-date"></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;align-items:flex-end"><div style="flex:1"><label class="fl">Du</label><input type="date" id="filt-date-from" value="${S.dFilt.dateFrom}" style="display:block;opacity:1;visibility:visible;font-size:16px;width:100%;height:auto;-webkit-appearance:none;appearance:none;background:white;border:1px solid #ccc;border-radius:8px;padding:8px;color:#000;box-sizing:border-box"></div><div style="flex:1"><label class="fl">Au</label><input type="date" id="filt-date-to" value="${S.dFilt.dateTo}" style="display:block;opacity:1;visibility:visible;font-size:16px;width:100%;height:auto;-webkit-appearance:none;appearance:none;background:white;border:1px solid #ccc;border-radius:8px;padding:8px;color:#000;box-sizing:border-box"></div><button class="btn btn-s btn-sm" data-action="filt-date-reset" style="flex-shrink:0;align-self:flex-end">Réinitialiser</button></div>
     ${filt.length===0?`<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><p>Aucune livraison.<br>Appuie sur + pour en ajouter une.</p></div>`:filt.map(d=>livCard(d,true)).join('')}
     <button class="fab" data-action="new-liv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
   `;
@@ -837,12 +844,12 @@ function saveLiv(){
   const d={id,plat:document.getElementById('liv-plat').value,rev:parseFloat(document.getElementById('liv-rev').value)||0,tip:parseFloat(document.getElementById('liv-tip').value)||0,km:parseFloat(document.getElementById('liv-km').value)||0,date:dateVal,dureeMin:parseInt(document.getElementById('liv-duree').value)||0,notes:document.getElementById('liv-notes').value};
   const i=S.deliveries.findIndex(x=>x.id===id);
   if(i>=0)S.deliveries[i]=d;else S.deliveries.unshift(d);
-  saveLS(); sbUpsert('livraisons',dToDB(d)); closeM('m-liv'); render(); toast('Livraison enregistrée');
+  refreshProRatio(); saveLS(); sbUpsert('livraisons',dToDB(d)); closeM('m-liv'); render(); toast('Livraison enregistrée');
 }
 function delLiv(id){
   if(!confirm('Supprimer cette livraison ?'))return;
   S.deliveries=S.deliveries.filter(d=>d.id!==id);
-  saveLS(); sbDelete('livraisons',id); render(); toast('Supprimé');
+  refreshProRatio(); saveLS(); sbDelete('livraisons',id); render(); toast('Supprimé');
 }
 
 // ── DÉPENSES ───────────────────────────────────────────────────────────────────
@@ -1402,6 +1409,7 @@ function initEvents(){
       else if(a==='edit-liv')openLivModal(lBtn.dataset.id);
       else if(a==='del-liv')delLiv(lBtn.dataset.id);
       else if(a==='filt-plat'){S.dFilt.plat=lBtn.dataset.val;rLiv();}
+      else if(a==='filt-date-reset'){S.dFilt.dateFrom='';S.dFilt.dateTo='';rLiv();}
       return;}
 
     // Dépenses
@@ -1429,10 +1437,10 @@ function initEvents(){
       btn.disabled=true; btn.textContent='Sauvegarde…';
       buildFiscalSnapshot(now.getFullYear(),now.getMonth()+1,false).then(ok=>{
         const b=document.getElementById('save-snap-btn');
-        if(b){b.textContent='✓ Sauvegardé';}
-        if(ok)loadFiscalSnapshots().then(()=>{rFisc();});
+        if(ok){if(b)b.textContent='✓ Sauvegardé';loadFiscalSnapshots().then(()=>{rFisc();});}
+        else{if(b)b.textContent='⚠ Erreur sauvegarde';}
         setTimeout(()=>{const b2=document.getElementById('save-snap-btn');if(b2){b2.disabled=false;b2.textContent='Sauvegarder ce mois';}},2000);
-      }).catch(()=>{});
+      }).catch(()=>{const b=document.getElementById('save-snap-btn');if(b)b.textContent='⚠ Erreur sauvegarde';setTimeout(()=>{const b2=document.getElementById('save-snap-btn');if(b2){b2.disabled=false;b2.textContent='Sauvegarder ce mois';}},2000);});
       return;}
     if(e.target.id==='hist-back'){S.fiscal.histMode=false;S.fiscal.histSnap=null;rFisc();return;}
     if(e.target.id==='fiscal-excel-btn'){exportFiscalExcel();return;}
@@ -1464,7 +1472,8 @@ function initEvents(){
 
   document.addEventListener('change',e=>{
     if(e.target.id==='dep-cat'){updateDepCat();return;}
-    if(e.target.closest('#panel-livraisons')&&e.target.dataset.action==='filt-date'){S.dFilt.date=e.target.value;rLiv();return;}
+    if(e.target.id==='filt-date-from'){S.dFilt.dateFrom=e.target.value;rLiv();return;}
+    if(e.target.id==='filt-date-to'){S.dFilt.dateTo=e.target.value;rLiv();return;}
     if(e.target.id==='snap-nav-sel'){
       const val=e.target.value;
       if(!val){S.fiscal.histMode=false;S.fiscal.histSnap=null;rFisc();return;}
