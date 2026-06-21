@@ -145,6 +145,8 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
 .conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#8E8E93;flex-shrink:0}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+/* Safari/iOS: preserve native date picker */
+input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cursor:pointer}
 /* DRAWER */
 #drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;display:none;opacity:0;transition:opacity .25s}
 #drawer-overlay.open{display:block;opacity:1}
@@ -404,11 +406,15 @@ const _SVG_TRASH='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" st
 const CAT_SVG={'Recharge VE':_SVG_BOLT,'Téléphone':_SVG_PHONE,'Assurance auto':_SVG_SHIELD,'Entretien véhicule':_SVG_WRENCH,'Immatriculation':_SVG_CLIP,'Leasing':_SVG_CAR,'Stationnement':_SVG_PARK,'Équipement':_SVG_TOOL,'Autre':_SVG_BOX};
 const PLAT_CLR={'Instacart':'#0AAD0A','DoorDash':'#FF3008','Uber Eats':'#142328','SkipTheDishes':'#F96816','Cornershop':'#1F5C2E'};
 const MIXED=['Téléphone','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
+const RATIO_CATS=['Recharge VE','Téléphone','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
 const VEH=['Recharge VE','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
 const DATE_LABEL_CATS=['Téléphone','Assurance auto','Immatriculation','Leasing'];
 const TABS=['dashboard','livraisons','depenses','fiscal','outils'];
 const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',outils:'Outils'};
 const LS_KEY='lt_v4';
+
+// ── HELPERS (rounding) ─────────────────────────────────────────────────────────
+const r2=x=>Math.round((x||0)*100)/100;
 
 // ── STATE ──────────────────────────────────────────────────────────────────────
 const S={
@@ -417,7 +423,8 @@ const S={
   cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra'},
   dFilt:{plat:'',date:''}, eFilt:'', eShowFilt:false,
   dedDetailOpen:false,
-  exportDateFrom:'', exportDateTo:''
+  exportDateFrom:'', exportDateTo:'',
+  proRatio:null
 };
 
 // ── STORAGE ────────────────────────────────────────────────────────────────────
@@ -428,6 +435,7 @@ function loadLS(){
     if(d.expenses)   S.expenses=d.expenses;
     if(d.cfg)        S.cfg={...S.cfg,...d.cfg};
   }catch(e){}
+  refreshProRatio();
 }
 function saveLS(){
   try{localStorage.setItem(LS_KEY,JSON.stringify({deliveries:S.deliveries,expenses:S.expenses,cfg:S.cfg}));}catch(e){}
@@ -459,14 +467,22 @@ function eToDB(e){return{id:e.id,categorie:e.cat,montant:e.amt||0,montant_annuel
 async function sbLoad(){
   const sb=sbClient();if(!sb){connDot(false);return false;}
   try{
-    const[l,d]=await Promise.all([
+    const[l,d,p]=await Promise.all([
       sb.from('livraisons').select('*').order('created_at',{ascending:false}),
-      sb.from('depenses').select('*').order('created_at',{ascending:false})
+      sb.from('depenses').select('*').order('created_at',{ascending:false}),
+      sb.from('parametres').select('*')
     ]);
     if(l.error)throw l.error;
     if(d.error)throw d.error;
     S.deliveries=l.data.map(dFromDB);
     S.expenses=d.data.map(eFromDB);
+    if(p.data){
+      p.data.forEach(row=>{
+        if(row.cle==='odometer_start') S.cfg.vehicleKmJan=parseFloat(row.valeur)||0;
+        if(row.cle==='odometer_current') S.cfg.vehicleKmNow=parseFloat(row.valeur)||0;
+      });
+    }
+    refreshProRatio();
     saveLS(); connDot(true); return true;
   }catch(e){console.error('[SB load]',e.message); connDot(false); return false;}
 }
@@ -515,40 +531,45 @@ function fmtDur(min){if(!min||min<=0)return'';return min>=60?`${Math.floor(min/6
 function calcBracket(inc,brackets){let tax=0,prev=0;for(const b of brackets){if(inc<=prev)break;tax+=(Math.min(inc,b.max)-prev)*b.r;prev=b.max;}return tax;}
 
 function expAnnual(e){
-  if(e.cat==='Téléphone') return (e.amt||0)*12;
-  if(e.cat==='Leasing') return (e.amt||0)*26;
-  return e.amt||0;
+  if(e.cat==='Téléphone') return r2((e.amt||0)*12);
+  if(e.cat==='Leasing') return r2((e.amt||0)*26);
+  return r2(e.amt||0);
 }
 function expDed(e,proRatio){
-  if(!MIXED.includes(e.cat)) return expAnnual(e);
+  if(!RATIO_CATS.includes(e.cat)) return expAnnual(e);
   const ratio=e.proRatioOverride!=null?e.proRatioOverride/100:(proRatio??1);
-  return expAnnual(e)*ratio;
+  return r2(expAnnual(e)*ratio);
 }
 
 function calcFiscal(){
   const yr=S.cfg.year;
   const divs=S.deliveries.filter(d=>parseDate(d.date).getFullYear()===yr);
   const exps=S.expenses.filter(e=>parseDate(e.date).getFullYear()===yr);
-  const gross=divs.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
-  const km=divs.reduce((s,d)=>s+(d.km||0),0);
+  const gross=r2(divs.reduce((s,d)=>s+r2((d.rev||0)+(d.tip||0)),0));
+  const km=r2(divs.reduce((s,d)=>s+(d.km||0),0));
   const kmPro=km;
   const kmTotal=Math.max(0,(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0));
-  const proRatio=kmTotal>0&&kmPro>0?Math.min(1,kmPro/kmTotal):null;
-  const kmDed=km<=KM_THRESH?km*KM_R1:KM_THRESH*KM_R1+(km-KM_THRESH)*KM_R2;
-  const vehDed=exps.filter(e=>VEH.includes(e.cat)).reduce((s,e)=>s+expDed(e,proRatio),0);
-  const otherDed=exps.filter(e=>!VEH.includes(e.cat)).reduce((s,e)=>s+expDed(e,proRatio),0);
+  const proRatio=S.proRatio;
+  const kmDed=r2(km<=KM_THRESH?km*KM_R1:KM_THRESH*KM_R1+(km-KM_THRESH)*KM_R2);
+  const vehDed=r2(exps.filter(e=>VEH.includes(e.cat)).reduce((s,e)=>r2(s+expDed(e,proRatio)),0));
+  const otherDed=r2(exps.filter(e=>!VEH.includes(e.cat)).reduce((s,e)=>r2(s+expDed(e,proRatio)),0));
   const method=S.cfg.deductionMethod||'cra';
-  const totDed=method==='cra'?(kmDed+otherDed):(vehDed+otherDed);
-  const net=Math.max(0,gross-totDed);
-  const fedOwed=Math.max(0,calcBracket(net,FED_BR)-FED_BASIC*.15);
-  const qcOwed=Math.max(0,calcBracket(net,QC_BR)-QC_BASIC*.14);
-  const rrq=net>3500?Math.min(Math.max(0,Math.min(net,73200)-3500)*.119,8316.05):0;
-  const total=fedOwed+qcOwed+rrq;
-  const vehExpTotal=exps.filter(e=>VEH.includes(e.cat)).reduce((s,e)=>s+expAnnual(e),0);
+  const totDed=r2(method==='cra'?(kmDed+otherDed):(vehDed+otherDed));
+  const net=r2(Math.max(0,gross-totDed));
+  const fedOwed=r2(Math.max(0,calcBracket(net,FED_BR)-FED_BASIC*.15));
+  const qcOwed=r2(Math.max(0,calcBracket(net,QC_BR)-QC_BASIC*.14));
+  const rrq=r2(net>3500?Math.min(Math.max(0,Math.min(net,73200)-3500)*.119,8316.05):0);
+  const total=r2(fedOwed+qcOwed+rrq);
+  const vehExpTotal=r2(exps.filter(e=>VEH.includes(e.cat)).reduce((s,e)=>r2(s+expAnnual(e)),0));
   const autoKmCost=kmPro>0?vehExpTotal/kmPro:null;
   return{gross,km,kmPro,kmTotal,kmDed,vehDed,otherDed,totDed,net,fedOwed,qcOwed,rrq,total,rate:gross>0?total/gross:0,divs,exps,proRatio,needsTPS:gross>=TPS_SEUIL,autoKmCost,vehExpTotal};
 }
-function calcProRatio(){return calcFiscal().proRatio;}
+function calcProRatio(){return S.proRatio;}
+function refreshProRatio(){
+  const kmPro=r2(S.deliveries.filter(d=>parseDate(d.date).getFullYear()===S.cfg.year).reduce((s,d)=>s+(d.km||0),0));
+  const kmTotal=Math.max(0,(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0));
+  S.proRatio=kmTotal>0&&kmPro>0?Math.round(Math.min(1,kmPro/kmTotal)*10000)/10000:null;
+}
 
 // ── TOAST ──────────────────────────────────────────────────────────────────────
 let _toastT;
@@ -611,7 +632,7 @@ function rDash(){
     </div>
     <div class="grid2">
       <div class="scard"><div class="slabel">Revenus ce mois</div><div class="sval">${$f(sum(mo))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${mo.length} livraison${mo.length!==1?'s':''}</div></div>
-      <div class="scard"><div class="slabel">Dépenses ce mois</div><div class="sval r">${$f(S.expenses.filter(e=>parseDate(e.date)>=moStart).reduce((s,e)=>s+expAnnual(e),0))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${S.expenses.filter(e=>parseDate(e.date)>=moStart).length} dépense${S.expenses.filter(e=>parseDate(e.date)>=moStart).length!==1?'s':''}</div></div>
+      <div class="scard"><div class="slabel">Dépenses ce mois</div><div class="sval r">${$f(r2(S.expenses.filter(e=>parseDate(e.date)>=moStart).reduce((s,e)=>r2(s+(e.amt||0)),0)))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${S.expenses.filter(e=>parseDate(e.date)>=moStart).length} dépense${S.expenses.filter(e=>parseDate(e.date)>=moStart).length!==1?'s':''}</div></div>
     </div>
     <div class="grid2">
       <div class="scard"><div class="slabel">Km pro ${S.cfg.year}</div><div class="sval y">${f.km.toFixed(0)}<span style="font-size:13px"> km</span></div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.divs.length} livraisons</div></div>
@@ -701,26 +722,32 @@ function rDep(){
   const now=new Date();
   const moStart=new Date(now.getFullYear(),now.getMonth(),1);
 
-  // Totals par catégorie (annualisé)
+  // Totals par catégorie (montants réels)
   const totals={};
-  cats.forEach(c=>{totals[c]=S.expenses.filter(e=>e.cat===c).reduce((s,e)=>s+expAnnual(e),0);});
-  const grand=S.expenses.reduce((s,e)=>s+expAnnual(e),0);
+  cats.forEach(c=>{totals[c]=r2(S.expenses.filter(e=>e.cat===c).reduce((s,e)=>r2(s+(e.amt||0)),0));});
+  const grand=r2(S.expenses.reduce((s,e)=>r2(s+(e.amt||0)),0));
 
-  // Total ce mois
+  // Total ce mois (montants réels)
   const moExps=S.expenses.filter(e=>parseDate(e.date)>=moStart);
-  const moTotal=moExps.reduce((s,e)=>s+expAnnual(e),0);
+  const moTotal=r2(moExps.reduce((s,e)=>r2(s+(e.amt||0)),0));
 
-  // Bar chart SVG par catégorie (celles avec >0 seulement)
+  // Barres de progression par catégorie
   const activeCats=cats.filter(c=>totals[c]>0);
   const maxVal=activeCats.length>0?Math.max(...activeCats.map(c=>totals[c])):1;
   const barChart=activeCats.length===0?`<p style="font-size:12px;color:var(--text2);margin-top:8px">Aucune dépense enregistrée.</p>`:`
-    <div class="dep-bar-wrap">
-      ${activeCats.map(c=>`
-        <div class="dep-bar-row">
-          <span class="dep-bar-label" style="display:flex;align-items:center;gap:5px"><span style="color:var(--text2);flex-shrink:0">${CAT_SVG[c]}</span>${c}</span>
-          <div class="dep-bar-track"><div class="dep-bar-fill" style="width:${Math.round(totals[c]/maxVal*100)}%"></div></div>
-          <span class="dep-bar-val">${$f(totals[c])}</span>
-        </div>`).join('')}
+    <div class="dep-bar-wrap" style="gap:9px">
+      ${activeCats.map(c=>{
+        const pct=Math.round(totals[c]/maxVal*100);
+        return`<div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+            <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)">${CAT_SVG[c]}<span>${esc(c)}</span></span>
+            <span style="font-size:12px;font-weight:700">${$f(totals[c])}</span>
+          </div>
+          <div style="height:7px;background:var(--card2);border-radius:4px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:var(--accent);border-radius:4px;transition:width .3s"></div>
+          </div>
+        </div>`;
+      }).join('')}
     </div>`;
 
   // Card résumé
@@ -733,7 +760,8 @@ function rDep(){
         </button>
       </div>
       <div class="card-value">${$f(moTotal)}</div>
-      <div class="card-sub">Total annualisé : ${$f(grand)}</div>
+      <div class="card-sub">Total cumulatif (toutes dates) : ${$f(grand)}</div>
+      ${proRatio===null&&RATIO_CATS.some(c=>totals[c]>0)?`<div style="font-size:11px;color:var(--warn);margin-top:6px;padding:6px 10px;background:rgba(255,149,0,.08);border-radius:8px;border:1px solid rgba(255,149,0,.2)">⚠ Odomètre non configuré — ratio pro/perso indisponible</div>`:''}
       ${barChart}
     </div>`;
 
@@ -779,19 +807,26 @@ function rDep(){
 }
 
 function depCard(e,proRatio){
-  const annual=expAnnual(e), ded=expDed(e,proRatio), isMixed=MIXED.includes(e.cat);
-  const ratio=isMixed?(e.proRatioOverride!=null?e.proRatioOverride/100:(proRatio??1)):1;
-  const pct=Math.round(ratio*100);
+  const annual=expAnnual(e), ded=expDed(e,proRatio);
+  const isRatio=RATIO_CATS.includes(e.cat);
+  const isMixed=MIXED.includes(e.cat);
+  const ratio=isRatio?(e.proRatioOverride!=null?e.proRatioOverride/100:(proRatio!=null?proRatio:null)):null;
+  const pct=ratio!=null?Math.round(ratio*100):null;
+  const ratioLabel=isRatio?(proRatio===null&&e.proRatioOverride==null?
+    `<div style="font-size:11px;color:var(--warn);margin-top:2px">⚠ Odomètre non configuré</div>`:
+    `<div style="font-size:11px;color:var(--text2);margin-top:2px">Ratio pro : <strong>${pct??0}%</strong></div>`
+  ):'';
   return`<div class="li">
     <div class="li-ico" style="color:var(--text2)">${CAT_SVG[e.cat]||_SVG_BOX}</div>
     <div class="li-body">
       <div class="li-title">${esc(e.desc||e.cat)}</div>
-      <div class="li-sub">${fdate(e.date)} · ${e.cat}${e.kwh?' · '+e.kwh+' kWh':''}${isMixed?' · '+pct+'% pro':''}</div>
-      ${isMixed?`<div class="ratio-row" style="max-width:100px"><div class="ratio-pro" style="flex:${pct}"></div><div class="ratio-perso" style="flex:${100-pct}"></div></div>`:''}
+      <div class="li-sub">${fdate(e.date)} · ${e.cat}${e.kwh?' · '+e.kwh+' kWh':''}</div>
+      ${ratioLabel}
+      ${isMixed&&pct!=null?`<div class="ratio-row" style="max-width:100px"><div class="ratio-pro" style="flex:${pct}"></div><div class="ratio-perso" style="flex:${100-pct}"></div></div>`:''}
     </div>
     <div class="li-right">
       <div class="li-amt" style="color:var(--warn)">${$f(annual)}</div>
-      ${isMixed&&ded<annual?`<div style="font-size:11px;color:var(--ok)">${$f(ded)}</div>`:''}
+      ${isRatio&&ded<annual?`<div style="font-size:11px;color:var(--ok)">${$f(ded)} déd.</div>`:''}
       <div class="li-acts"><button class="btn btn-xs btn-s" data-action="edit-dep" data-id="${e.id}">${_SVG_EDIT}</button><button class="btn btn-xs btn-d" data-action="del-dep" data-id="${e.id}">${_SVG_TRASH}</button></div>
     </div>
   </div>`;
@@ -892,7 +927,12 @@ function rFsub(){
   }else if(S.fsub==='deductions'){
     const many=f.exps.length>5;
     const detailBtn=many?`<button class="btn btn-s btn-xs" id="ded-toggle">${S.dedDetailOpen?'Masquer le détail':'Afficher le détail ('+f.exps.length+' dépenses)'}</button>`:'';
-    const detailRows=(!many||S.dedDetailOpen)?`<div class="card" style="margin-top:10px"><table class="dtable"><thead><tr><th>Catégorie</th><th>Total</th><th>Déductible</th></tr></thead><tbody>${f.exps.map(e=>`<tr><td>${e.cat}</td><td style="text-align:right">${$f(expAnnual(e))}</td><td style="color:var(--ok)">${$f(expDed(e,f.proRatio))}</td></tr>`).join('')}</tbody></table></div>`:'';
+    const _ratioForExp=e=>{
+      if(!RATIO_CATS.includes(e.cat)) return null;
+      if(e.proRatioOverride!=null) return e.proRatioOverride;
+      return f.proRatio!=null?Math.round(f.proRatio*100):null;
+    };
+    const detailRows=(!many||S.dedDetailOpen)?`<div class="card" style="margin-top:10px"><table class="dtable"><thead><tr><th>Catégorie</th><th style="text-align:right">Total</th><th style="text-align:right">Déductible</th><th style="text-align:right">Ratio</th></tr></thead><tbody>${f.exps.map(e=>{const rp=_ratioForExp(e);return`<tr><td>${esc(e.cat)}${e.desc?`<br><span style="font-size:11px;color:var(--text2)">${esc(e.desc)}</span>`:''}</td><td style="text-align:right">${$f(expAnnual(e))}</td><td style="text-align:right;color:var(--ok)">${$f(expDed(e,f.proRatio))}</td><td style="text-align:right;font-size:11px;color:var(--text2)">${rp!=null?rp+'%':'100%'}</td></tr>`;}).join('')}</tbody></table></div>`:'';
     el.innerHTML=`
       <div class="card"><div class="card-title">Méthode de déduction véhicule</div>
         <div class="subtabs" style="margin-top:8px;margin-bottom:8px">
@@ -902,6 +942,7 @@ function rFsub(){
         ${S.cfg.deductionMethod==='detailed'?`<p class="note-sm">Si vos frais réels dépassent vos revenus, votre revenu net imposable est 0$ — vous ne payez pas d'impôt sur ces livraisons cette année.</p>`:''}
       </div>
       <div class="card"><div class="card-title">Déduction km CRA</div><div style="font-size:22px;font-weight:700">${$f(f.kmDed)}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${f.km.toFixed(1)} km · 0,70$/km ≤5 000 / 0,64$ après</div></div>
+      ${f.proRatio===null&&f.exps.some(e=>RATIO_CATS.includes(e.cat))?`<div class="alert alert-w"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></em><p>Odomètre non configuré — le ratio pro/perso est à 0% pour les dépenses mixtes. Configurez les km dans l'onglet Véhicule.</p></div>`:''}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span class="stitle" style="margin:0">Dépenses</span>${detailBtn}</div>
       ${f.exps.length===0?`<div class="alert alert-i"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></em><p>Aucune dépense pour ${yr}.</p></div>`:detailRows}
       <div class="card"><table class="dtable"><tr><td>${S.cfg.deductionMethod==='cra'?'Déduction km CRA':'Frais véhicule réels'}</td><td>${$f(S.cfg.deductionMethod==='cra'?f.kmDed:f.vehDed)}</td></tr><tr><td>Autres dépenses</td><td>${$f(f.otherDed)}</td></tr><tr><td style="font-weight:700">Total déductions</td><td style="color:var(--ok);font-weight:700">${$f(f.totDed)}</td></tr><tr><td style="font-weight:700">Revenu net imposable <span class="tip" title="Revenu brut moins toutes les déductions. L'impôt est calculé sur ce montant.">?</span></td><td style="color:var(--accent);font-weight:700">${$f(f.net)}</td></tr></table></div>
@@ -1244,7 +1285,7 @@ function initEvents(){
     if(e.target.id==='save-vkm'){
       S.cfg.vehicleKmJan=parseFloat(document.getElementById('v-km-jan')?.value)||0;
       S.cfg.vehicleKmNow=parseFloat(document.getElementById('v-km-now')?.value)||0;
-      saveLS();rFsub();toast('Km enregistrés');return;}
+      refreshProRatio();saveLS();rFsub();toast('Km enregistrés');return;}
     if(e.target.id==='ded-toggle'){S.dedDetailOpen=!S.dedDetailOpen;rFsub();return;}
 
     // Outils
