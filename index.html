@@ -363,6 +363,10 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
   <button class="btn btn-s btn-w btn-sm" id="test-conn-btn" style="margin-bottom:12px">Tester la connexion</button>
 
   <div class="div"></div>
+  <div class="stitle">Driversnote</div>
+  <div class="fg"><label class="fl">Clé API Driversnote</label><input type="password" class="fi" id="s-dn-key" placeholder="Votre clé API…" autocomplete="off"></div>
+
+  <div class="div"></div>
   <div class="stitle">Fiscal</div>
   <div class="frow">
     <div class="fg"><label class="fl">Année fiscale</label><input type="number" class="fi" id="s-year" min="2020" max="2035"></div>
@@ -381,6 +385,27 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
   </div>
   <div class="div"></div>
   <button class="btn btn-d btn-w btn-sm" id="clear-all-btn">Effacer toutes les données</button>
+</div></div>
+
+<!-- MODAL QUART EDIT -->
+<div class="moverlay" id="m-quart">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle"><span>Modifier le quart</span><button class="mclose" data-close="m-quart">✕</button></div>
+  <input type="hidden" id="quart-edit-id">
+  <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="quart-edit-date"></div>
+  <div class="frow">
+    <div class="fg"><label class="fl">Heure début</label><input type="datetime-local" class="fi" id="quart-edit-debut"></div>
+    <div class="fg"><label class="fl">Heure fin</label><input type="datetime-local" class="fi" id="quart-edit-fin"></div>
+  </div>
+  <div class="frow">
+    <div class="fg"><label class="fl">Durée (min)</label><input type="number" inputmode="numeric" class="fi" id="quart-edit-duree" min="0" step="1"></div>
+    <div class="fg"><label class="fl">Distance (km)</label><input type="number" inputmode="decimal" class="fi" id="quart-edit-dist" min="0" step="0.1"></div>
+  </div>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn-p" style="flex:1" id="quart-edit-save">Sauvegarder</button>
+    <button class="btn btn-s" data-close="m-quart">Annuler</button>
+  </div>
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="console.warn('[LT] Supabase CDN indisponible')"></script>
@@ -419,7 +444,7 @@ const LS_KEY='lt_v4';
 const S={
   tab:'dashboard', fsub:'revenus',
   deliveries:[], expenses:[],
-  cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra'},
+  cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra',driversnoteKey:''},
   dFilt:{plat:'',date:''}, eFilt:'', eShowFilt:false,
   dedDetailOpen:false,
   exportDateFrom:'', exportDateTo:''
@@ -1106,6 +1131,7 @@ function openSettings(){
   document.getElementById('s-sb-key').value=S.cfg.supabaseKey||'';
   document.getElementById('s-year').value=S.cfg.year;
   document.getElementById('s-kwh').value=S.cfg.kwhCost;
+  document.getElementById('s-dn-key').value=S.cfg.driversnoteKey||'';
   connDot(!!_sb||null);
   renderPlatList();
   // Auto km cost
@@ -1136,7 +1162,11 @@ function saveSettings(){
   S.cfg.year=parseInt(document.getElementById('s-year').value)||new Date().getFullYear();
   S.cfg.kwhCost=parseFloat(document.getElementById('s-kwh').value)||.085;
   S.cfg.defaultPlat=document.getElementById('default-plat').value;
+  const dnKey=document.getElementById('s-dn-key').value.trim();
+  S.cfg.driversnoteKey=dnKey;
   saveLS();
+  const sb2=sbClient();
+  if(sb2&&dnKey){sb2.from('parametres').upsert({cle:'driversnote_api_key',valeur:dnKey}).then(()=>{});}
   if(changed){
     sbReset();
     if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
@@ -1277,6 +1307,7 @@ function initEvents(){
     if(e.target.id==='dep-save'){saveDep();return;}
     if(e.target.id==='dep-ratio-clear'){document.getElementById('dep-ratio').value='';return;}
     if(e.target.id==='settings-save'){saveSettings();return;}
+    if(e.target.id==='quart-edit-save'){saveQuartEdit();return;}
     if(e.target.id==='test-conn-btn'){testConn();return;}
     if(e.target.id==='add-plat-btn'){
       const v=document.getElementById('new-plat').value.trim();
@@ -1357,6 +1388,10 @@ function initPWAIcon(){
 // ── QUART ─────────────────────────────────────────────────────────────────────
 let _quartSec=0,_quartInterval=null,_quartRunning=false,_quartStartTime=null;
 let _quartHistory=[];
+let _quartTrajets=[];
+let _quartTrajetsDecision={};
+let _quartPendingDebut=null,_quartPendingFin=null,_quartPendingDuree=0;
+
 function _quartFmt(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');}
 function _quartTick(){
   _quartSec++;
@@ -1371,6 +1406,22 @@ async function _quartLoadHistory(){
     if(!error&&data)_quartHistory=data;
   }catch(e){}
 }
+async function _quartFetchDN(debut,fin){
+  const key=S.cfg.driversnoteKey;
+  if(!key)return;
+  try{
+    const resp=await fetch('https://api.driversnote.com/v1/driversnote',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key},
+      body:JSON.stringify({query:`query GetTrips($FROM:String!,$TO:String!){trips(from:$FROM,to:$TO){id startedAt endedAt distance startAddress endAddress}}`,variables:{FROM:debut,TO:fin}})
+    });
+    const json=await resp.json();
+    const trips=json?.data?.trips||[];
+    _quartTrajets=trips;
+    _quartTrajetsDecision={};
+    render();
+  }catch(e){toast('Driversnote: '+e.message);}
+}
 async function _quartHandleAction(action){
   if(action==='start'){
     if(_quartRunning)return;
@@ -1381,35 +1432,117 @@ async function _quartHandleAction(action){
     if(!_quartRunning)return;
     _quartRunning=false;clearInterval(_quartInterval);_quartInterval=null;
   } else if(action==='stop'){
-    if(!confirm('Terminer et sauvegarder ce quart ?'))return;
+    if(!confirm('Terminer ce quart ?'))return;
     _quartRunning=false;clearInterval(_quartInterval);_quartInterval=null;
-    const dureeMin=Math.round(_quartSec/60);
-    const todStr=new Date().toLocaleDateString('fr-CA');
-    const kmPro=S.deliveries.filter(d=>d.date===todStr).reduce((s,d)=>s+(d.km||0),0);
-    const heureDebut=_quartStartTime;
-    const heureFin=new Date().toISOString();
+    _quartPendingDebut=_quartStartTime;
+    _quartPendingFin=new Date().toISOString();
+    _quartPendingDuree=_quartSec;
     _quartSec=0;_quartStartTime=null;
+    _quartTrajets=[];_quartTrajetsDecision={};
+    render();
+    if(S.cfg.driversnoteKey&&_quartPendingDebut){
+      _quartFetchDN(_quartPendingDebut,_quartPendingFin);
+    }
+    return;
+  } else if(action==='confirm-quart'){
     const sb=sbClient();
-    if(sb&&heureDebut){
+    const debut=_quartPendingDebut;
+    const fin=_quartPendingFin;
+    const dureeMin=Math.round(_quartPendingDuree/60);
+    const todStr=debut?new Date(debut).toLocaleDateString('fr-CA'):new Date().toLocaleDateString('fr-CA');
+    const proTrajets=_quartTrajets.filter(t=>_quartTrajetsDecision[t.id]==='pro');
+    const kmPro=proTrajets.reduce((s,t)=>s+(t.distance||0),0);
+    const finalKm=_quartTrajets.length>0?kmPro:S.deliveries.filter(d=>d.date===todStr).reduce((s,d)=>s+(d.km||0),0);
+    if(sb&&debut){
       try{
-        await sb.from('quarts').insert({date:todStr,heure_debut:heureDebut,heure_fin:heureFin,duree:dureeMin,distance:kmPro,points_gps:null});
+        const{data:qData,error:qErr}=await sb.from('quarts').insert({date:todStr,heure_debut:debut,heure_fin:fin,duree:dureeMin,distance:finalKm,points_gps:null}).select().single();
+        if(qErr)throw qErr;
+        if(proTrajets.length>0){
+          const rows=proTrajets.map(t=>({driversnote_id:t.id,date:todStr,heure_debut:t.startedAt,heure_fin:t.endedAt,distance:t.distance,depart:t.startAddress,arrivee:t.endAddress,type:'pro',livraison_id:null}));
+          await sb.from('trajets').insert(rows);
+        }
         await _quartLoadHistory();
         toast('Quart sauvegardé ✓');
+        _quartPendingDebut=null;_quartPendingFin=null;_quartPendingDuree=0;
+        _quartTrajets=[];_quartTrajetsDecision={};
       }catch(e){toast('Erreur sauvegarde: '+e.message);}
     } else {
-      toast(heureDebut?'Supabase non configuré — quart non sauvegardé':'Aucun quart actif');
+      toast(debut?'Supabase non configuré':'Aucun quart à confirmer');
     }
+  } else if(action==='cancel-quart'){
+    _quartPendingDebut=null;_quartPendingFin=null;_quartPendingDuree=0;
+    _quartTrajets=[];_quartTrajetsDecision={};
   }
   render();
 }
+function openQuartEdit(q){
+  document.getElementById('quart-edit-id').value=q.id||'';
+  document.getElementById('quart-edit-date').value=q.date||'';
+  const toLocal=iso=>{if(!iso)return'';const d=new Date(iso);const pad=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());};
+  document.getElementById('quart-edit-debut').value=toLocal(q.heure_debut);
+  document.getElementById('quart-edit-fin').value=toLocal(q.heure_fin);
+  document.getElementById('quart-edit-duree').value=q.duree!=null?q.duree:'';
+  document.getElementById('quart-edit-dist').value=q.distance!=null?q.distance:'';
+  openM('m-quart');
+}
+async function saveQuartEdit(){
+  const id=document.getElementById('quart-edit-id').value;
+  if(!id)return;
+  const sb=sbClient();if(!sb){toast('Supabase non configuré');return;}
+  const toISO=s=>{if(!s)return null;return new Date(s).toISOString();};
+  const payload={
+    date:document.getElementById('quart-edit-date').value||null,
+    heure_debut:toISO(document.getElementById('quart-edit-debut').value),
+    heure_fin:toISO(document.getElementById('quart-edit-fin').value),
+    duree:parseInt(document.getElementById('quart-edit-duree').value)||null,
+    distance:parseFloat(document.getElementById('quart-edit-dist').value)||null
+  };
+  try{
+    const{error}=await sb.from('quarts').update(payload).eq('id',id);
+    if(error)throw error;
+    await _quartLoadHistory();
+    closeM('m-quart');
+    toast('Quart modifié ✓');
+    if(S.tab==='quart')rQuart();
+  }catch(e){toast('Erreur: '+e.message);}
+}
+async function deleteQuart(id){
+  if(!confirm('Supprimer ce quart ?'))return;
+  const sb=sbClient();if(!sb){toast('Supabase non configuré');return;}
+  try{
+    const{error}=await sb.from('quarts').delete().eq('id',id);
+    if(error)throw error;
+    await _quartLoadHistory();
+    toast('Quart supprimé');
+    if(S.tab==='quart')rQuart();
+  }catch(e){toast('Erreur: '+e.message);}
+}
 function rQuart(){
+  const isPending=!!_quartPendingDebut;
   const statusColor=_quartRunning?'var(--ok)':_quartSec>0?'var(--warn)':'var(--text2)';
-  const statusText=_quartRunning?'Quart en cours':_quartSec>0?'Quart en pause':'Aucun quart en cours';
-  const btns=!_quartRunning&&_quartSec===0
+  const statusText=_quartRunning?'Quart en cours':_quartSec>0?'Quart en pause':isPending?'Quart terminé — à confirmer':'Aucun quart en cours';
+  const btns=isPending
+    ?`<button class="btn btn-ok" style="flex:1" data-qaction="confirm-quart">Confirmer le quart</button><button class="btn btn-s" data-qaction="cancel-quart">Annuler</button>`
+    :!_quartRunning&&_quartSec===0
     ?`<button class="btn btn-ok" style="flex:1" data-qaction="start">Démarrer</button>`
     :_quartRunning
     ?`<button class="btn btn-s" style="flex:1" data-qaction="pause">Pause</button><button class="btn btn-d" style="flex:1" data-qaction="stop">Arrêter</button>`
     :`<button class="btn btn-ok" style="flex:1" data-qaction="start">Reprendre</button><button class="btn btn-d" style="flex:1" data-qaction="stop">Arrêter</button>`;
+  const trajetsHtml=_quartTrajets.length===0?'':`<div class="stitle">Trajets Driversnote</div><div id="trajets-container">${_quartTrajets.map(t=>{
+    const dec=_quartTrajetsDecision[t.id]||'';
+    const btnStyle=(v)=>dec===v?'btn-p':'btn-s';
+    const timeStr=t.startedAt?new Date(t.startedAt).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):'';
+    return`<div class="li" data-trip-id="${t.id}">
+      <div class="li-body">
+        <div class="li-title" style="font-size:13px">${timeStr} · ${t.distance!=null?(+t.distance).toFixed(1)+' km':'—'}</div>
+        <div class="li-sub">${esc(t.startAddress||'')} → ${esc(t.endAddress||'')}</div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <button class="btn btn-xs ${btnStyle('pro')}" data-td="${t.id}" data-tv="pro">Pro</button>
+          <button class="btn btn-xs ${btnStyle('perso')}" data-td="${t.id}" data-tv="perso">Perso</button>
+          <button class="btn btn-xs ${btnStyle('ignore')}" data-td="${t.id}" data-tv="ignore">Ignorer</button>
+        </div>
+      </div>
+    </div>`;}).join('')}</div>`;
   const histHtml=_quartHistory.length===0
     ?`<div class="empty"><p>Aucun quart sauvegardé.</p></div>`
     :_quartHistory.map(q=>`<div class="li">
@@ -1417,6 +1550,10 @@ function rQuart(){
       <div class="li-body">
         <div class="li-title">${esc(q.date||'')}</div>
         <div class="li-sub">${q.duree!=null?q.duree+' min':'—'}${q.distance?` · ${(+q.distance).toFixed(1)} km pro`:''}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-xs btn-s" data-qedit="${q.id}" title="Modifier"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn btn-xs btn-d" data-qdel="${q.id}" title="Supprimer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
       </div>
     </div>`).join('');
   document.getElementById('panel-quart').innerHTML=`<div id="quart-page">
@@ -1427,11 +1564,19 @@ function rQuart(){
       <div style="font-size:60px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:4px;color:var(--text);margin-bottom:28px;line-height:1" id="quart-page-timer">${_quartFmt(_quartSec)}</div>
       <div style="display:flex;gap:10px">${btns}</div>
     </div>
+    ${trajetsHtml}
     <div class="stitle">Historique des quarts</div>
     ${histHtml}
   </div>`;
-  document.getElementById('quart-page').addEventListener('click',e=>{
-    const btn=e.target.closest('[data-qaction]');if(btn)_quartHandleAction(btn.dataset.qaction);
+  const page=document.getElementById('quart-page');
+  page.addEventListener('click',e=>{
+    const btn=e.target.closest('[data-qaction]');if(btn){_quartHandleAction(btn.dataset.qaction);return;}
+    const editBtn=e.target.closest('[data-qedit]');
+    if(editBtn){const q=_quartHistory.find(h=>h.id===editBtn.dataset.qedit);if(q)openQuartEdit(q);return;}
+    const delBtn=e.target.closest('[data-qdel]');
+    if(delBtn){deleteQuart(delBtn.dataset.qdel);return;}
+    const tdBtn=e.target.closest('[data-td]');
+    if(tdBtn){_quartTrajetsDecision[tdBtn.dataset.td]=tdBtn.dataset.tv;rQuart();return;}
   });
   if(_quartHistory.length===0){_quartLoadHistory().then(()=>{if(S.tab==='quart')rQuart();});}
 }
