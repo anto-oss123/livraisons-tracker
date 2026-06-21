@@ -147,6 +147,18 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 /* Safari/iOS: preserve native date picker */
 input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cursor:pointer}
+/* Phase 2: ensure date input is never clipped by stacking contexts */
+#panel-livraisons input[type="date"]{position:relative;z-index:2}
+/* Print styles */
+#print-fiscal{display:none}
+@media print{
+  #app,#bnav,#drawer,#drawer-overlay,#toast,.moverlay{display:none!important}
+  #print-fiscal{display:block!important;padding:20px;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+  body,html{background:#fff!important;color:#000!important;height:auto!important}
+  .print-fiscal-tbl{width:100%;border-collapse:collapse;margin-bottom:18px}
+  .print-fiscal-tbl td{padding:6px 4px;border-bottom:1px solid #ddd;font-size:13px}
+  .print-fiscal-tbl td:last-child{text-align:right;font-weight:600}
+}
 /* DRAWER */
 #drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;display:none;opacity:0;transition:opacity .25s}
 #drawer-overlay.open{display:block;opacity:1}
@@ -241,6 +253,7 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
   </button>
 </nav>
 
+<div id="print-fiscal"></div>
 <div id="toast"></div>
 <div class="tip-popup" id="tip-popup"></div>
 
@@ -409,6 +422,7 @@ const MIXED=['Téléphone','Assurance auto','Entretien véhicule','Immatriculati
 const RATIO_CATS=['Recharge VE','Téléphone','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
 const VEH=['Recharge VE','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
 const DATE_LABEL_CATS=['Téléphone','Assurance auto','Immatriculation','Leasing'];
+const MONTH_NAMES=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
 const TABS=['dashboard','livraisons','depenses','fiscal','outils'];
 const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',outils:'Outils'};
 const LS_KEY='lt_v4';
@@ -424,7 +438,8 @@ const S={
   dFilt:{plat:'',date:''}, eFilt:'', eShowFilt:false,
   dedDetailOpen:false,
   exportDateFrom:'', exportDateTo:'',
-  proRatio:null
+  proRatio:null,
+  fiscal:{histMode:false,histSnap:null,snapshots:[]}
 };
 
 // ── STORAGE ────────────────────────────────────────────────────────────────────
@@ -569,6 +584,121 @@ function refreshProRatio(){
   const kmPro=r2(S.deliveries.filter(d=>parseDate(d.date).getFullYear()===S.cfg.year).reduce((s,d)=>s+(d.km||0),0));
   const kmTotal=Math.max(0,(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0));
   S.proRatio=kmTotal>0&&kmPro>0?Math.round(Math.min(1,kmPro/kmTotal)*10000)/10000:null;
+}
+
+// ── FISCAL SNAPSHOTS ───────────────────────────────────────────────────────────
+function fiscalFromSnap(snap){
+  return{
+    gross:snap.revenu_brut||0, km:snap.km_pro||0, kmPro:snap.km_pro||0,
+    kmTotal:snap.km_total||0, kmDed:snap.deduction_km_cra||0, vehDed:0,
+    otherDed:snap.autres_deductions||0, totDed:snap.total_deductions||0,
+    net:snap.revenu_net_imposable||0,
+    fedOwed:0,qcOwed:0,rrq:0,total:0,rate:0,
+    divs:{length:snap.nombre_livraisons||0},
+    exps:snap.depenses_detail||[],
+    proRatio:snap.ratio_pro,
+    needsTPS:(snap.revenu_brut||0)>=TPS_SEUIL,
+    autoKmCost:null,vehExpTotal:0,_isSnap:true
+  };
+}
+async function buildFiscalSnapshot(annee,mois,isAuto){
+  const sb=sbClient();if(!sb)return false;
+  try{
+    const pfx=`${annee}-${String(mois).padStart(2,'0')}`;
+    const divs=S.deliveries.filter(d=>d.date&&d.date.startsWith(pfx));
+    const exps=S.expenses.filter(e=>e.date&&e.date.startsWith(pfx));
+    const proRatio=S.proRatio;
+    const kmPro=r2(divs.reduce((s,d)=>s+(d.km||0),0));
+    const kmTotal=Math.max(0,(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0));
+    const gross=r2(divs.reduce((s,d)=>s+r2((d.rev||0)+(d.tip||0)),0));
+    const tips=r2(divs.reduce((s,d)=>s+(d.tip||0),0));
+    const kmDed=r2(kmPro<=KM_THRESH?kmPro*KM_R1:KM_THRESH*KM_R1+(kmPro-KM_THRESH)*KM_R2);
+    const method=S.cfg.deductionMethod||'cra';
+    const vehDed=r2(exps.filter(e=>VEH.includes(e.cat)).reduce((s,e)=>r2(s+expDed(e,proRatio)),0));
+    const otherDed=r2(exps.filter(e=>!VEH.includes(e.cat)).reduce((s,e)=>r2(s+expDed(e,proRatio)),0));
+    const totDed=r2(method==='cra'?(kmDed+otherDed):(vehDed+otherDed));
+    const net=r2(Math.max(0,gross-totDed));
+    const depensesDetail=exps.map(e=>({cat:e.cat,desc:e.desc||'',amt:e.amt,annual:expAnnual(e),ded:expDed(e,proRatio)}));
+    const row={annee,mois,type_snapshot:'mensuel',revenu_brut:gross,total_pourboires:tips,nombre_livraisons:divs.length,km_pro:kmPro,km_total:kmTotal,ratio_pro:proRatio,odometer_start:S.cfg.vehicleKmJan||0,odometer_current:S.cfg.vehicleKmNow||0,deduction_km_cra:kmDed,autres_deductions:otherDed,total_deductions:totDed,revenu_net_imposable:net,depenses_detail:depensesDetail,methode_deduction:method,taux_km_cra:KM_R1,sauvegarde_auto:isAuto};
+    const{error}=await sb.from('fiscal_snapshots').upsert(row);
+    if(error)throw error;
+    return true;
+  }catch(e){console.error('[LT] snapshot',e.message);return false;}
+}
+async function buildAnnualSnapshot(annee){
+  const sb=sbClient();if(!sb)return false;
+  try{
+    const{data,error}=await sb.from('fiscal_snapshots').select('*').eq('annee',annee).eq('type_snapshot','mensuel');
+    if(error)throw error;
+    if(!data||data.length===0)return false;
+    const gross=r2(data.reduce((s,r)=>s+(r.revenu_brut||0),0));
+    const tips=r2(data.reduce((s,r)=>s+(r.total_pourboires||0),0));
+    const livs=data.reduce((s,r)=>s+(r.nombre_livraisons||0),0);
+    const kmPro=r2(data.reduce((s,r)=>s+(r.km_pro||0),0));
+    const kmDed=r2(data.reduce((s,r)=>s+(r.deduction_km_cra||0),0));
+    const otherDed=r2(data.reduce((s,r)=>s+(r.autres_deductions||0),0));
+    const totDed=r2(data.reduce((s,r)=>s+(r.total_deductions||0),0));
+    const net=r2(Math.max(0,gross-totDed));
+    const last=data[data.length-1];
+    const row={annee,mois:0,type_snapshot:'annuel',revenu_brut:gross,total_pourboires:tips,nombre_livraisons:livs,km_pro:kmPro,km_total:last?.km_total||0,ratio_pro:last?.ratio_pro,odometer_start:data[0]?.odometer_start||0,odometer_current:last?.odometer_current||0,deduction_km_cra:kmDed,autres_deductions:otherDed,total_deductions:totDed,revenu_net_imposable:net,depenses_detail:[],methode_deduction:last?.methode_deduction||'cra',taux_km_cra:KM_R1,sauvegarde_auto:true};
+    const{error:e2}=await sb.from('fiscal_snapshots').upsert(row);
+    if(e2)throw e2;
+    return true;
+  }catch(e){console.error('[LT] annual snap',e.message);return false;}
+}
+async function loadFiscalSnapshots(){
+  const sb=sbClient();if(!sb)return;
+  try{
+    const{data,error}=await sb.from('fiscal_snapshots').select('annee,mois,type_snapshot').eq('type_snapshot','mensuel').order('annee',{ascending:false}).order('mois',{ascending:false});
+    if(error)throw error;
+    S.fiscal.snapshots=data||[];
+  }catch(e){console.error('[LT] load snaps',e.message);}
+}
+async function loadHistSnap(annee,mois){
+  const sb=sbClient();if(!sb){toast('Supabase non configuré');return;}
+  try{
+    const{data,error}=await sb.from('fiscal_snapshots').select('*').eq('annee',annee).eq('mois',mois).eq('type_snapshot','mensuel').limit(1);
+    if(error)throw error;
+    if(data&&data.length>0){
+      S.fiscal.histMode=true; S.fiscal.histSnap=data[0]; rFisc();
+    }else{toast('Aucun snapshot pour cette période');}
+  }catch(e){console.error('[LT] load hist snap',e.message);toast('Erreur chargement snapshot');}
+}
+
+function exportFiscalPrint(){
+  const f=S.fiscal.histMode&&S.fiscal.histSnap?fiscalFromSnap(S.fiscal.histSnap):calcFiscal();
+  const snap=S.fiscal.histSnap;
+  const period=S.fiscal.histMode&&snap?`${MONTH_NAMES[(snap.mois||1)-1]} ${snap.annee}`:`Année ${S.cfg.year}`;
+  const printEl=document.getElementById('print-fiscal');if(!printEl)return;
+  const rows1=`<tr><td>Revenus bruts</td><td>${$f(f.gross)}</td></tr><tr><td>Livraisons</td><td>${typeof f.divs.length!=='undefined'?f.divs.length:0}</td></tr><tr><td>Km pro</td><td>${(f.kmPro||0).toFixed(0)} km</td></tr>`;
+  const rows2=`<tr><td>Déduction km CRA</td><td>${$f(f.kmDed)}</td></tr><tr><td>Autres déductions</td><td>${$f(f.otherDed)}</td></tr><tr><td><strong>Total déductions</strong></td><td><strong>${$f(f.totDed)}</strong></td></tr>`;
+  const rows3=`<tr><td><strong>Revenu net imposable</strong></td><td><strong>${$f(f.net)}</strong></td></tr>${!f._isSnap?`<tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr><tr><td>Impôt provincial (QC)</td><td>${$f(f.qcOwed)}</td></tr><tr><td>Cotisation RRQ</td><td>${$f(f.rrq)}</td></tr><tr><td><strong>Total impôt estimé</strong></td><td><strong style="color:#FF3B30">${$f(f.total)}</strong></td></tr>`:''}`;
+  const depRows=(f.exps||[]).length>0?`<h2 style="margin:18px 0 8px;color:#333">Dépenses</h2><table class="print-fiscal-tbl"><thead><tr><th style="text-align:left;padding:6px 4px;border-bottom:2px solid #007AFF">Catégorie</th><th style="text-align:left;padding:6px 4px;border-bottom:2px solid #007AFF">Description</th><th style="text-align:right;padding:6px 4px;border-bottom:2px solid #007AFF">Total</th><th style="text-align:right;padding:6px 4px;border-bottom:2px solid #007AFF">Déductible</th></tr></thead><tbody>${(f.exps||[]).map(e=>`<tr><td style="padding:6px 4px;border-bottom:1px solid #eee">${esc(e.cat||'')}</td><td style="padding:6px 4px;border-bottom:1px solid #eee;font-size:12px;color:#666">${esc(e.desc||e.description||'')}</td><td style="text-align:right;padding:6px 4px;border-bottom:1px solid #eee">${$f(e.annual!=null?e.annual:expAnnual(e))}</td><td style="text-align:right;padding:6px 4px;border-bottom:1px solid #eee;color:#34C759">${$f(e.ded!=null?e.ded:expDed(e,f.proRatio))}</td></tr>`).join('')}</tbody></table>`:'';
+  printEl.innerHTML=`<h1 style="color:#007AFF;margin:0 0 4px">Livraisons Tracker</h1><p style="color:#666;margin:0 0 20px;font-size:13px">Rapport fiscal · ${esc(period)} · Généré le ${new Date().toLocaleDateString('fr-CA')}</p><h2 style="margin:0 0 8px;color:#333">Revenus</h2><table class="print-fiscal-tbl"><tbody>${rows1}</tbody></table><h2 style="margin:0 0 8px;color:#333">Déductions</h2><table class="print-fiscal-tbl"><tbody>${rows2}</tbody></table><h2 style="margin:0 0 8px;color:#333">Résumé fiscal</h2><table class="print-fiscal-tbl"><tbody>${rows3}</tbody></table>${depRows}`;
+  window.print();
+}
+
+function exportFiscalExcel(){
+  if(!window.XLSX){toast('SheetJS non disponible');return;}
+  const XLSX=window.XLSX;
+  const f=calcFiscal(); const yr=S.cfg.year;
+  const revRows=[['Mois','Livraisons','Revenus bruts','Km']];
+  for(let m=1;m<=12;m++){
+    const pfx=`${yr}-${String(m).padStart(2,'0')}`;
+    const md=S.deliveries.filter(d=>d.date&&d.date.startsWith(pfx));
+    revRows.push([MONTH_NAMES[m-1],md.length,r2(md.reduce((s,d)=>s+r2((d.rev||0)+(d.tip||0)),0)),r2(md.reduce((s,d)=>s+(d.km||0),0))]);
+  }
+  revRows.push(['TOTAL',f.divs.length,f.gross,f.km]);
+  const dedRows=[['Catégorie','Description','Total annuel','Déductible','Ratio %']];
+  f.exps.forEach(e=>{const rp=!RATIO_CATS.includes(e.cat)?100:(e.proRatioOverride!=null?e.proRatioOverride:(f.proRatio!=null?Math.round(f.proRatio*100):0));dedRows.push([e.cat,e.desc||'',expAnnual(e),expDed(e,f.proRatio),rp]);});
+  dedRows.push(['','Total','',f.totDed,'']);
+  const sumRows=[['Résumé fiscal',yr],['Revenus bruts',f.gross],['Km pro',f.kmPro],['Déduction km CRA',f.kmDed],['Autres déductions',f.otherDed],['Total déductions',f.totDed],['Revenu net imposable',f.net],['Impôt fédéral',f.fedOwed],['Impôt provincial (QC)',f.qcOwed],['Cotisation RRQ',f.rrq],['Total impôt estimé',f.total],['Ratio pro',f.proRatio!=null?Math.round(f.proRatio*100)+'%':'N/A']];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(revRows),'Revenus');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(dedRows),'Déductions');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sumRows),'Résumé');
+  XLSX.writeFile(wb,`fiscal-${yr}-${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('Excel exporté');
 }
 
 // ── TOAST ──────────────────────────────────────────────────────────────────────
@@ -903,19 +1033,26 @@ function delDep(id){
 
 // ── FISCAL ─────────────────────────────────────────────────────────────────────
 function rFisc(){
-  document.getElementById('panel-fiscal').innerHTML=`
-    <div class="subtabs">
-      <button class="stab${S.fsub==='revenus'?' active':''}" data-fsub="revenus">Revenus</button>
-      <button class="stab${S.fsub==='deductions'?' active':''}" data-fsub="deductions">Déductions</button>
-      <button class="stab${S.fsub==='vehicule'?' active':''}" data-fsub="vehicule">Véhicule</button>
-    </div>
-    <div id="fsub-content"></div>`;
+  const histBanner=S.fiscal.histMode&&S.fiscal.histSnap?`<div class="alert alert-i" style="margin-bottom:12px;display:flex;align-items:center;gap:10px"><em style="flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></em><p style="flex:1;margin:0">Mode historique — ${MONTH_NAMES[(S.fiscal.histSnap.mois||1)-1]} ${S.fiscal.histSnap.annee}</p><button class="btn btn-xs btn-s" id="hist-back">Retour</button></div>`:'';
+  const snapSel=S.fiscal.snapshots.length>0?`<select class="fs" id="snap-nav-sel" style="flex:1;min-width:0;font-size:13px;padding:8px 14px"><option value="">📅 Historique</option>${S.fiscal.snapshots.map(s=>`<option value="${s.annee}-${s.mois}"${S.fiscal.histMode&&S.fiscal.histSnap&&S.fiscal.histSnap.annee===s.annee&&S.fiscal.histSnap.mois===s.mois?' selected':''}>${MONTH_NAMES[(s.mois||1)-1]} ${s.annee}</option>`).join('')}</select>`:'';
+  const saveBtn=!S.fiscal.histMode?`<button class="btn btn-s btn-sm" id="save-snap-btn">Sauvegarder ce mois</button>`:'';
+  const topBar=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">${snapSel}${saveBtn}<button class="btn btn-s btn-sm" id="fiscal-excel-btn">📊 Excel</button><button class="btn btn-s btn-sm" id="fiscal-print-btn">🖨 PDF</button></div>`;
+  const subtabs=!S.fiscal.histMode?`<div class="subtabs"><button class="stab${S.fsub==='revenus'?' active':''}" data-fsub="revenus">Revenus</button><button class="stab${S.fsub==='deductions'?' active':''}" data-fsub="deductions">Déductions</button><button class="stab${S.fsub==='vehicule'?' active':''}" data-fsub="vehicule">Véhicule</button></div>`:'';
+  document.getElementById('panel-fiscal').innerHTML=`${histBanner}${topBar}${subtabs}<div id="fsub-content"></div>`;
   rFsub();
 }
 
 function rFsub(){
-  const f=calcFiscal(), yr=S.cfg.year, el=document.getElementById('fsub-content');
+  const el=document.getElementById('fsub-content');
   if(!el)return;
+  if(S.fiscal.histMode&&S.fiscal.histSnap){
+    const snap=S.fiscal.histSnap; const f=fiscalFromSnap(snap);
+    const pct=snap.ratio_pro!=null?Math.round(snap.ratio_pro*100):null;
+    const detRows=(snap.depenses_detail||[]).length>0?`<div class="stitle">Dépenses du mois</div><div class="card"><table class="dtable"><thead><tr><th>Catégorie</th><th style="text-align:right">Total</th><th style="text-align:right">Déductible</th></tr></thead><tbody>${(snap.depenses_detail||[]).map(e=>`<tr><td>${esc(e.cat||'')}${e.desc?`<br><span style="font-size:11px;color:var(--text2)">${esc(e.desc)}</span>`:''}</td><td style="text-align:right">${$f(e.annual!=null?e.annual:e.amt||0)}</td><td style="text-align:right;color:var(--ok)">${$f(e.ded||0)}</td></tr>`).join('')}</tbody></table></div>`:'';
+    el.innerHTML=`<div class="card"><div class="card-title">${MONTH_NAMES[(snap.mois||1)-1]} ${snap.annee}</div><div class="card-value">${$f(f.gross)}</div><div class="card-sub">${snap.nombre_livraisons||0} livraisons · ${(f.kmPro||0).toFixed(0)} km</div></div><div class="card"><table class="dtable"><tr><td>Déduction km CRA</td><td>${$f(f.kmDed)}</td></tr><tr><td>Autres déductions</td><td>${$f(f.otherDed)}</td></tr><tr><td style="font-weight:700">Total déductions</td><td style="color:var(--ok);font-weight:700">${$f(f.totDed)}</td></tr><tr><td style="font-weight:700">Revenu net imposable</td><td style="color:var(--accent);font-weight:700">${$f(f.net)}</td></tr>${pct!=null?`<tr><td>Ratio pro</td><td>${pct}%</td></tr>`:''}</table></div>${detRows}<p style="font-size:11px;color:var(--text2);text-align:center;margin-top:8px">Sauvegardé le ${snap.created_at?new Date(snap.created_at).toLocaleDateString('fr-CA'):''}</p>`;
+    return;
+  }
+  const f=calcFiscal(), yr=S.cfg.year;
   if(S.fsub==='revenus'){
     const setA=f.gross*Math.max(f.rate,.25);
     el.innerHTML=`
@@ -1287,6 +1424,19 @@ function initEvents(){
       S.cfg.vehicleKmNow=parseFloat(document.getElementById('v-km-now')?.value)||0;
       refreshProRatio();saveLS();rFsub();toast('Km enregistrés');return;}
     if(e.target.id==='ded-toggle'){S.dedDetailOpen=!S.dedDetailOpen;rFsub();return;}
+    if(e.target.id==='save-snap-btn'){
+      const now=new Date(); const btn=e.target;
+      btn.disabled=true; btn.textContent='Sauvegarde…';
+      buildFiscalSnapshot(now.getFullYear(),now.getMonth()+1,false).then(ok=>{
+        const b=document.getElementById('save-snap-btn');
+        if(b){b.textContent='✓ Sauvegardé';}
+        if(ok)loadFiscalSnapshots().then(()=>{rFisc();});
+        setTimeout(()=>{const b2=document.getElementById('save-snap-btn');if(b2){b2.disabled=false;b2.textContent='Sauvegarder ce mois';}},2000);
+      }).catch(()=>{});
+      return;}
+    if(e.target.id==='hist-back'){S.fiscal.histMode=false;S.fiscal.histSnap=null;rFisc();return;}
+    if(e.target.id==='fiscal-excel-btn'){exportFiscalExcel();return;}
+    if(e.target.id==='fiscal-print-btn'){exportFiscalPrint();return;}
 
     // Outils
     if(e.target.id==='outils-sync-btn'){doSync();return;}
@@ -1315,6 +1465,12 @@ function initEvents(){
   document.addEventListener('change',e=>{
     if(e.target.id==='dep-cat'){updateDepCat();return;}
     if(e.target.closest('#panel-livraisons')&&e.target.dataset.action==='filt-date'){S.dFilt.date=e.target.value;rLiv();return;}
+    if(e.target.id==='snap-nav-sel'){
+      const val=e.target.value;
+      if(!val){S.fiscal.histMode=false;S.fiscal.histSnap=null;rFisc();return;}
+      const[a,m]=val.split('-').map(Number);
+      loadHistSnap(a,m);
+      return;}
   });
 
   document.addEventListener('input',e=>{
@@ -1384,7 +1540,22 @@ function init(){
   if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
     setTimeout(async()=>{
       const ok=await sbLoad();
-      if(ok){render();sbSubscribe();}
+      if(ok){
+        render();sbSubscribe();
+        await loadFiscalSnapshots();
+        // Auto-trigger: snapshot previous month if month changed since last visit
+        const now=new Date();
+        const curYM=`${now.getFullYear()}-${now.getMonth()+1}`;
+        const lastYM=localStorage.getItem('lt_lastYM')||'';
+        if(lastYM&&lastYM!==curYM){
+          const[ly,lm]=lastYM.split('-').map(Number);
+          buildFiscalSnapshot(ly,lm,true).then(()=>loadFiscalSnapshots()).catch(()=>{});
+          if(now.getMonth()===0){
+            buildAnnualSnapshot(now.getFullYear()-1).catch(()=>{});
+          }
+        }
+        localStorage.setItem('lt_lastYM',curYM);
+      }
     },0);
   }
   if(!S.cfg.supabaseUrl){
