@@ -179,6 +179,20 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
   .modal{max-width:540px;margin:0 auto;border-radius:20px}
   .moverlay{align-items:center;justify-content:center;padding:20px}
 }
+/* QUART */
+.quart-timer{font-size:56px;font-weight:700;letter-spacing:-2px;text-align:center;color:var(--text);margin:16px 0 8px;font-variant-numeric:tabular-nums}
+.quart-status{text-align:center;font-size:14px;color:var(--text2);margin-bottom:20px;min-height:20px}
+.quart-btns{display:flex;gap:10px}
+.quart-trip{background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:var(--r);padding:14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+@media(prefers-color-scheme:dark){.quart-trip{background:rgba(28,28,30,0.9);border-color:rgba(255,255,255,0.1);}}
+.quart-trip-info{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4}
+.trip-classify-btns{display:flex;gap:6px;margin-top:10px}
+.trip-banner{background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.2);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}
+.trip-banner:active{opacity:.7}
+.trip-banner p{font-size:13px;color:var(--accent);font-weight:600;margin:0}
+.trip-select-item{background:var(--card2);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border:2px solid transparent}
+.trip-select-item:active{opacity:.7}
+.trip-select-item.selected{border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -192,6 +206,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
     <button class="sb-btn" data-tab="depenses"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Dépenses</button>
     <button class="sb-btn" data-tab="fiscal"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></span>Fiscal</button>
     <button class="sb-btn" data-tab="outils"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></span>Outils</button>
+    <button class="sb-btn" data-tab="quart"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/><line x1="9" y1="1" x2="15" y2="1"/></svg></span>Quart</button>
   </nav>
   <div class="sb-footer">
     <button class="sb-btn" id="sb-sync"><span class="ico" id="sb-sync-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>Synchroniser</button>
@@ -204,7 +219,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
     <span style="color:var(--accent);display:flex;align-items:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
     <span class="hdr-title" id="hdr-title">Tableau de bord</span>
     <div class="hdr-actions">
-      <button class="icon-btn" id="mob-sync"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+      <button class="icon-btn" id="mob-quart" aria-label="Quart" title="Quart"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/><line x1="9" y1="1" x2="15" y2="1"/></svg></button>
       <button class="icon-btn" id="mob-menu" aria-label="Menu">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
@@ -216,6 +231,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
     <div id="panel-depenses" class="panel"></div>
     <div id="panel-fiscal" class="panel"></div>
     <div id="panel-outils" class="panel"></div>
+    <div id="panel-quart" class="panel"></div>
   </main>
 </div>
 </div>
@@ -236,6 +252,10 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
   <button class="nb" data-tab="fiscal">
     <span class="nb-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></span>
     <span class="nb-lbl">Fiscal</span>
+  </button>
+  <button class="nb" data-tab="quart">
+    <span class="nb-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/><line x1="9" y1="1" x2="15" y2="1"/></svg></span>
+    <span class="nb-lbl">Quart</span>
   </button>
 </nav>
 
@@ -358,6 +378,11 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
   <button class="btn btn-s btn-w btn-sm" id="test-conn-btn" style="margin-bottom:12px">Tester la connexion</button>
 
   <div class="div"></div>
+  <div class="stitle">Driversnote</div>
+  <div class="fg"><label class="fl">Clé API Driversnote</label><input type="password" class="fi" id="s-dn-key" placeholder="Votre clé API Driversnote" autocomplete="off"></div>
+  <p class="note-sm" style="margin-bottom:10px">Utilisée pour récupérer vos trajets en fin de quart. Stockée dans Supabase (table <code>parametres</code>).</p>
+
+  <div class="div"></div>
   <div class="stitle">Fiscal</div>
   <div class="frow">
     <div class="fg"><label class="fl">Année fiscale</label><input type="number" class="fi" id="s-year" min="2020" max="2035"></div>
@@ -376,6 +401,29 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
   </div>
   <div class="div"></div>
   <button class="btn btn-d btn-w btn-sm" id="clear-all-btn">Effacer toutes les données</button>
+</div></div>
+
+<!-- MODAL CLASSIFICATION TRAJETS -->
+<div class="moverlay" id="m-classif">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle"><span>Classification des trajets</span><button class="mclose" data-close="m-classif">✕</button></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <span style="font-size:13px;color:var(--text2)">Total km pro :</span>
+    <span style="font-size:18px;font-weight:700;color:var(--accent)" id="classif-pro-km">0 km</span>
+  </div>
+  <div id="classif-content"></div>
+  <button class="btn btn-p btn-w" id="classif-confirm-btn" style="margin-top:10px">Confirmer et sauvegarder le quart</button>
+</div></div>
+
+<!-- MODAL TRAJETS DISPONIBLES (nouvelle livraison) -->
+<div class="moverlay" id="m-trips">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle"><span>Trajets disponibles</span><button class="mclose" data-close="m-trips">✕</button></div>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Sélectionne un trajet pour pré-remplir la distance et la durée.</p>
+  <div id="trips-list"></div>
+  <button class="btn btn-p btn-w" id="trips-select-btn" style="margin-top:10px">Utiliser ce trajet</button>
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="console.warn('[LT] Supabase CDN indisponible')"></script>
@@ -406,8 +454,8 @@ const PLAT_CLR={'Instacart':'#0AAD0A','DoorDash':'#FF3008','Uber Eats':'#142328'
 const MIXED=['Téléphone','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
 const VEH=['Recharge VE','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
 const DATE_LABEL_CATS=['Téléphone','Assurance auto','Immatriculation','Leasing'];
-const TABS=['dashboard','livraisons','depenses','fiscal','outils'];
-const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',outils:'Outils'};
+const TABS=['dashboard','livraisons','depenses','fiscal','outils','quart'];
+const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',outils:'Outils',quart:'Quart'};
 const LS_KEY='lt_v4';
 
 // ── STATE ──────────────────────────────────────────────────────────────────────
@@ -569,7 +617,7 @@ function goTab(tab){
   render();
 }
 function render(){
-  ({dashboard:rDash,livraisons:rLiv,depenses:rDep,fiscal:rFisc,outils:rOutils})[S.tab]?.();
+  ({dashboard:rDash,livraisons:rLiv,depenses:rDep,fiscal:rFisc,outils:rOutils,quart:rQuart})[S.tab]?.();
 }
 
 // ── SYNC ───────────────────────────────────────────────────────────────────────
@@ -605,6 +653,7 @@ function rDash(){
   if(f.rate>0) alerts.push({t:'i',i:_iInfo,m:`Mets ~${Math.ceil(Math.max(f.rate,.25)*100)}% de côté (~${$f(f.gross*Math.max(f.rate,.25))})`});
   const recent=[...S.deliveries].sort((a,b)=>parseDate(b.date)-parseDate(a.date)).slice(0,5);
   document.getElementById('panel-dashboard').innerHTML=`
+    ${quartDashCard()}
     <div class="grid2">
       <div class="scard"><div class="slabel">Aujourd'hui</div><div class="sval g">${$f(sum(tod))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${tod.length} livraison${tod.length!==1?'s':''}</div></div>
       <div class="scard"><div class="slabel">Cette semaine</div><div class="sval b">${$f(sum(wk))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${wk.length} livraison${wk.length!==1?'s':''}</div></div>
@@ -676,7 +725,46 @@ function openLivModal(id=null){
     ['liv-rev','liv-tip','liv-km','liv-duree','liv-notes'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('liv-date').value=today;
   }
+  // Inject trip suggestion banner
+  injectTripBanner();
   openM('m-liv');
+}
+
+async function injectTripBanner(){
+  const sb=sbClient();if(!sb)return;
+  try{
+    const{data}=await sb.from('trajets').select('*').eq('type','pro').is('livraison_id',null).order('heure_debut',{ascending:false});
+    const trips=(data||[]);
+    if(trips.length===0)return;
+    const modal=document.querySelector('#m-liv .modal');
+    if(!modal)return;
+    // Remove existing banner
+    modal.querySelector('.trip-banner')?.remove();
+    const banner=document.createElement('div');
+    banner.className='trip-banner';
+    banner.id='liv-trip-banner';
+    banner.innerHTML=`<p>${trips.length} trajet${trips.length>1?'s':''} disponible${trips.length>1?'s':''} — Utiliser un trajet ?</p><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+    banner.addEventListener('click',()=>openTripSelector(trips));
+    modal.insertBefore(banner,modal.querySelector('.fg'));
+    window._availableTrips=trips;
+  }catch(e){}
+}
+
+function openTripSelector(trips){
+  const el=document.getElementById('trips-list');
+  if(!el)return;
+  window._selectedTrip=null;
+  el.innerHTML=trips.map((t,i)=>{
+    const sd=new Date(t.heure_debut);
+    const ed=new Date(t.heure_fin);
+    const dur=Math.round((ed-sd)/60000);
+    return`<div class="trip-select-item" data-trip-idx="${i}">
+      <div style="font-size:14px;font-weight:600">${sd.toLocaleDateString('fr-CA',{day:'numeric',month:'short'})} · ${(t.distance||0).toFixed(1)} km</div>
+      <div class="quart-trip-info">${esc((t.depart||'').substring(0,35))} → ${esc((t.arrivee||'').substring(0,35))}</div>
+      ${dur>0?`<div class="quart-trip-info">${dur} min</div>`:''}
+    </div>`;
+  }).join('');
+  openM('m-trips');
 }
 
 function saveLiv(){
@@ -686,7 +774,14 @@ function saveLiv(){
   const d={id,plat:document.getElementById('liv-plat').value,rev:parseFloat(document.getElementById('liv-rev').value)||0,tip:parseFloat(document.getElementById('liv-tip').value)||0,km:parseFloat(document.getElementById('liv-km').value)||0,date:dateVal,dureeMin:parseInt(document.getElementById('liv-duree').value)||0,notes:document.getElementById('liv-notes').value};
   const i=S.deliveries.findIndex(x=>x.id===id);
   if(i>=0)S.deliveries[i]=d;else S.deliveries.unshift(d);
-  saveLS(); sbUpsert('livraisons',dToDB(d)); closeM('m-liv'); render(); toast('Livraison enregistrée');
+  saveLS(); sbUpsert('livraisons',dToDB(d));
+  // Link selected trip to this livraison
+  if(window._selectedTripId){
+    const sb=sbClient();
+    if(sb){sb.from('trajets').update({livraison_id:id}).eq('id',window._selectedTripId).then(({error})=>{if(error)console.error('[SB trajet link]',error.message);});}
+    window._selectedTripId=null;
+  }
+  closeM('m-liv'); render(); toast('Livraison enregistrée');
 }
 function delLiv(id){
   if(!confirm('Supprimer cette livraison ?'))return;
@@ -1091,6 +1186,13 @@ function openSettings(){
   document.getElementById('s-sb-key').value=S.cfg.supabaseKey||'';
   document.getElementById('s-year').value=S.cfg.year;
   document.getElementById('s-kwh').value=S.cfg.kwhCost;
+  // Load Driversnote key from Supabase or local
+  const dnEl=document.getElementById('s-dn-key');
+  if(dnEl){
+    dnEl.value=S.cfg.driversnoteApiKey||'';
+    const sb=sbClient();
+    if(sb){sb.from('parametres').select('valeur').eq('cle','driversnote_api_key').single().then(({data})=>{if(data?.valeur)dnEl.value=data.valeur;}).catch(()=>{});}
+  }
   connDot(!!_sb||null);
   renderPlatList();
   // Auto km cost
@@ -1121,6 +1223,13 @@ function saveSettings(){
   S.cfg.year=parseInt(document.getElementById('s-year').value)||new Date().getFullYear();
   S.cfg.kwhCost=parseFloat(document.getElementById('s-kwh').value)||.085;
   S.cfg.defaultPlat=document.getElementById('default-plat').value;
+  // Save Driversnote API key to Supabase parametres table
+  const dnKey=document.getElementById('s-dn-key').value.trim();
+  if(dnKey){
+    S.cfg.driversnoteApiKey=dnKey;
+    const sb=sbClient();
+    if(sb){sb.from('parametres').upsert({cle:'driversnote_api_key',valeur:dnKey}).then(({error})=>{if(error)console.error('[SB param]',error.message);});}
+  }
   saveLS();
   if(changed){
     sbReset();
@@ -1185,6 +1294,7 @@ function initEvents(){
   document.getElementById('mob-sync').addEventListener('click',doSync);
   document.getElementById('sb-sync').addEventListener('click',doSync);
   document.getElementById('sb-settings').addEventListener('click',openSettings);
+  document.getElementById('mob-quart').addEventListener('click',()=>goTab('quart'));
   document.getElementById('mob-menu').addEventListener('click',openDrawer);
   document.getElementById('drawer-close').addEventListener('click',closeDrawer);
   document.getElementById('drawer-overlay').addEventListener('click',closeDrawer);
@@ -1247,6 +1357,43 @@ function initEvents(){
       saveLS();rFsub();toast('Km enregistrés');return;}
     if(e.target.id==='ded-toggle'){S.dedDetailOpen=!S.dedDetailOpen;rFsub();return;}
 
+    // Quart — page
+    if(e.target.id==='quart-start-btn'){quartStart();return;}
+    if(e.target.id==='quart-pause-btn'){quartPause();return;}
+    if(e.target.id==='quart-resume-btn'){quartResume();return;}
+    if(e.target.id==='quart-stop-btn'){quartTerminer();return;}
+    // Quart — dashboard card
+    if(e.target.id==='dash-quart-start'){quartStart();return;}
+    if(e.target.id==='dash-quart-pause'){quartPause();return;}
+    if(e.target.id==='dash-quart-resume'){quartResume();return;}
+    if(e.target.id==='dash-quart-stop'){quartTerminer();return;}
+    // Classif trajets
+    const classifBtn=e.target.closest('#classif-content [data-classif]');
+    if(classifBtn){
+      const idx=+classifBtn.dataset.idx;
+      QS.trajetsClassif[idx].type=classifBtn.dataset.classif;
+      renderClassifModal();return;
+    }
+    if(e.target.id==='classif-confirm-btn'){confirmClassif();return;}
+    // Trip selector (nouvelle livraison)
+    const tripItem=e.target.closest('#trips-list .trip-select-item');
+    if(tripItem){
+      document.querySelectorAll('#trips-list .trip-select-item').forEach(el=>el.classList.remove('selected'));
+      tripItem.classList.add('selected');
+      window._selectedTrip=window._availableTrips?.[+tripItem.dataset.tripIdx];return;
+    }
+    if(e.target.id==='trips-select-btn'){
+      const t=window._selectedTrip;
+      if(!t){toast('Sélectionne un trajet');return;}
+      const dist=t.distance||0;
+      const dur=Math.round((new Date(t.heure_fin)-new Date(t.heure_debut))/60000);
+      document.getElementById('liv-km').value=dist.toFixed(1);
+      document.getElementById('liv-duree').value=dur||'';
+      // Tag the trip id for later linking
+      window._selectedTripId=t.id;
+      closeM('m-trips');
+      toast('Trajet pré-rempli');return;
+    }
     // Outils
     if(e.target.id==='outils-sync-btn'){doSync();return;}
     if(e.target.id==='export-excel-btn'){exportExcel();return;}
@@ -1334,12 +1481,229 @@ function initPWAIcon(){
   }
 }
 
+// ── QUART ─────────────────────────────────────────────────────────────────────
+const QS={state:'idle',startTime:null,elapsed:0,quartsHistory:[],trajetsClassif:[],_quartStart:null,_quartEnd:null};
+
+function loadQuartLS(){
+  try{
+    const d=JSON.parse(localStorage.getItem('lt_quart')||'{}');
+    if(d.state)QS.state=d.state;
+    if(d.startTime)QS.startTime=d.startTime;
+    if(d.elapsed!=null)QS.elapsed=d.elapsed;
+    if(d.quartsHistory)QS.quartsHistory=d.quartsHistory;
+  }catch(e){}
+}
+function saveQuartLS(){
+  try{localStorage.setItem('lt_quart',JSON.stringify({state:QS.state,startTime:QS.startTime,elapsed:QS.elapsed,quartsHistory:QS.quartsHistory}));}catch(e){}
+}
+
+function quartElapsed(){
+  if(QS.state==='running'&&QS.startTime) return QS.elapsed+(Date.now()-QS.startTime);
+  return QS.elapsed;
+}
+
+function fmtTimer(ms){
+  const tot=Math.floor(ms/1000);
+  const h=Math.floor(tot/3600),m=Math.floor((tot%3600)/60),s=tot%60;
+  return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+let _quartInterval=null;
+function startQuartTimer(){
+  clearInterval(_quartInterval);
+  _quartInterval=setInterval(()=>{
+    const e=quartElapsed();
+    document.getElementById('quart-timer-display')?.setAttribute('data-ms',e)||void(document.getElementById('quart-timer-display')&&(document.getElementById('quart-timer-display').textContent=fmtTimer(e)));
+    const d=document.getElementById('dash-quart-timer');
+    if(d)d.textContent=fmtTimer(e);
+    _updateQuartTimers();
+    _updateQuartStatus();
+  },1000);
+}
+function _updateQuartTimers(){
+  const e=quartElapsed();
+  ['quart-timer-display','dash-quart-timer'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmtTimer(e);});
+}
+function _updateQuartStatus(){
+  const el=document.getElementById('quart-status-text');
+  if(!el)return;
+  if(QS.state==='idle'){el.textContent='Aucun quart en cours';}
+  else if(QS.state==='paused'){el.textContent='Quart en pause';}
+  else{
+    const ms=quartElapsed();
+    const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);
+    el.textContent=`Quart en cours depuis${h>0?' '+h+'h':''} ${m}min`;
+  }
+}
+
+function quartStart(){
+  QS.state='running';QS.startTime=Date.now();QS.elapsed=0;
+  saveQuartLS();startQuartTimer();rQuart();if(S.tab==='dashboard')rDash();
+}
+function quartPause(){
+  QS.elapsed+=Date.now()-QS.startTime;QS.startTime=null;QS.state='paused';
+  clearInterval(_quartInterval);saveQuartLS();rQuart();if(S.tab==='dashboard')rDash();
+}
+function quartResume(){
+  QS.state='running';QS.startTime=Date.now();
+  saveQuartLS();startQuartTimer();rQuart();if(S.tab==='dashboard')rDash();
+}
+
+async function quartTerminer(){
+  if(!confirm('Terminer ce quart ?'))return;
+  clearInterval(_quartInterval);
+  const endTime=new Date();
+  const startTime=new Date(QS.startTime?QS.startTime-QS.elapsed:Date.now()-QS.elapsed);
+  QS._quartStart=startTime;QS._quartEnd=endTime;
+
+  const apiKey=await getDriversnoteApiKey();
+  if(apiKey){
+    toast('Récupération des trajets Driversnote…');
+    try{
+      const from=startTime.toISOString();
+      const to=endTime.toISOString();
+      const res=await fetch('https://api.driversnote.com/v1/driversnote',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':apiKey},
+        body:JSON.stringify({
+          query:`query GetTrips($from:String,$to:String){trips(filter:{startedAt:{gte:$from,lte:$to}}){nodes{id startedAt endedAt distance startLocation{address} endLocation{address}}}}`,
+          variables:{from,to}
+        })
+      });
+      const data=await res.json();
+      const trips=(data?.data?.trips?.nodes)||[];
+      QS.trajetsClassif=trips.map(t=>({...t,type:null}));
+      renderClassifModal();
+      openM('m-classif');
+    }catch(e){
+      toast('Erreur Driversnote: '+e.message);
+      await doSaveQuart(startTime,endTime,[]);
+    }
+  }else{
+    await doSaveQuart(startTime,endTime,[]);
+  }
+}
+
+async function getDriversnoteApiKey(){
+  const sb=sbClient();
+  if(sb){
+    try{const{data}=await sb.from('parametres').select('valeur').eq('cle','driversnote_api_key').single();if(data?.valeur)return data.valeur;}catch(e){}
+  }
+  return S.cfg.driversnoteApiKey||'';
+}
+
+function renderClassifModal(){
+  const el=document.getElementById('classif-content');if(!el)return;
+  const trips=QS.trajetsClassif||[];
+  const proKm=trips.filter(t=>t.type==='pro').reduce((s,t)=>s+(t.distance||0),0);
+  const totEl=document.getElementById('classif-pro-km');
+  if(totEl)totEl.textContent=proKm.toFixed(1)+' km pro';
+  if(trips.length===0){
+    el.innerHTML=`<div class="empty"><p>Aucun trajet trouvé pour cette période.</p></div>`;return;
+  }
+  el.innerHTML=trips.map((t,i)=>{
+    const sd=new Date(t.startedAt);
+    const dur=Math.round((new Date(t.endedAt)-sd)/60000);
+    const dep=(t.startLocation?.address||'—').substring(0,40);
+    const arr=(t.endLocation?.address||'—').substring(0,40);
+    return`<div class="quart-trip">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:14px;font-weight:600">${sd.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})} · ${(t.distance||0).toFixed(1)} km</div>
+          <div class="quart-trip-info">${esc(dep)} → ${esc(arr)}</div>
+          ${dur>0?`<div class="quart-trip-info">${dur} min</div>`:''}
+        </div>
+        ${t.type?`<span class="badge ${t.type==='pro'?'bdg-b':t.type==='perso'?'bdg-y':'bdg-g'}">${t.type==='pro'?'Pro':t.type==='perso'?'Perso':'Ignoré'}</span>`:''}
+      </div>
+      <div class="trip-classify-btns">
+        <button class="btn btn-xs ${t.type==='pro'?'btn-p':'btn-s'}" data-classif="pro" data-idx="${i}">Pro</button>
+        <button class="btn btn-xs ${t.type==='perso'?'btn-ok':'btn-s'}" data-classif="perso" data-idx="${i}">Perso</button>
+        <button class="btn btn-xs ${t.type==='ignore'?'btn-d':'btn-s'}" data-classif="ignore" data-idx="${i}">Ignorer</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function doSaveQuart(startTime,endTime,proTrajets){
+  QS.state='idle';QS.elapsed=0;QS.startTime=null;
+  saveQuartLS();
+  const quartId=uid();
+  const quart={id:quartId,debut:startTime.toISOString(),fin:endTime.toISOString(),duree_min:Math.round((endTime-startTime)/60000),km_pro:proTrajets.reduce((s,t)=>s+(t.distance||0),0),nb_trajets:proTrajets.length};
+  const sb=sbClient();
+  if(sb){
+    try{await sb.from('quarts').upsert(quart);}catch(e){console.error('[SB quart]',e.message);}
+    for(const t of proTrajets){
+      const trajet={id:uid(),quart_id:quartId,driversnote_id:t.id,distance:t.distance||0,date:new Date(t.startedAt).toLocaleDateString('fr-CA'),heure_debut:t.startedAt,heure_fin:t.endedAt,depart:t.startLocation?.address||'',arrivee:t.endLocation?.address||'',type:'pro',livraison_id:null};
+      try{await sb.from('trajets').upsert(trajet);}catch(e){console.error('[SB trajet]',e.message);}
+    }
+  }
+  QS.quartsHistory.unshift({...quart});
+  saveQuartLS();
+  toast('Quart enregistré !');
+  rQuart();if(S.tab==='dashboard')rDash();
+}
+
+async function confirmClassif(){
+  const proTrajets=QS.trajetsClassif.filter(t=>t.type==='pro');
+  closeM('m-classif');
+  await doSaveQuart(QS._quartStart,QS._quartEnd,proTrajets);
+}
+
+function quartDashCard(){
+  const elapsed=quartElapsed();
+  const stateLabel=QS.state==='idle'?'Inactif':QS.state==='paused'?'En pause':'En cours';
+  const stateColor=QS.state==='running'?'var(--ok)':QS.state==='paused'?'var(--warn)':'var(--text3)';
+  const btnHtml=QS.state==='idle'
+    ?`<button class="btn btn-ok btn-w" id="dash-quart-start">▶ Démarrer</button>`
+    :QS.state==='running'
+      ?`<button class="btn btn-s" style="flex:1" id="dash-quart-pause">⏸ Pause</button><button class="btn btn-d" style="flex:1" id="dash-quart-stop">⏹ Terminer</button>`
+      :`<button class="btn btn-ok" style="flex:1" id="dash-quart-resume">▶ Reprendre</button><button class="btn btn-d" style="flex:1" id="dash-quart-stop">⏹ Terminer</button>`;
+  return`<div class="card" style="margin-bottom:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="card-title" style="margin-bottom:0">Quart</div>
+      <span style="font-size:11px;font-weight:600;color:${stateColor}">${stateLabel}</span>
+    </div>
+    <div style="font-size:38px;font-weight:700;text-align:center;letter-spacing:-1px;font-variant-numeric:tabular-nums;margin-bottom:12px" id="dash-quart-timer">${fmtTimer(elapsed)}</div>
+    <div style="display:flex;gap:8px">${btnHtml}</div>
+  </div>`;
+}
+
+function rQuart(){
+  const panEl=document.getElementById('panel-quart');if(!panEl)return;
+  const elapsed=quartElapsed();
+  const btnHtml=QS.state==='idle'
+    ?`<button class="btn btn-ok btn-w" id="quart-start-btn">▶ Démarrer</button>`
+    :QS.state==='running'
+      ?`<div class="quart-btns"><button class="btn btn-s" style="flex:1" id="quart-pause-btn">⏸ Pause</button><button class="btn btn-d" style="flex:1" id="quart-stop-btn">⏹ Terminer</button></div>`
+      :`<div class="quart-btns"><button class="btn btn-ok" style="flex:1" id="quart-resume-btn">▶ Reprendre</button><button class="btn btn-d" style="flex:1" id="quart-stop-btn">⏹ Terminer</button></div>`;
+  const hist=QS.quartsHistory.slice(0,10);
+  const histHtml=hist.length===0
+    ?`<div class="empty"><div class="empty-ico" style="font-size:40px">⏱</div><p>Aucun quart enregistré.</p></div>`
+    :hist.map(q=>{
+      const d=new Date(q.debut);
+      return`<div class="li"><div class="li-body"><div class="li-title">${d.toLocaleDateString('fr-CA',{weekday:'short',day:'numeric',month:'short'})}</div><div class="li-sub">${fmtDur(q.duree_min)} · ${(q.km_pro||0).toFixed(1)} km pro · ${q.nb_trajets||0} trajet${(q.nb_trajets||0)!==1?'s':''}</div></div></div>`;
+    }).join('');
+  panEl.innerHTML=`
+    <div class="card" style="text-align:center;padding:24px 16px">
+      <div class="quart-timer" id="quart-timer-display">${fmtTimer(elapsed)}</div>
+      <div class="quart-status" id="quart-status-text"></div>
+      ${btnHtml}
+    </div>
+    <div class="stitle">Historique</div>
+    ${histHtml}
+  `;
+  _updateQuartStatus();
+  if(QS.state==='running') startQuartTimer();
+}
+
 // ── INIT ───────────────────────────────────────────────────────────────────────
 function init(){
   loadLS();
+  loadQuartLS();
   initPWAIcon();
   initEvents();
   rDash();
+  if(QS.state==='running') startQuartTimer();
   if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
     setTimeout(async()=>{
       const ok=await sbLoad();
@@ -1351,12 +1715,18 @@ function init(){
     console.log(`create table livraisons (id uuid default gen_random_uuid() primary key, plateforme text, revenu numeric, pourboire numeric, distance numeric, duree integer, date text, notes text, created_at timestamptz default now());
 create table depenses (id uuid default gen_random_uuid() primary key, categorie text, montant numeric, montant_annuel numeric, description text, note_recu text, date text, ratio_pro numeric, kwh numeric, created_at timestamptz default now());
 create table parametres (cle text primary key, valeur text);
+create table quarts (id uuid default gen_random_uuid() primary key, debut timestamptz, fin timestamptz, duree_min integer, km_pro numeric, nb_trajets integer, created_at timestamptz default now());
+create table trajets (id uuid default gen_random_uuid() primary key, quart_id uuid references quarts(id), driversnote_id text, distance numeric, date text, heure_debut timestamptz, heure_fin timestamptz, depart text, arrivee text, type text, livraison_id uuid references livraisons(id), created_at timestamptz default now());
 alter table livraisons enable row level security;
 alter table depenses enable row level security;
 alter table parametres enable row level security;
+alter table quarts enable row level security;
+alter table trajets enable row level security;
 create policy "Public" on livraisons for all using (true);
 create policy "Public" on depenses for all using (true);
-create policy "Public" on parametres for all using (true);`);
+create policy "Public" on parametres for all using (true);
+create policy "Public" on quarts for all using (true);
+create policy "Public" on trajets for all using (true);`);
   }
 }
 document.addEventListener('DOMContentLoaded',init);
