@@ -366,6 +366,10 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
   <button class="btn btn-s btn-w btn-sm" id="test-conn-btn" style="margin-bottom:12px">Tester la connexion</button>
 
   <div class="div"></div>
+  <div class="stitle">Driversnote</div>
+  <div class="fg"><label class="fl">Clé API Driversnote</label><input type="password" class="fi" id="s-driversnote-key" placeholder="Clé API…" autocomplete="off"></div>
+
+  <div class="div"></div>
   <div class="stitle">Fiscal</div>
   <div class="frow">
     <div class="fg"><label class="fl">Année fiscale</label><input type="number" class="fi" id="s-year" min="2020" max="2035"></div>
@@ -403,6 +407,12 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
       <button class="btn btn-ok" style="flex:1" data-qm="confirm">Confirmer et sauvegarder</button>
       <button class="btn btn-s" data-qm="cancel">Annuler</button>
     </div>
+  </div>
+  <div id="trajets-wrap" style="display:none;margin-bottom:4px">
+    <div class="div"></div>
+    <div class="stitle" style="margin-top:0;margin-bottom:4px">Trajets Driversnote</div>
+    <div id="trajets-list"></div>
+    <button class="btn btn-p btn-w" data-qm="terminer-trajets" style="margin-top:12px">Terminer la classification</button>
   </div>
   <div id="quart-edit-wrap" style="display:none;margin-bottom:4px">
     <div class="div"></div>
@@ -465,7 +475,7 @@ const LS_KEY='lt_v4';
 const S={
   tab:'dashboard', fsub:'revenus',
   deliveries:[], expenses:[],
-  cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra'},
+  cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',driversnoteKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra'},
   dFilt:{plat:'',date:''}, eFilt:'', eShowFilt:false,
   dedDetailOpen:false,
   exportDateFrom:'', exportDateTo:''
@@ -1150,6 +1160,7 @@ function exportPDF(){
 function openSettings(){
   document.getElementById('s-sb-url').value=S.cfg.supabaseUrl||'';
   document.getElementById('s-sb-key').value=S.cfg.supabaseKey||'';
+  document.getElementById('s-driversnote-key').value=S.cfg.driversnoteKey||'';
   document.getElementById('s-year').value=S.cfg.year;
   document.getElementById('s-kwh').value=S.cfg.kwhCost;
   connDot(!!_sb||null);
@@ -1179,10 +1190,14 @@ function saveSettings(){
   const newKey=document.getElementById('s-sb-key').value.trim();
   const changed=newUrl!==S.cfg.supabaseUrl||newKey!==S.cfg.supabaseKey;
   S.cfg.supabaseUrl=newUrl; S.cfg.supabaseKey=newKey;
+  const newDnKey=document.getElementById('s-driversnote-key').value.trim();
+  S.cfg.driversnoteKey=newDnKey;
   S.cfg.year=parseInt(document.getElementById('s-year').value)||new Date().getFullYear();
   S.cfg.kwhCost=parseFloat(document.getElementById('s-kwh').value)||.085;
   S.cfg.defaultPlat=document.getElementById('default-plat').value;
   saveLS();
+  // Save Driversnote key to Supabase parametres
+  if(newDnKey){const sbp=sbClient();if(sbp)sbp.from('parametres').upsert({cle:'driversnote_api_key',valeur:newDnKey}).then(()=>{});}
   if(changed){
     sbReset();
     if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
@@ -1404,6 +1419,64 @@ function initPWAIcon(){
 // ── QUART MODAL ────────────────────────────────────────────────────────────────
 let _qTimer = null;
 let _qHistData = [];
+let _qTrajets = [];
+let _qCurrentQuartId = null;
+let _qCurrentQuartFrom = null;
+let _qCurrentQuartTo = null;
+
+async function _qFetchDriversnote(from, to, apiKey) {
+  const query = `{ trips(filter: { startedAt: { gte: "${from}", lte: "${to}" } }) { nodes { id startedAt endedAt distance startLocation { address } endLocation { address } } } }`;
+  const resp = await fetch('https://api.driversnote.com/v1/driversnote', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','x-api-key':apiKey},
+    body: JSON.stringify({query})
+  });
+  if (!resp.ok) throw new Error(`Driversnote HTTP ${resp.status}`);
+  const json = await resp.json();
+  if (json.errors) throw new Error(json.errors[0]?.message || 'GraphQL error');
+  return json.data?.trips?.nodes || [];
+}
+
+function _qRenderTrajets(trips, state, errMsg) {
+  const wrap = document.getElementById('trajets-wrap');
+  const list = document.getElementById('trajets-list');
+  if (!wrap || !list) return;
+  wrap.style.display = 'block';
+  if (state === 'loading') {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2)"><span class="spin" style="font-size:22px">↻</span><div style="margin-top:8px;font-size:13px">Chargement des trajets…</div></div>';
+    return;
+  }
+  if (state === 'error') {
+    list.innerHTML = `<div class="alert alert-w"><p>Erreur Driversnote : ${esc(errMsg||'')}</p></div>`;
+    return;
+  }
+  if (!trips || trips.length === 0) {
+    list.innerHTML = '<div class="empty" style="padding:20px 0"><p>Aucun trajet trouvé pour ce quart.</p></div>';
+    return;
+  }
+  list.innerHTML = trips.map((t, i) => {
+    const heure = t.startedAt ? new Date(t.startedAt).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}) : '—';
+    const dist = t.distance != null ? (+t.distance).toFixed(1) : '?';
+    const dep = t.startLocation?.address || '—';
+    const arr = t.endLocation?.address || '—';
+    const cl = t.classif;
+    return `<div class="li" style="flex-direction:column;gap:8px;align-items:stretch">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div class="li-ico" style="color:var(--accent);flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div>
+        <div class="li-body">
+          <div class="li-title" style="font-size:13px">${heure} · ${dist} km</div>
+          <div class="li-sub" style="font-size:11px;margin-top:2px">${esc(dep)}</div>
+          <div class="li-sub" style="font-size:11px">→ ${esc(arr)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-xs${cl==='pro'?' btn-ok':' btn-s'}" data-qm="pro-trajet" data-ti="${i}" style="flex:1">Pro${cl==='pro'?' ✓':''}</button>
+        <button class="btn btn-xs${cl==='perso'?' btn-d':' btn-s'}" data-qm="perso-trajet" data-ti="${i}" style="flex:1">Perso${cl==='perso'?' ✓':''}</button>
+        <button class="btn btn-xs btn-s" data-qm="ignore-trajet" data-ti="${i}" style="flex:1${cl==='ignore'?';opacity:.4':''}">Ignorer${cl==='ignore'?' ✓':''}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
 function _qGetState() {
   return {
@@ -1469,7 +1542,7 @@ function _qRenderButtons() {
     if(kmWrap) kmWrap.style.display='none';
   } else if (st.etat === 'confirmer') {
     btnEl.innerHTML = '';
-    if(statusEl){statusEl.textContent='En attente de confirmation';statusEl.style.color='var(--warn)';}
+    if(statusEl){statusEl.textContent='Arrêté — en attente de confirmation';statusEl.style.color='var(--warn)';}
     if(kmWrap) kmWrap.style.display='block';
   }
 }
@@ -1567,25 +1640,47 @@ document.addEventListener('DOMContentLoaded', () => {
       const km = parseFloat(document.getElementById('quart-modal-km')?.value) || 0;
       const dureeMin = Math.round(st.elapsed / 60000);
       const todStr = new Date().toLocaleDateString('fr-CA');
+      const quartFrom = st.debutISO;
+      const quartTo = st.stopISO || new Date().toISOString();
       btn.disabled = true; btn.textContent = 'Sauvegarde…';
       try {
-        await sb.from('quarts').insert({
+        const {data:inserted, error} = await sb.from('quarts').insert({
           date: todStr,
-          heure_debut: st.debutISO,
-          heure_fin: st.stopISO || new Date().toISOString(),
+          heure_debut: quartFrom,
+          heure_fin: quartTo,
           duree: dureeMin,
           distance: km
-        });
+        }).select().single();
+        if (error) throw error;
+        _qCurrentQuartId = inserted?.id || null;
+        _qCurrentQuartFrom = quartFrom;
+        _qCurrentQuartTo = quartTo;
         localStorage.removeItem('quart_etat');
         localStorage.removeItem('quart_debut');
         localStorage.removeItem('quart_debut_iso');
         localStorage.removeItem('quart_stop_iso');
         localStorage.setItem('quart_pause_elapsed', '0');
+        document.getElementById('quart-modal-km-wrap').style.display = 'none';
         _qUpdateDisplay();
         _qRenderButtons();
         toast('Quart sauvegardé ✓');
         _qLoadHistory();
-        closeQuartModal();
+        // Driversnote
+        const apiKey = S.cfg.driversnoteKey;
+        if (apiKey && quartFrom && quartTo) {
+          _qTrajets = [];
+          _qRenderTrajets(null, 'loading');
+          setTimeout(() => document.getElementById('trajets-wrap')?.scrollIntoView({behavior:'smooth',block:'nearest'}), 60);
+          try {
+            const trips = await _qFetchDriversnote(quartFrom, quartTo, apiKey);
+            _qTrajets = trips.map(t => ({...t, classif: null}));
+            _qRenderTrajets(_qTrajets);
+          } catch(derr) {
+            _qRenderTrajets(null, 'error', derr.message);
+          }
+        } else {
+          closeQuartModal();
+        }
       } catch(err) {
         toast('Erreur : ' + err.message);
         btn.disabled = false; btn.textContent = 'Confirmer et sauvegarder';
@@ -1662,6 +1757,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } else if (action === 'cancel-quart-edit') {
       document.getElementById('quart-edit-wrap').style.display = 'none';
+
+    } else if (action === 'pro-trajet' || action === 'perso-trajet' || action === 'ignore-trajet') {
+      const ti = parseInt(btn.dataset.ti);
+      if (!_qTrajets || isNaN(ti) || ti < 0 || ti >= _qTrajets.length) return;
+      _qTrajets[ti].classif = action === 'pro-trajet' ? 'pro' : action === 'perso-trajet' ? 'perso' : 'ignore';
+      _qRenderTrajets(_qTrajets);
+
+    } else if (action === 'terminer-trajets') {
+      const sb = sbClient();
+      if (!sb) { toast('Supabase non configuré'); return; }
+      btn.disabled = true; btn.textContent = 'Finalisation…';
+      const proTrajets = (_qTrajets || []).filter(t => t.classif === 'pro');
+      const kmPro = proTrajets.reduce((s, t) => s + (t.distance != null ? +t.distance : 0), 0);
+      try {
+        for (const t of proTrajets) {
+          await sb.from('trajets').insert({
+            driversnote_id: t.id || null,
+            date: t.startedAt ? new Date(t.startedAt).toLocaleDateString('fr-CA') : null,
+            heure_debut: t.startedAt || null,
+            heure_fin: t.endedAt || null,
+            distance: t.distance != null ? +t.distance : null,
+            depart: t.startLocation?.address || null,
+            arrivee: t.endLocation?.address || null,
+            type: 'pro',
+            livraison_id: null
+          });
+        }
+        if (_qCurrentQuartId) {
+          await sb.from('quarts').update({distance: kmPro}).eq('id', _qCurrentQuartId);
+        }
+        toast(`Classification terminée · ${kmPro.toFixed(1)} km pro`);
+        _qTrajets = [];
+        _qCurrentQuartId = null;
+        document.getElementById('trajets-wrap').style.display = 'none';
+        closeQuartModal();
+      } catch(err) {
+        toast('Erreur : ' + err.message);
+        btn.disabled = false; btn.textContent = 'Terminer la classification';
+      }
     }
   });
 
