@@ -404,6 +404,24 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
       <button class="btn btn-s" data-qm="cancel">Annuler</button>
     </div>
   </div>
+  <div id="quart-edit-wrap" style="display:none;margin-bottom:4px">
+    <div class="div"></div>
+    <div class="stitle" style="margin-top:0;margin-bottom:12px">Modifier le quart</div>
+    <input type="hidden" id="quart-edit-id">
+    <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="quart-edit-date"></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Heure début</label><input type="time" class="fi" id="quart-edit-hdebut"></div>
+      <div class="fg"><label class="fl">Heure fin</label><input type="time" class="fi" id="quart-edit-hfin"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Durée (min)</label><input type="number" inputmode="numeric" class="fi" id="quart-edit-duree" min="0" placeholder="0"></div>
+      <div class="fg"><label class="fl">Distance (km)</label><input type="number" inputmode="decimal" class="fi" id="quart-edit-km" step="0.1" min="0" placeholder="0.0"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-p" style="flex:1" data-qm="save-quart-edit">Sauvegarder</button>
+      <button class="btn btn-s" data-qm="cancel-quart-edit">Annuler</button>
+    </div>
+  </div>
   <div id="quart-modal-hist-wrap" style="display:none">
     <div class="div"></div>
     <div class="stitle" style="margin-top:0">Derniers quarts</div>
@@ -1385,6 +1403,7 @@ function initPWAIcon(){
 
 // ── QUART MODAL ────────────────────────────────────────────────────────────────
 let _qTimer = null;
+let _qHistData = [];
 
 function _qGetState() {
   return {
@@ -1450,7 +1469,7 @@ function _qRenderButtons() {
     if(kmWrap) kmWrap.style.display='none';
   } else if (st.etat === 'confirmer') {
     btnEl.innerHTML = '';
-    if(statusEl){statusEl.textContent='Quart terminé';statusEl.style.color='var(--err)';}
+    if(statusEl){statusEl.textContent='En attente de confirmation';statusEl.style.color='var(--warn)';}
     if(kmWrap) kmWrap.style.display='block';
   }
 }
@@ -1464,6 +1483,7 @@ async function _qLoadHistory() {
 }
 
 function _qRenderHistory(data) {
+  _qHistData = data || [];
   const wrap = document.getElementById('quart-modal-hist-wrap');
   const el = document.getElementById('quart-modal-hist');
   if(!el||!wrap) return;
@@ -1475,6 +1495,10 @@ function _qRenderHistory(data) {
       <div class="li-title">${esc(q.date||'')}</div>
       <div class="li-sub">${q.duree!=null?q.duree+' min':'—'}${q.distance?` · ${(+q.distance).toFixed(1)} km`:''}${q.heure_debut?' · '+new Date(q.heure_debut).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):''}</div>
     </div>
+    <div class="li-right"><div class="li-acts">
+      <button class="btn btn-xs btn-s" data-qm="edit-quart" data-qid="${esc(String(q.id))}">${_SVG_EDIT}</button>
+      <button class="btn btn-xs btn-d" data-qm="del-quart" data-qid="${esc(String(q.id))}">${_SVG_TRASH}</button>
+    </div></div>
   </div>`).join('');
 }
 
@@ -1577,6 +1601,67 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('quart-modal-km').value = '';
       _qStartTick();
       _qRenderButtons();
+
+    } else if (action === 'edit-quart') {
+      const qid = btn.dataset.qid;
+      const q = _qHistData.find(x => String(x.id) === qid);
+      if (!q) return;
+      const toTime = iso => {
+        if (!iso) return '';
+        try { const d = new Date(iso); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); } catch(e){return '';}
+      };
+      document.getElementById('quart-edit-id').value = qid;
+      document.getElementById('quart-edit-date').value = q.date || '';
+      document.getElementById('quart-edit-hdebut').value = toTime(q.heure_debut);
+      document.getElementById('quart-edit-hfin').value = toTime(q.heure_fin);
+      document.getElementById('quart-edit-duree').value = q.duree != null ? q.duree : '';
+      document.getElementById('quart-edit-km').value = q.distance != null ? q.distance : '';
+      const editWrap = document.getElementById('quart-edit-wrap');
+      editWrap.style.display = 'block';
+      setTimeout(() => editWrap.scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
+
+    } else if (action === 'del-quart') {
+      const qid = btn.dataset.qid;
+      if (!confirm('Supprimer ce quart ?')) return;
+      const sb = sbClient();
+      if (!sb) { toast('Supabase non configuré'); return; }
+      try {
+        const {error} = await sb.from('quarts').delete().eq('id', qid);
+        if (error) throw error;
+        toast('Quart supprimé');
+        await _qLoadHistory();
+      } catch(err) { toast('Erreur : ' + err.message); }
+
+    } else if (action === 'save-quart-edit') {
+      const qid = document.getElementById('quart-edit-id').value;
+      const sb = sbClient();
+      if (!sb) { toast('Supabase non configuré'); return; }
+      const dateVal = document.getElementById('quart-edit-date').value;
+      const hdebut = document.getElementById('quart-edit-hdebut').value;
+      const hfin = document.getElementById('quart-edit-hfin').value;
+      const duree = parseInt(document.getElementById('quart-edit-duree').value);
+      const km = parseFloat(document.getElementById('quart-edit-km').value);
+      const toISO = (date, time) => (date && time) ? new Date(date + 'T' + time + ':00').toISOString() : null;
+      btn.disabled = true; btn.textContent = 'Sauvegarde…';
+      try {
+        const {error} = await sb.from('quarts').update({
+          date: dateVal || null,
+          heure_debut: toISO(dateVal, hdebut),
+          heure_fin: toISO(dateVal, hfin),
+          duree: isNaN(duree) ? null : duree,
+          distance: isNaN(km) ? null : km
+        }).eq('id', qid);
+        if (error) throw error;
+        document.getElementById('quart-edit-wrap').style.display = 'none';
+        toast('Quart modifié ✓');
+        await _qLoadHistory();
+      } catch(err) {
+        toast('Erreur : ' + err.message);
+        btn.disabled = false; btn.textContent = 'Sauvegarder';
+      }
+
+    } else if (action === 'cancel-quart-edit') {
+      document.getElementById('quart-edit-wrap').style.display = 'none';
     }
   });
 
