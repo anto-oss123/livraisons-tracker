@@ -133,8 +133,6 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
 .moverlay.open{display:flex}
 .modal{background:#ffffff;border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding:12px 16px calc(24px + var(--sb))}
 @media(prefers-color-scheme:dark){.modal{background:#1c1c1e;}}
-@media(prefers-color-scheme:dark){#quart-modal-inner{background:#1c1c1e!important;}}
-@media(prefers-color-scheme:dark){#dn-import-modal-inner{background:#1c1c1e!important;}}
 .mhandle{width:36px;height:4px;background:var(--card2);border-radius:2px;margin:0 auto 16px}
 .mtitle{font-size:18px;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
 .mclose{background:var(--card2);border:none;color:var(--text2);font-size:15px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
@@ -194,7 +192,6 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
     <button class="sb-btn" data-tab="depenses"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Dépenses</button>
     <button class="sb-btn" data-tab="fiscal"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></span>Fiscal</button>
     <button class="sb-btn" data-tab="outils"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></span>Outils</button>
-    <button class="sb-btn" id="sb-quart-btn"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg></span>Quart</button>
   </nav>
   <div class="sb-footer">
     <button class="sb-btn" id="sb-sync"><span class="ico" id="sb-sync-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>Synchroniser</button>
@@ -207,7 +204,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
     <span style="color:var(--accent);display:flex;align-items:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
     <span class="hdr-title" id="hdr-title">Tableau de bord</span>
     <div class="hdr-actions">
-      <button class="icon-btn" id="mob-quart" aria-label="Quart" style="width:auto;min-width:36px;padding:0 8px;border-radius:18px;gap:4px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg><span id="hdr-quart-time" style="font-size:12px;font-weight:700;display:none;letter-spacing:.5px"></span></button>
+      <button class="icon-btn" id="mob-sync"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
       <button class="icon-btn" id="mob-menu" aria-label="Menu">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
@@ -219,8 +216,6 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
     <div id="panel-depenses" class="panel"></div>
     <div id="panel-fiscal" class="panel"></div>
     <div id="panel-outils" class="panel"></div>
-    <div id="panel-quart" class="panel"></div>
-    <div id="panel-trajets" class="panel"></div>
   </main>
 </div>
 </div>
@@ -268,18 +263,6 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
   <button class="drawer-btn" id="drawer-fiscal">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
     Fiscal
-  </button>
-  <button class="drawer-btn" id="drawer-quart">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>
-    Quart
-  </button>
-  <button class="drawer-btn" id="drawer-trajets">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l3-10h12l3 10"/><path d="M3 17h18"/><path d="M9 17V9m6 8V9"/></svg>
-    Trajets
-  </button>
-  <button class="drawer-btn" id="drawer-dn-import">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-    Importer trajets Driversnote
   </button>
 </div>
 
@@ -395,69 +378,6 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
   <button class="btn btn-d btn-w btn-sm" id="clear-all-btn">Effacer toutes les données</button>
 </div></div>
 
-<!-- MODAL QUART -->
-<div class="moverlay" id="quart-modal" style="background:rgba(0,0,0,.5)">
-<div class="modal" style="background:#ffffff;-webkit-backdrop-filter:none;backdrop-filter:none" id="quart-modal-inner">
-  <div class="mhandle"></div>
-  <div class="mtitle"><span>Quart</span><button class="mclose" id="quart-modal-close">✕</button></div>
-  <div style="text-align:center;padding:8px 0 24px">
-    <div style="font-size:60px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:4px;margin-bottom:8px;line-height:1" id="quart-modal-timer">00:00:00</div>
-    <div style="font-size:14px;font-weight:600;margin-bottom:24px" id="quart-modal-status"></div>
-    <div style="display:flex;gap:10px;justify-content:center" id="quart-modal-btns"></div>
-  </div>
-  <div id="quart-confirm-wrap" style="display:none;margin-bottom:16px">
-    <div class="div" style="margin-top:0"></div>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-p" style="flex:1" data-qm="confirm">Confirmer</button>
-      <button class="btn btn-s" data-qm="cancel">Annuler</button>
-    </div>
-  </div>
-  <div id="quart-edit-wrap" style="display:none;margin-bottom:4px">
-    <div class="div"></div>
-    <div class="stitle" style="margin-top:0;margin-bottom:12px">Modifier le quart</div>
-    <input type="hidden" id="quart-edit-id">
-    <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="quart-edit-date"></div>
-    <div class="frow">
-      <div class="fg"><label class="fl">Heure début</label><input type="time" class="fi" id="quart-edit-hdebut"></div>
-      <div class="fg"><label class="fl">Heure fin</label><input type="time" class="fi" id="quart-edit-hfin"></div>
-    </div>
-    <p class="note-sm" style="margin-bottom:12px">La durée sera calculée automatiquement.</p>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-p" style="flex:1" data-qm="save-quart-edit">Sauvegarder</button>
-      <button class="btn btn-s" data-qm="cancel-quart-edit">Annuler</button>
-    </div>
-  </div>
-  <div id="quart-modal-hist-wrap" style="display:none">
-    <div class="div"></div>
-    <div class="stitle" style="margin-top:0">Derniers quarts</div>
-    <div id="quart-modal-hist"></div>
-  </div>
-</div></div>
-
-<!-- MODAL IMPORT DRIVERSNOTE -->
-<div class="moverlay" id="dn-import-modal" style="background:rgba(0,0,0,.5)">
-<div class="modal" style="background:#ffffff;-webkit-backdrop-filter:none;backdrop-filter:none" id="dn-import-modal-inner">
-  <div class="mhandle"></div>
-  <div class="mtitle"><span>Importer trajets Driversnote</span><button class="mclose" id="dn-import-close">✕</button></div>
-  <p style="font-size:14px;color:var(--text2);margin-bottom:16px">Sélectionnez l'export Excel Driversnote. Les trajets <strong>Professionnel</strong> seront importés automatiquement.</p>
-  <div style="margin-bottom:16px">
-    <label class="btn btn-s btn-w" style="cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Choisir un fichier Excel
-      <input type="file" id="dn-file-input" accept=".xlsx,.xls" style="display:none">
-    </label>
-    <div id="dn-file-name" style="font-size:12px;color:var(--text2);text-align:center;margin-top:6px"></div>
-  </div>
-  <div id="dn-trajets-wrap" style="display:none">
-    <div class="div" style="margin-top:0"></div>
-    <div id="dn-trajets-list"></div>
-    <div style="margin-top:12px">
-      <button class="btn btn-p btn-w" id="dn-import-btn">Importer les trajets sélectionnés</button>
-    </div>
-  </div>
-  <div id="dn-import-result" style="display:none;margin-top:12px"></div>
-</div></div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="console.warn('[LT] Supabase CDN indisponible')"></script>
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" onerror="console.warn('[LT] SheetJS CDN indisponible')"></script>
 <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js" onerror="console.warn('[LT] jsPDF CDN indisponible')"></script>
@@ -486,8 +406,8 @@ const PLAT_CLR={'Instacart':'#0AAD0A','DoorDash':'#FF3008','Uber Eats':'#142328'
 const MIXED=['Téléphone','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
 const VEH=['Recharge VE','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
 const DATE_LABEL_CATS=['Téléphone','Assurance auto','Immatriculation','Leasing'];
-const TABS=['dashboard','livraisons','depenses','fiscal','outils','quart','trajets'];
-const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',outils:'Outils',quart:'Quart',trajets:'Trajets'};
+const TABS=['dashboard','livraisons','depenses','fiscal','outils'];
+const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',outils:'Outils'};
 const LS_KEY='lt_v4';
 
 // ── STATE ──────────────────────────────────────────────────────────────────────
@@ -649,7 +569,7 @@ function goTab(tab){
   render();
 }
 function render(){
-  ({dashboard:rDash,livraisons:rLiv,depenses:rDep,fiscal:rFisc,outils:rOutils,quart:rQuart,trajets:rTrajets})[S.tab]?.();
+  ({dashboard:rDash,livraisons:rLiv,depenses:rDep,fiscal:rFisc,outils:rOutils})[S.tab]?.();
 }
 
 // ── SYNC ───────────────────────────────────────────────────────────────────────
@@ -1202,7 +1122,6 @@ function saveSettings(){
   S.cfg.kwhCost=parseFloat(document.getElementById('s-kwh').value)||.085;
   S.cfg.defaultPlat=document.getElementById('default-plat').value;
   saveLS();
-
   if(changed){
     sbReset();
     if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
@@ -1263,8 +1182,7 @@ function closeM(id){
 function initEvents(){
   document.getElementById('bnav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);});
   document.getElementById('sb-nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);});
-  document.getElementById('mob-quart').addEventListener('click',()=>openQuartModal());
-  document.getElementById('sb-quart-btn').addEventListener('click',()=>openQuartModal());
+  document.getElementById('mob-sync').addEventListener('click',doSync);
   document.getElementById('sb-sync').addEventListener('click',doSync);
   document.getElementById('sb-settings').addEventListener('click',openSettings);
   document.getElementById('mob-menu').addEventListener('click',openDrawer);
@@ -1274,9 +1192,6 @@ function initEvents(){
   document.getElementById('drawer-export').addEventListener('click',()=>{closeDrawer();goTab('outils');});
   document.getElementById('drawer-settings').addEventListener('click',()=>{closeDrawer();openSettings();});
   document.getElementById('drawer-fiscal').addEventListener('click',()=>{closeDrawer();goTab('fiscal');});
-  document.getElementById('drawer-quart').addEventListener('click',()=>{closeDrawer();openQuartModal();});
-  document.getElementById('drawer-dn-import').addEventListener('click',()=>{closeDrawer();openDnImportModal();});
-  document.getElementById('drawer-trajets').addEventListener('click',()=>{closeDrawer();goTab('trajets');});
 
   // Tooltip popup
   const _tipPop=document.getElementById('tip-popup');
@@ -1319,18 +1234,6 @@ function initEvents(){
       else if(a==='del-dep')delDep(dBtn.dataset.id);
       else if(a==='filt-dep'){S.eFilt=dBtn.dataset.val;rDep();}
       else if(a==='dep-toggle-filt'){S.eShowFilt=!S.eShowFilt;rDep();}
-      return;}
-
-    // Trajets
-    const tBtn=e.target.closest('#trajets-page [data-action]');
-    if(tBtn){const a=tBtn.dataset.action;
-      if(a==='del-trajet'){
-        if(!confirm('Supprimer ce trajet ?'))return;
-        const sb=sbClient();if(!sb){toast('Supabase non configuré');return;}
-        sb.from('trajets').delete().eq('id',tBtn.dataset.id).then(({error})=>{
-          if(error){toast('Erreur : '+error.message);}else{toast('Trajet supprimé');rTrajets();}
-        });
-      }
       return;}
 
     // Fiscal
@@ -1431,511 +1334,11 @@ function initPWAIcon(){
   }
 }
 
-// ── QUART MODAL ────────────────────────────────────────────────────────────────
-let _qTimer = null;
-let _qHistData = [];
-
-function _qGetState() {
-  return {
-    etat: localStorage.getItem('quart_etat') || 'arrete',
-    debut: parseInt(localStorage.getItem('quart_debut') || '0'),
-    elapsed: parseInt(localStorage.getItem('quart_pause_elapsed') || '0'),
-    debutISO: localStorage.getItem('quart_debut_iso') || null,
-    stopISO: localStorage.getItem('quart_stop_iso') || null
-  };
-}
-
-function _qElapsedMs() {
-  const st = _qGetState();
-  if (st.etat === 'en_cours') return st.elapsed + (Date.now() - st.debut);
-  return st.elapsed;
-}
-
-function _qFmt(ms) {
-  const s = Math.floor(ms / 1000);
-  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
-  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
-}
-
-function _qUpdateDisplay() {
-  const ms = _qElapsedMs();
-  const fmt = _qFmt(ms);
-  const t1 = document.getElementById('quart-modal-timer'); if(t1) t1.textContent = fmt;
-  const st = _qGetState();
-  const hdrTime = document.getElementById('hdr-quart-time');
-  if (hdrTime) {
-    if (st.etat === 'en_cours' || (st.etat !== 'arrete' && st.elapsed > 0)) {
-      const totalSec = Math.floor(ms / 1000);
-      const mm = Math.floor(totalSec / 60), ss2 = totalSec % 60;
-      hdrTime.textContent = String(mm).padStart(2,'0') + ':' + String(ss2).padStart(2,'0');
-      hdrTime.style.display = 'inline';
-    } else {
-      hdrTime.style.display = 'none';
-    }
-  }
-}
-
-function _qStartTick() {
-  _qStopTick();
-  _qTimer = setInterval(_qUpdateDisplay, 1000);
-}
-
-function _qStopTick() {
-  if (_qTimer) { clearInterval(_qTimer); _qTimer = null; }
-}
-
-function _qRenderButtons() {
-  const st = _qGetState();
-  const btnEl = document.getElementById('quart-modal-btns');
-  const statusEl = document.getElementById('quart-modal-status');
-  const confirmWrap = document.getElementById('quart-confirm-wrap');
-  if (!btnEl) return;
-  if (st.etat === 'arrete' && st.elapsed === 0) {
-    btnEl.innerHTML = `<button class="btn btn-ok" style="flex:1" data-qm="start">Démarrer</button>`;
-    if(statusEl){statusEl.textContent='Inactif';statusEl.style.color='var(--text2)';}
-    if(confirmWrap) confirmWrap.style.display='none';
-  } else if (st.etat === 'en_cours') {
-    btnEl.innerHTML = `<button class="btn btn-s" style="flex:1" data-qm="pause">Pause</button><button class="btn btn-d" style="flex:1" data-qm="stop">Arrêter</button>`;
-    if(statusEl){statusEl.textContent='En cours';statusEl.style.color='var(--ok)';}
-    if(confirmWrap) confirmWrap.style.display='none';
-  } else if (st.etat === 'pause') {
-    btnEl.innerHTML = `<button class="btn btn-ok" style="flex:1" data-qm="start">Reprendre</button><button class="btn btn-d" style="flex:1" data-qm="stop">Arrêter</button>`;
-    if(statusEl){statusEl.textContent='En pause';statusEl.style.color='var(--warn)';}
-    if(confirmWrap) confirmWrap.style.display='none';
-  } else if (st.etat === 'confirmer') {
-    btnEl.innerHTML = '';
-    if(statusEl){statusEl.textContent='Arrêté — en attente de confirmation';statusEl.style.color='var(--warn)';}
-    if(confirmWrap) confirmWrap.style.display='block';
-  }
-}
-
-async function _qLoadHistory() {
-  const sb = sbClient(); if(!sb) return;
-  try {
-    const{data,error}=await sb.from('quarts').select('*').order('date',{ascending:false}).limit(5);
-    if(!error&&data) _qRenderHistory(data);
-  } catch(e){}
-}
-
-function _qRenderHistory(data) {
-  _qHistData = data || [];
-  const wrap = document.getElementById('quart-modal-hist-wrap');
-  const el = document.getElementById('quart-modal-hist');
-  if(!el||!wrap) return;
-  if(!data||data.length===0){wrap.style.display='none';return;}
-  wrap.style.display='block';
-  el.innerHTML = data.map(q=>`<div class="li">
-    <div class="li-ico" style="color:var(--accent)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg></div>
-    <div class="li-body">
-      <div class="li-title">${esc(q.date||'')}</div>
-      <div class="li-sub">${q.duree!=null?q.duree+' min':'—'}${q.distance?` · ${(+q.distance).toFixed(1)} km`:''}${q.heure_debut?' · '+new Date(q.heure_debut).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):''}</div>
-    </div>
-    <div class="li-right"><div class="li-acts">
-      <button class="btn btn-xs btn-s" data-qm="edit-quart" data-qid="${esc(String(q.id))}">${_SVG_EDIT}</button>
-      <button class="btn btn-xs btn-d" data-qm="del-quart" data-qid="${esc(String(q.id))}">${_SVG_TRASH}</button>
-    </div></div>
-  </div>`).join('');
-}
-
-function openQuartModal() {
-  const st = _qGetState();
-  _qUpdateDisplay();
-  _qRenderButtons();
-  _qLoadHistory();
-  openM('quart-modal');
-  if (st.etat === 'en_cours') _qStartTick();
-}
-
-function closeQuartModal() {
-  _qStopTick();
-  closeM('quart-modal');
-}
-
-// Event delegation on #quart-modal
-document.addEventListener('DOMContentLoaded', () => {
-  const modal = document.getElementById('quart-modal');
-  if (!modal) return;
-
-  modal.addEventListener('click', async e => {
-    const closeBtn = e.target.closest('#quart-modal-close');
-    if (closeBtn || e.target === modal) { closeQuartModal(); return; }
-
-    const btn = e.target.closest('[data-qm]');
-    if (!btn) return;
-    const action = btn.dataset.qm;
-
-    if (action === 'start') {
-      const st = _qGetState();
-      if (st.etat === 'en_cours') return;
-      const now = Date.now();
-      localStorage.setItem('quart_debut', now);
-      localStorage.setItem('quart_etat', 'en_cours');
-      if (!st.debutISO) localStorage.setItem('quart_debut_iso', new Date(now).toISOString());
-      _qStartTick();
-      _qRenderButtons();
-
-    } else if (action === 'pause') {
-      const st = _qGetState();
-      if (st.etat !== 'en_cours') return;
-      const accumulated = st.elapsed + (Date.now() - st.debut);
-      localStorage.setItem('quart_pause_elapsed', accumulated);
-      localStorage.setItem('quart_etat', 'pause');
-      _qStopTick();
-      _qRenderButtons();
-
-    } else if (action === 'stop') {
-      const st = _qGetState();
-      if (st.elapsed === 0 && st.etat !== 'en_cours') return;
-      let accumulated = st.elapsed;
-      if (st.etat === 'en_cours') accumulated += Date.now() - st.debut;
-      localStorage.setItem('quart_pause_elapsed', accumulated);
-      localStorage.setItem('quart_stop_iso', new Date().toISOString());
-      localStorage.setItem('quart_etat', 'confirmer');
-      _qStopTick();
-      _qUpdateDisplay();
-      _qRenderButtons();
-
-    } else if (action === 'confirm') {
-      const st = _qGetState();
-      const sb = sbClient();
-      if (!sb) { toast('Supabase non configuré'); return; }
-      const dureeMin = Math.round(st.elapsed / 60000);
-      const todStr = new Date().toLocaleDateString('fr-CA');
-      btn.disabled = true; btn.textContent = 'Sauvegarde…';
-      try {
-        const {error} = await sb.from('quarts').insert({
-          date: todStr,
-          heure_debut: st.debutISO,
-          heure_fin: st.stopISO || new Date().toISOString(),
-          duree: dureeMin
-        });
-        if (error) throw error;
-        localStorage.removeItem('quart_etat');
-        localStorage.removeItem('quart_debut');
-        localStorage.removeItem('quart_debut_iso');
-        localStorage.removeItem('quart_stop_iso');
-        localStorage.setItem('quart_pause_elapsed', '0');
-        _qUpdateDisplay();
-        _qRenderButtons();
-        toast('Quart sauvegardé ✓');
-        _qLoadHistory();
-        closeQuartModal();
-      } catch(err) {
-        toast('Erreur : ' + err.message);
-        btn.disabled = false; btn.textContent = 'Confirmer';
-      }
-
-    } else if (action === 'cancel') {
-      const now = Date.now();
-      localStorage.setItem('quart_debut', now);
-      localStorage.setItem('quart_etat', 'en_cours');
-      localStorage.removeItem('quart_stop_iso');
-      _qStartTick();
-      _qRenderButtons();
-
-    } else if (action === 'edit-quart') {
-      const qid = btn.dataset.qid;
-      const q = _qHistData.find(x => String(x.id) === qid);
-      if (!q) return;
-      const toTime = iso => {
-        if (!iso) return '';
-        try { const d = new Date(iso); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); } catch(e){return '';}
-      };
-      document.getElementById('quart-edit-id').value = qid;
-      document.getElementById('quart-edit-date').value = q.date || '';
-      document.getElementById('quart-edit-hdebut').value = toTime(q.heure_debut);
-      document.getElementById('quart-edit-hfin').value = toTime(q.heure_fin);
-      const editWrap = document.getElementById('quart-edit-wrap');
-      editWrap.style.display = 'block';
-      setTimeout(() => editWrap.scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
-
-    } else if (action === 'del-quart') {
-      const qid = btn.dataset.qid;
-      if (!confirm('Supprimer ce quart ?')) return;
-      const sb = sbClient();
-      if (!sb) { toast('Supabase non configuré'); return; }
-      try {
-        const {error} = await sb.from('quarts').delete().eq('id', qid);
-        if (error) throw error;
-        toast('Quart supprimé');
-        await _qLoadHistory();
-      } catch(err) { toast('Erreur : ' + err.message); }
-
-    } else if (action === 'save-quart-edit') {
-      const qid = document.getElementById('quart-edit-id').value;
-      const sb = sbClient();
-      if (!sb) { toast('Supabase non configuré'); return; }
-      const dateVal = document.getElementById('quart-edit-date').value;
-      const hdebut = document.getElementById('quart-edit-hdebut').value;
-      const hfin = document.getElementById('quart-edit-hfin').value;
-      const toISO = (date, time) => (date && time) ? new Date(date + 'T' + time + ':00').toISOString() : null;
-      const debutISO = toISO(dateVal, hdebut);
-      const finISO = toISO(dateVal, hfin);
-      let dureeMin = null;
-      if (debutISO && finISO) { const diffMs = new Date(finISO) - new Date(debutISO); if (diffMs > 0) dureeMin = Math.round(diffMs / 60000); }
-      btn.disabled = true; btn.textContent = 'Sauvegarde…';
-      try {
-        const {error} = await sb.from('quarts').update({
-          date: dateVal || null,
-          heure_debut: debutISO,
-          heure_fin: finISO,
-          duree: dureeMin
-        }).eq('id', qid);
-        if (error) throw error;
-        document.getElementById('quart-edit-wrap').style.display = 'none';
-        toast('Quart modifié ✓');
-        await _qLoadHistory();
-      } catch(err) {
-        toast('Erreur : ' + err.message);
-        btn.disabled = false; btn.textContent = 'Sauvegarder';
-      }
-
-    } else if (action === 'cancel-quart-edit') {
-      document.getElementById('quart-edit-wrap').style.display = 'none';
-    }
-  });
-
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) _qUpdateHeaderTimer();
-  });
-});
-
-// ── IMPORT DRIVERSNOTE EXCEL ───────────────────────────────────────────────────
-let _dnTrajets = []; // {date, heure_debut, heure_fin, depart, arrivee, distance, selected}
-
-function openDnImportModal() {
-  _dnTrajets = [];
-  document.getElementById('dn-trajets-wrap').style.display = 'none';
-  document.getElementById('dn-import-result').style.display = 'none';
-  document.getElementById('dn-file-name').textContent = '';
-  document.getElementById('dn-file-input').value = '';
-  document.getElementById('dn-trajets-list').innerHTML = '';
-  document.getElementById('dn-import-btn').disabled = false;
-  document.getElementById('dn-import-btn').textContent = 'Importer les trajets sélectionnés';
-  openM('dn-import-modal');
-}
-
-function closeDnImportModal() { closeM('dn-import-modal'); }
-
-function _dnRenderTrajets() {
-  const wrap = document.getElementById('dn-trajets-wrap');
-  const list = document.getElementById('dn-trajets-list');
-  if (!_dnTrajets.length) { wrap.style.display = 'none'; return; }
-  wrap.style.display = 'block';
-  list.innerHTML = _dnTrajets.map((t, i) => `
-    <div class="li" style="align-items:flex-start;gap:10px;padding:10px 0">
-      <input type="checkbox" data-dn-idx="${i}" ${t.selected?'checked':''} style="margin-top:3px;width:18px;height:18px;flex-shrink:0;accent-color:var(--accent)">
-      <div class="li-body" style="min-width:0">
-        <div class="li-title" style="font-size:13px">${esc(t.date||'')} · ${esc(t.heure_debut||'')}→${esc(t.heure_fin||'')} · ${t.distance!=null?(+t.distance).toFixed(1)+' km':'—'}</div>
-        <div class="li-sub" style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.depart||'—')} → ${esc(t.arrivee||'—')}</div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function _dnParseExcel(file) {
-  return new Promise((resolve, reject) => {
-    if (typeof XLSX === 'undefined') { reject(new Error('SheetJS non disponible')); return; }
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
-        // Chercher la feuille "Rapport kilométrique" ou prendre la première
-        const sheetName = wb.SheetNames.find(n => n.toLowerCase().includes('rapport') || n.toLowerCase().includes('km')) || wb.SheetNames[0];
-        const ws = wb.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
-        // Détecter les colonnes dynamiquement (insensible à la casse et aux espaces)
-        const norm = s => String(s||'').toLowerCase().replace(/\s+/g,'').replace(/[éèê]/g,'e').replace(/[àâ]/g,'a').replace(/[î]/g,'i').replace(/[ô]/g,'o').replace(/[ù]/g,'u');
-        const findCol = (row, candidates) => {
-          const keys = Object.keys(row);
-          for (const c of candidates) {
-            const k = keys.find(k => norm(k) === norm(c));
-            if (k) return k;
-          }
-          return null;
-        };
-        if (!rows.length) { resolve([]); return; }
-        const sample = rows[0];
-        const colDebut = findCol(sample, ['Début','Debut','Start','Date début','DateDebut']);
-        const colFin = findCol(sample, ['Fin','End','Date fin','DateFin']);
-        const colDe = findCol(sample, ['De','From','Départ','Depart','Origine','StartAddress']);
-        const colA = findCol(sample, ['À','A','To','Arrivée','Arrivee','Destination','EndAddress']);
-        const colRaison = findCol(sample, ['Raison','Reason','Type','Categorie','Catégorie','Purpose']);
-        const colDist = findCol(sample, ['Distance','Km','Kilometres','Kilomètres','Dist']);
-        const fmt = v => {
-          if (!v) return '';
-          if (v instanceof Date) return String(v.getHours()).padStart(2,'0')+':'+String(v.getMinutes()).padStart(2,'0');
-          const s = String(v);
-          // handles "2024-01-15 08:30" or "08:30" or "08:30:00"
-          const m = s.match(/(\d{1,2}):(\d{2})/);
-          return m ? m[1].padStart(2,'0')+':'+m[2] : s;
-        };
-        const fmtDate = v => {
-          if (!v) return '';
-          if (v instanceof Date) return v.toLocaleDateString('fr-CA');
-          return String(v).slice(0,10);
-        };
-        const trajets = [];
-        for (const row of rows) {
-          const raison = colRaison ? String(row[colRaison]||'').toLowerCase() : '';
-          if (colRaison && !raison.includes('pro') && !raison.includes('profes')) continue;
-          const debutVal = colDebut ? row[colDebut] : '';
-          const finVal = colFin ? row[colFin] : '';
-          const dist = colDist ? parseFloat(String(row[colDist]).replace(',','.')) : null;
-          trajets.push({
-            date: fmtDate(debutVal),
-            heure_debut: fmt(debutVal),
-            heure_fin: fmt(finVal),
-            depart: colDe ? String(row[colDe]||'') : '',
-            arrivee: colA ? String(row[colA]||'') : '',
-            distance: isNaN(dist) ? null : dist,
-            selected: true
-          });
-        }
-        resolve(trajets);
-      } catch(err) { reject(err); }
-    };
-    reader.onerror = () => reject(new Error('Erreur lecture fichier'));
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const dnModal = document.getElementById('dn-import-modal');
-  if (!dnModal) return;
-
-  // Fermer modal
-  dnModal.addEventListener('click', e => {
-    if (e.target === dnModal || e.target.closest('#dn-import-close')) closeDnImportModal();
-  });
-
-  // Sélection fichier
-  document.getElementById('dn-file-input').addEventListener('change', async e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    document.getElementById('dn-file-name').textContent = file.name;
-    document.getElementById('dn-trajets-wrap').style.display = 'none';
-    document.getElementById('dn-import-result').style.display = 'none';
-    try {
-      _dnTrajets = await _dnParseExcel(file);
-      if (!_dnTrajets.length) {
-        document.getElementById('dn-import-result').style.display = 'block';
-        document.getElementById('dn-import-result').innerHTML = '<div class="alert alert-w"><p>Aucun trajet professionnel trouvé dans ce fichier.</p></div>';
-        return;
-      }
-      _dnRenderTrajets();
-    } catch(err) {
-      document.getElementById('dn-import-result').style.display = 'block';
-      document.getElementById('dn-import-result').innerHTML = `<div class="alert alert-w"><p>Erreur : ${esc(err.message)}</p></div>`;
-    }
-  });
-
-  // Toggle checkbox via event delegation
-  document.getElementById('dn-trajets-list').addEventListener('change', e => {
-    const cb = e.target.closest('input[data-dn-idx]');
-    if (!cb) return;
-    const idx = parseInt(cb.dataset.dnIdx);
-    if (!isNaN(idx) && _dnTrajets[idx]) _dnTrajets[idx].selected = cb.checked;
-  });
-
-  // Import
-  document.getElementById('dn-import-btn').addEventListener('click', async () => {
-    const sb = sbClient();
-    if (!sb) { toast('Supabase non configuré'); return; }
-    const selected = _dnTrajets.filter(t => t.selected);
-    if (!selected.length) { toast('Aucun trajet sélectionné'); return; }
-    const btn = document.getElementById('dn-import-btn');
-    btn.disabled = true; btn.textContent = 'Import en cours…';
-    let ok = 0, err = 0;
-    for (const t of selected) {
-      try {
-        const toISO = (date, time) => (date && time) ? new Date(date+'T'+time+':00').toISOString() : null;
-        const {error} = await sb.from('trajets').insert({
-          date: t.date || null,
-          heure_debut: toISO(t.date, t.heure_debut),
-          heure_fin: toISO(t.date, t.heure_fin),
-          distance: t.distance,
-          depart: t.depart || null,
-          arrivee: t.arrivee || null,
-          type: 'pro',
-          livraison_id: null
-        });
-        if (error) throw error;
-        ok++;
-      } catch(e) { err++; }
-    }
-    btn.disabled = false; btn.textContent = 'Importer les trajets sélectionnés';
-    const res = document.getElementById('dn-import-result');
-    res.style.display = 'block';
-    res.innerHTML = `<div class="alert alert-${err?'w':'ok'}"><p>${ok} trajet${ok>1?'s':''} importé${ok>1?'s':''}${err?' · '+err+' erreur'+(err>1?'s':''):''}.</p></div>`;
-    toast(`${ok} trajet${ok>1?'s':''} importé${ok>1?'s':''} ✓`);
-    if (!err) { setTimeout(closeDnImportModal, 1500); }
-  });
-});
-
-function _qUpdateHeaderTimer() {
-  const hdrTime = document.getElementById('hdr-quart-time');
-  if (!hdrTime) return;
-  const etat = localStorage.getItem('quart_etat') || 'arrete';
-  const elapsed = parseInt(localStorage.getItem('quart_pause_elapsed') || '0');
-  if (etat === 'en_cours' || (etat !== 'arrete' && elapsed > 0)) {
-    let ms = elapsed;
-    if (etat === 'en_cours') {
-      const debut = parseInt(localStorage.getItem('quart_debut') || '0');
-      ms = elapsed + (Date.now() - debut);
-    }
-    const totalSec = Math.floor(ms / 1000);
-    const mm = Math.floor(totalSec / 60), ss = totalSec % 60;
-    hdrTime.textContent = String(mm).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
-    hdrTime.style.display = 'inline';
-  } else {
-    hdrTime.style.display = 'none';
-  }
-}
-
-function rQuart(){
-  document.getElementById('panel-quart').innerHTML='';
-}
-
-// ── TRAJETS ────────────────────────────────────────────────────────────────────
-async function rTrajets(){
-  const el=document.getElementById('panel-trajets');
-  el.innerHTML=`<div id="trajets-page"><div class="card" style="margin-bottom:12px"><div class="card-title">Total km pro</div><div id="trajets-total-km" class="card-value">—</div><div class="card-sub">Tous les trajets professionnels</div></div><div id="trajets-list"><div class="empty"><p class="spin" style="font-size:24px">⏳</p><p>Chargement…</p></div></div></div>`;
-  const sb=sbClient();
-  if(!sb){document.getElementById('trajets-list').innerHTML='<div class="alert alert-w"><p>Supabase non configuré. Configure la connexion dans Paramètres.</p></div>';return;}
-  try{
-    const{data,error}=await sb.from('trajets').select('*').order('date',{ascending:false});
-    if(error)throw error;
-    const totalKm=data.reduce((s,t)=>s+(parseFloat(t.distance)||0),0);
-    document.getElementById('trajets-total-km').textContent=totalKm.toFixed(1)+' km';
-    if(!data.length){document.getElementById('trajets-list').innerHTML='<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M3 17l3-10h12l3 10"/><path d="M3 17h18"/></svg></div><p>Aucun trajet enregistré.</p></div>';return;}
-    document.getElementById('trajets-list').innerHTML=data.map(t=>{
-      const hDebut=t.heure_debut?new Date(t.heure_debut).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):'—';
-      const hFin=t.heure_fin?new Date(t.heure_fin).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):'—';
-      const km=t.distance!=null?(+t.distance).toFixed(1)+' km':'—';
-      const assigne=t.livraison_id?`<span class="badge bdg-g">Assigné</span>`:`<span class="badge bdg-y">Non assigné</span>`;
-      return`<div class="li">
-        <div class="li-ico" style="color:var(--accent)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l3-10h12l3 10"/><path d="M3 17h18"/><path d="M9 17V9m6 8V9"/></svg></div>
-        <div class="li-body">
-          <div class="li-title">${esc(t.date||'—')}</div>
-          <div class="li-sub">${hDebut}→${hFin} · ${km}</div>
-          <div style="margin-top:4px">${assigne}</div>
-        </div>
-        <div class="li-right"><button class="btn btn-xs btn-d" data-action="del-trajet" data-id="${esc(String(t.id))}">${_SVG_TRASH}</button></div>
-      </div>`;
-    }).join('');
-  }catch(e){document.getElementById('trajets-list').innerHTML=`<div class="alert alert-w"><p>Erreur : ${esc(e.message)}</p></div>`;}
-}
-
-
 // ── INIT ───────────────────────────────────────────────────────────────────────
 function init(){
   loadLS();
   initPWAIcon();
   initEvents();
-  // Timer header global — tourne toujours, peu importe l'onglet actif
-  _qUpdateHeaderTimer();
-  setInterval(_qUpdateHeaderTimer, 1000);
   rDash();
   if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
     setTimeout(async()=>{
