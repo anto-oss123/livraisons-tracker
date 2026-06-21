@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#007AFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Livraisons">
+<link rel="apple-touch-icon" id="pwa-icon-link">
+<link rel="manifest" id="pwa-manifest-link">
+<title>Livraisons Tracker</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f2f2f7;--card:#ffffff;--card2:#f2f2f7;
+  --border:rgba(0,0,0,0.1);
+  --text:#000;--text2:#6e6e73;--text3:#aeaeb2;
+  --accent:#007AFF;--ok:#34C759;--warn:#FF9500;--err:#FF3B30;--purple:#5856D6;
+  --r:16px;
+  --grad:linear-gradient(135deg,rgba(102,126,234,.13),rgba(118,75,162,.13));
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+  --sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#000;--card:#1c1c1e;--card2:#2c2c2e;--border:rgba(255,255,255,0.1);--text:#fff;--text2:rgba(235,235,245,0.6);--text3:#636366;--grad:linear-gradient(135deg,rgba(50,0,80,.25),rgba(0,20,80,.25));}
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;font-size:16px;-webkit-font-smoothing:antialiased}
+body{background-image:var(--grad);background-attachment:fixed}
+#app{display:flex;height:100vh;height:100dvh;overflow:hidden}
+#sidebar{display:none;width:240px;background:rgba(242,242,247,0.85);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-right:1px solid var(--border);flex-direction:column;flex-shrink:0;padding-top:var(--st)}
+@media(prefers-color-scheme:dark){#sidebar{background:rgba(28,28,30,0.9);}}
+.sb-logo{padding:24px 20px 8px;font-size:20px;font-weight:700;color:var(--accent)}
+.sb-nav{flex:1;padding:6px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.sb-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;background:none;border-radius:10px;color:var(--text2);font-size:15px;font-weight:500;cursor:pointer;text-align:left;width:100%;font-family:inherit;min-height:44px;touch-action:manipulation}
+.sb-btn.active{background:rgba(0,122,255,.12);color:var(--accent);font-weight:600}
+.sb-btn .ico{font-size:18px;width:24px;text-align:center}
+.sb-footer{padding:10px calc(10px + var(--sl)) calc(16px + var(--sb));border-top:1px solid var(--border)}
+#app-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:calc(10px + var(--st));background:rgba(242,242,247,0.8);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+@media(prefers-color-scheme:dark){header{background:rgba(0,0,0,0.75);}}
+.hdr-title{font-size:17px;font-weight:600}
+.hdr-actions{display:flex;gap:8px}
+.icon-btn{width:36px;height:36px;border:none;border-radius:50%;background:var(--card2);color:var(--accent);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--sb))}
+.panel{display:none;padding:16px;min-height:100%}
+.panel.active{display:block}
+#bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(242,242,247,0.95);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid rgba(0,0,0,0.1);display:flex;padding-bottom:var(--sb);z-index:100;height:calc(72px + var(--sb))}
+@media(prefers-color-scheme:dark){#bnav{background:rgba(28,28,30,0.95);border-top-color:rgba(255,255,255,0.12);}}
+.nb{flex:1;border:none;background:none;color:#8E8E93;padding:10px 2px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:inherit;touch-action:manipulation}
+.nb.active{color:#007AFF}
+.nb-ico{width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.nb-ico svg{width:24px;height:24px;stroke:currentColor}
+.nb-lbl{font-size:11px;font-weight:500;line-height:1}
+.card{background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+@media(prefers-color-scheme:dark){.card{background:rgba(28,28,30,0.9);border-color:rgba(255,255,255,0.1);}}
+.card-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600}
+.card-value{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.card-sub{font-size:12px;color:var(--text2);margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.scard{background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:var(--r);padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+@media(prefers-color-scheme:dark){.scard{background:rgba(28,28,30,0.9);border-color:rgba(255,255,255,0.1);}}
+.slabel{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500}
+.sval{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.sval.g{color:var(--ok)}.sval.b{color:var(--accent)}.sval.y{color:var(--warn)}.sval.r{color:var(--err)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px;font-family:inherit;touch-action:manipulation;transition:opacity .1s}
+.btn:active{opacity:.7}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-p{background:var(--accent);color:#fff}
+.btn-s{background:var(--card2);color:var(--text)}
+.btn-d{background:var(--err);color:#fff}
+.btn-ok{background:var(--ok);color:#fff}
+.btn-w{width:100%}
+.btn-sm{padding:8px 14px;font-size:14px;min-height:36px;border-radius:10px}
+.btn-xs{padding:5px 10px;font-size:12px;min-height:30px;border-radius:8px}
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:13px;color:var(--text2);margin-bottom:5px;font-weight:500}
+.fi,.fs,.fta{width:100%;background:var(--card2);border:1.5px solid transparent;border-radius:12px;color:var(--text);font-size:16px;padding:12px 14px;outline:none;-webkit-appearance:none;appearance:none;font-family:inherit}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--accent)}
+.fs{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238E8E93' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.li{background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:var(--r);padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+@media(prefers-color-scheme:dark){.li{background:rgba(28,28,30,0.9);border-color:rgba(255,255,255,0.1);}}
+.li-ico{width:40px;height:40px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.li-body{flex:1;min-width:0}
+.li-title{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li-sub{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4}
+.li-right{flex-shrink:0;text-align:right}
+.li-amt{font-size:16px;font-weight:700;color:var(--ok)}
+.li-acts{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
+.stitle{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin:20px 0 10px}
+.stitle:first-child{margin-top:0}
+.div{height:1px;background:var(--border);margin:14px 0}
+.alert{border-radius:var(--r);padding:12px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px}
+.alert-w{background:rgba(255,149,0,.1);border:1px solid rgba(255,149,0,.25)}
+.alert-i{background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.18)}
+.alert-g{background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.18)}
+.alert em{flex-shrink:0;display:flex;align-items:center}
+.alert p{font-size:13px;color:var(--text2);line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
+.chip{border:1px solid var(--border);padding:8px 14px;border-radius:20px;background:var(--card);color:var(--text2);font-size:13px;cursor:pointer;white-space:nowrap;min-height:36px;font-family:inherit;touch-action:manipulation}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.subtabs{display:flex;background:var(--card2);border-radius:10px;padding:3px;margin-bottom:16px;gap:2px}
+.stab{flex:1;padding:7px 4px;border:none;border-radius:8px;background:none;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;touch-action:manipulation}
+.stab.active{background:var(--card);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.pbar{height:6px;background:var(--card2);border-radius:3px;overflow:hidden;margin:6px 0}
+.pfill{height:100%;background:var(--accent);border-radius:3px}
+.dtable{width:100%;border-collapse:collapse}
+.dtable th{text-align:left;font-size:11px;color:var(--text2);text-transform:uppercase;padding:7px 0;border-bottom:1px solid var(--border);font-weight:600}
+.dtable td{padding:10px 0;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+.dtable tr:last-child td{border-bottom:none}
+.dtable td:last-child{text-align:right;font-weight:600}
+.ratio-row{display:flex;gap:3px;height:8px;border-radius:4px;overflow:hidden;margin:6px 0}
+.ratio-pro{background:var(--accent)}
+.ratio-perso{background:var(--card2)}
+.empty{text-align:center;padding:48px 20px;color:var(--text2)}
+.empty-ico{font-size:48px;margin-bottom:12px}
+.empty p{font-size:14px;line-height:1.6}
+.fab{position:fixed;bottom:calc(72px + var(--sb) + 16px);right:16px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,122,255,.4);z-index:150;touch-action:manipulation}
+.dep-date-hdr{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;padding:14px 0 6px;margin-bottom:0}
+.dep-date-hdr:first-child{padding-top:0}
+.dep-bar-wrap{display:flex;flex-direction:column;gap:5px;margin-top:10px}
+.dep-bar-row{display:flex;align-items:center;gap:8px;font-size:12px}
+.dep-bar-label{width:110px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.dep-bar-track{flex:1;height:5px;background:var(--card2);border-radius:3px;overflow:hidden}
+.dep-bar-fill{height:100%;background:var(--accent);border-radius:3px}
+.dep-bar-val{width:60px;text-align:right;font-weight:600;font-size:12px;flex-shrink:0}
+/* TOAST */
+#toast{position:fixed;bottom:calc(80px + var(--sb));left:50%;transform:translateX(-50%) translateY(10px);background:rgba(30,30,30,.95);color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;font-weight:500;z-index:400;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* MODAL */
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end}
+.moverlay.open{display:flex}
+.modal{background:#ffffff;border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding:12px 16px calc(24px + var(--sb))}
+@media(prefers-color-scheme:dark){.modal{background:#1c1c1e;}}
+@media(prefers-color-scheme:dark){#quart-modal-inner{background:#1c1c1e!important;}}
+@media(prefers-color-scheme:dark){#quart-modal-km-wrap{background:#1c1c1e!important;}}
+.mhandle{width:36px;height:4px;background:var(--card2);border-radius:2px;margin:0 auto 16px}
+.mtitle{font-size:18px;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+.mclose{background:var(--card2);border:none;color:var(--text2);font-size:15px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.badge{display:inline-block;padding:3px 9px;border-radius:8px;font-size:11px;font-weight:600}
+.bdg-b{background:rgba(0,122,255,.12);color:var(--accent)}
+.bdg-g{background:rgba(52,199,89,.12);color:var(--ok)}
+.bdg-y{background:rgba(255,149,0,.12);color:var(--warn)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;animation:spin .9s linear infinite}
+.conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#8E8E93;flex-shrink:0}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+/* DRAWER */
+#drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;display:none;opacity:0;transition:opacity .25s}
+#drawer-overlay.open{display:block;opacity:1}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:260px;background:#ffffff;z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding-top:var(--st)}
+@media(prefers-color-scheme:dark){#drawer{background:#1c1c1e;}}
+#drawer.open{transform:translateX(0)}
+.drawer-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1px solid var(--border)}
+.drawer-close{width:32px;height:32px;border:none;border-radius:50%;background:var(--card2);color:var(--text2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.drawer-btn{display:flex;align-items:center;gap:14px;width:100%;border:none;background:none;color:var(--text);font-size:16px;font-weight:500;padding:16px 20px;cursor:pointer;text-align:left;font-family:inherit;touch-action:manipulation;border-bottom:1px solid var(--border)}
+.drawer-btn:last-child{border-bottom:none}
+.drawer-btn:active{background:var(--card2)}
+.drawer-btn svg{flex-shrink:0;stroke:var(--accent)}
+/* Export */
+.export-section{margin-bottom:20px}
+/* 3-col grid for dep categories */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+/* ensure dep card buttons never clip */
+.li-right{flex-shrink:0;text-align:right;min-width:72px}
+/* tooltip helper */
+.tip{display:inline-block;width:16px;height:16px;border-radius:50%;background:var(--card2);color:var(--text2);font-size:10px;font-weight:700;text-align:center;line-height:16px;cursor:pointer;border:1px solid var(--border);margin-left:4px;vertical-align:middle;-webkit-user-select:none;user-select:none}
+.tip-popup{position:fixed;background:rgba(30,30,30,.95);color:#fff;font-size:12px;padding:8px 12px;border-radius:10px;max-width:240px;line-height:1.5;z-index:500;pointer-events:none;opacity:0;transition:opacity .15s;word-break:break-word}
+.tip-popup.show{opacity:1}
+.note-sm{font-size:11px;color:var(--text2);line-height:1.5;margin-top:4px;padding:6px 10px;background:var(--card2);border-radius:8px}
+@media(min-width:768px){
+  #sidebar{display:flex}
+  #bnav{display:none}
+  header{display:none}
+  main{padding-bottom:20px}
+  .panel{max-width:860px;margin:0 auto;padding:20px 24px}
+  .fab{bottom:24px}
+  #toast{bottom:24px}
+  .modal{max-width:540px;margin:0 auto;border-radius:20px}
+  .moverlay{align-items:center;justify-content:center;padding:20px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<aside id="sidebar">
+  <div class="sb-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:8px"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Livraisons</div>
+  <nav class="sb-nav" id="sb-nav">
+    <button class="sb-btn active" data-tab="dashboard"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg></span>Tableau de bord</button>
+    <button class="sb-btn" data-tab="livraisons"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>Livraisons</button>
+    <button class="sb-btn" data-tab="depenses"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Dépenses</button>
+    <button class="sb-btn" data-tab="fiscal"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></span>Fiscal</button>
+    <button class="sb-btn" data-tab="outils"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></span>Outils</button>
+    <button class="sb-btn" id="sb-quart-btn"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg></span>Quart</button>
+  </nav>
+  <div class="sb-footer">
+    <button class="sb-btn" id="sb-sync"><span class="ico" id="sb-sync-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>Synchroniser</button>
+    <button class="sb-btn" id="sb-settings"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Paramètres</button>
+  </div>
+</aside>
+
+<div id="app-main">
+  <header>
+    <span style="color:var(--accent);display:flex;align-items:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
+    <span class="hdr-title" id="hdr-title">Tableau de bord</span>
+    <div class="hdr-actions">
+      <button class="icon-btn" id="mob-quart" aria-label="Quart"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg></button>
+      <button class="icon-btn" id="mob-menu" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </header>
+  <main id="main-scroll">
+    <div id="panel-dashboard" class="panel active"></div>
+    <div id="panel-livraisons" class="panel"></div>
+    <div id="panel-depenses" class="panel"></div>
+    <div id="panel-fiscal" class="panel"></div>
+    <div id="panel-outils" class="panel"></div>
+    <div id="panel-quart" class="panel"></div>
+  </main>
+</div>
+</div>
+
+<nav id="bnav">
+  <button class="nb active" data-tab="dashboard">
+    <span class="nb-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg></span>
+    <span class="nb-lbl">Accueil</span>
+  </button>
+  <button class="nb" data-tab="livraisons">
+    <span class="nb-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>
+    <span class="nb-lbl">Livraisons</span>
+  </button>
+  <button class="nb" data-tab="depenses">
+    <span class="nb-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
+    <span class="nb-lbl">Dépenses</span>
+  </button>
+  <button class="nb" data-tab="fiscal">
+    <span class="nb-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></span>
+    <span class="nb-lbl">Fiscal</span>
+  </button>
+</nav>
+
+<div id="toast"></div>
+<div class="tip-popup" id="tip-popup"></div>
+
+<div id="drawer-overlay"></div>
+<div id="drawer">
+  <div class="drawer-hdr">
+    <span style="font-weight:700;font-size:17px">Menu</span>
+    <button class="drawer-close" id="drawer-close">&#x2715;</button>
+  </div>
+  <button class="drawer-btn" id="drawer-sync">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    Synchroniser
+  </button>
+  <button class="drawer-btn" id="drawer-export">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export
+  </button>
+  <button class="drawer-btn" id="drawer-settings">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Paramètres
+  </button>
+  <button class="drawer-btn" id="drawer-fiscal">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+    Fiscal
+  </button>
+  <button class="drawer-btn" id="drawer-quart">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>
+    Quart
+  </button>
+</div>
+
+<!-- MODAL LIVRAISON -->
+<div class="moverlay" id="m-liv">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle"><span id="liv-title">Nouvelle livraison</span><button class="mclose" data-close="m-liv">✕</button></div>
+  <input type="hidden" id="liv-id">
+  <div class="fg"><label class="fl">Plateforme</label><select class="fs" id="liv-plat"></select></div>
+  <div class="frow">
+    <div class="fg"><label class="fl">Revenu ($)</label><input type="number" inputmode="decimal" class="fi" id="liv-rev" step="0.01" min="0" placeholder="0.00"></div>
+    <div class="fg"><label class="fl">Pourboire ($)</label><input type="number" inputmode="decimal" class="fi" id="liv-tip" step="0.01" min="0" placeholder="0.00"></div>
+  </div>
+  <div class="fg"><label class="fl">Distance (km)</label><input type="number" inputmode="decimal" class="fi" id="liv-km" step="0.1" min="0" placeholder="0.0"></div>
+  <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="liv-date"></div>
+  <div class="fg"><label class="fl">Durée (min)</label><input type="number" inputmode="numeric" class="fi" id="liv-duree" step="1" min="0" placeholder="45"></div>
+  <div class="fg"><label class="fl">Notes</label><input type="text" class="fi" id="liv-notes" placeholder="Optionnel…"></div>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn-p" style="flex:1" id="liv-save">Enregistrer</button>
+    <button class="btn btn-s" data-close="m-liv">Annuler</button>
+  </div>
+</div></div>
+
+<!-- MODAL DÉPENSE -->
+<div class="moverlay" id="m-dep">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle"><span id="dep-title">Nouvelle dépense</span><button class="mclose" data-close="m-dep">✕</button></div>
+  <input type="hidden" id="dep-id">
+  <div class="fg"><label class="fl">Catégorie</label>
+    <select class="fs" id="dep-cat">
+      <option value="Recharge VE">Recharge VE</option>
+      <option value="Téléphone">Téléphone</option>
+      <option value="Assurance auto">Assurance auto</option>
+      <option value="Entretien véhicule">Entretien véhicule</option>
+      <option value="Immatriculation">Immatriculation</option>
+      <option value="Leasing">Leasing</option>
+      <option value="Stationnement">Stationnement</option>
+      <option value="Équipement">Équipement</option>
+      <option value="Autre">Autre</option>
+    </select>
+  </div>
+  <div id="ev-fields" style="display:none">
+    <div class="frow">
+      <div class="fg"><label class="fl">kWh rechargés</label><input type="number" inputmode="decimal" class="fi" id="dep-kwh" step="0.1" min="0" placeholder="0.0"></div>
+      <div class="fg"><label class="fl">Coût/kWh ($)</label><input type="number" class="fi" id="dep-kwh-rate" step="0.0001" readonly style="opacity:.6"></div>
+    </div>
+  </div>
+  <div id="ratio-fields" style="display:none">
+    <div class="fg">
+      <label class="fl">Ratio pro (%) <span id="auto-ratio-hint" style="color:var(--accent);font-size:11px"></span></label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" inputmode="numeric" class="fi" id="dep-ratio" step="1" min="0" max="100" placeholder="Auto" style="max-width:100px">
+        <button type="button" class="btn btn-xs btn-s" id="dep-ratio-clear">Auto</button>
+      </div>
+    </div>
+  </div>
+  <div class="frow">
+    <div class="fg"><label class="fl" id="dep-amt-label">Montant ($)</label><input type="number" inputmode="decimal" class="fi" id="dep-amt" step="0.01" min="0" placeholder="0.00"></div>
+    <div class="fg"><label class="fl" id="dep-date-label">Date</label><input type="date" class="fi" id="dep-date"></div>
+  </div>
+  <div class="fg"><label class="fl">Description</label><input type="text" class="fi" id="dep-desc" placeholder="Ex : Circuit électrique…"></div>
+  <div class="fg"><label class="fl">Note de reçu</label><textarea class="fta" id="dep-recu" rows="2" placeholder="No de reçu…"></textarea></div>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn-p" style="flex:1" id="dep-save">Enregistrer</button>
+    <button class="btn btn-s" data-close="m-dep">Annuler</button>
+  </div>
+</div></div>
+
+<!-- MODAL PARAMÈTRES -->
+<div class="moverlay" id="m-settings">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle"><span>Paramètres</span><button class="mclose" data-close="m-settings">✕</button></div>
+
+  <div class="stitle">Plateformes</div>
+  <div id="plat-list"></div>
+  <div class="frow" style="margin-top:8px">
+    <input type="text" class="fi" id="new-plat" placeholder="Nouvelle plateforme…">
+    <button class="btn btn-s" id="add-plat-btn">Ajouter</button>
+  </div>
+  <div class="fg" style="margin-top:10px"><label class="fl">Plateforme par défaut</label><select class="fs" id="default-plat"></select></div>
+
+  <div class="div"></div>
+  <div class="stitle">Supabase</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <span class="conn-dot" id="conn-dot"></span>
+    <span style="font-size:12px;color:var(--text2)" id="conn-status">Non configuré</span>
+  </div>
+  <div class="fg"><label class="fl">URL du projet</label><input type="url" class="fi" id="s-sb-url" placeholder="https://xxx.supabase.co" autocomplete="off"></div>
+  <div class="fg"><label class="fl">Anon Key</label><input type="password" class="fi" id="s-sb-key" placeholder="eyJ…" autocomplete="off"></div>
+  <button class="btn btn-s btn-w btn-sm" id="test-conn-btn" style="margin-bottom:12px">Tester la connexion</button>
+
+  <div class="div"></div>
+  <div class="stitle">Driversnote</div>
+  <div class="fg"><label class="fl">Clé API Driversnote</label><input type="password" class="fi" id="s-driversnote-key" placeholder="Clé API…" autocomplete="off"></div>
+
+  <div class="div"></div>
+  <div class="stitle">Fiscal</div>
+  <div class="frow">
+    <div class="fg"><label class="fl">Année fiscale</label><input type="number" class="fi" id="s-year" min="2020" max="2035"></div>
+    <div class="fg"><label class="fl">Coût/kWh ($)</label><input type="number" class="fi" id="s-kwh" step="0.001" min="0"></div>
+  </div>
+  <div id="auto-km-cost-wrap" style="background:var(--card2);border-radius:12px;padding:12px 14px;margin-bottom:12px;display:none">
+    <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500;text-transform:uppercase">Coût moyen / km (calculé)</div>
+    <div id="auto-km-cost" style="font-size:20px;font-weight:700;color:var(--accent)">—</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:2px">Total dépenses véhicule ÷ km pro</div>
+  </div>
+
+  <div class="div"></div>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn-p" style="flex:1" id="settings-save">Sauvegarder</button>
+    <button class="btn btn-s" data-close="m-settings">Annuler</button>
+  </div>
+  <div class="div"></div>
+  <button class="btn btn-d btn-w btn-sm" id="clear-all-btn">Effacer toutes les données</button>
+</div></div>
+
+<!-- MODAL QUART -->
+<div class="moverlay" id="quart-modal" style="background:rgba(0,0,0,.5)">
+<div class="modal" style="background:#ffffff;-webkit-backdrop-filter:none;backdrop-filter:none" id="quart-modal-inner">
+  <div class="mhandle"></div>
+  <div class="mtitle"><span>Quart</span><button class="mclose" id="quart-modal-close">✕</button></div>
+  <div style="text-align:center;padding:8px 0 24px">
+    <div style="font-size:60px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:4px;margin-bottom:8px;line-height:1" id="quart-modal-timer">00:00:00</div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:24px" id="quart-modal-status" style="color:var(--text2)">Inactif</div>
+    <div style="display:flex;gap:10px;justify-content:center" id="quart-modal-btns"></div>
+  </div>
+  <div id="quart-modal-km-wrap" style="display:none;margin-bottom:16px;background:#ffffff;border-radius:16px;padding:16px;position:relative;z-index:1">
+    <div class="div" style="margin-top:0"></div>
+    <div class="fg"><label class="fl">Km parcourus</label><input type="number" inputmode="decimal" class="fi" id="quart-modal-km" step="0.1" min="0" placeholder="0.0" autocomplete="off"></div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-ok" style="flex:1" data-qm="confirm">Confirmer et sauvegarder</button>
+      <button class="btn btn-s" data-qm="cancel">Annuler</button>
+    </div>
+  </div>
+  <div id="trajets-wrap" style="display:none;margin-bottom:4px">
+    <div class="div"></div>
+    <div class="stitle" style="margin-top:0;margin-bottom:4px">Trajets Driversnote</div>
+    <div id="trajets-list"></div>
+    <button class="btn btn-p btn-w" data-qm="terminer-trajets" style="margin-top:12px">Terminer la classification</button>
+  </div>
+  <div id="quart-edit-wrap" style="display:none;margin-bottom:4px">
+    <div class="div"></div>
+    <div class="stitle" style="margin-top:0;margin-bottom:12px">Modifier le quart</div>
+    <input type="hidden" id="quart-edit-id">
+    <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="quart-edit-date"></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Heure début</label><input type="time" class="fi" id="quart-edit-hdebut"></div>
+      <div class="fg"><label class="fl">Heure fin</label><input type="time" class="fi" id="quart-edit-hfin"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Durée (min)</label><input type="number" inputmode="numeric" class="fi" id="quart-edit-duree" min="0" placeholder="0"></div>
+      <div class="fg"><label class="fl">Distance (km)</label><input type="number" inputmode="decimal" class="fi" id="quart-edit-km" step="0.1" min="0" placeholder="0.0"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-p" style="flex:1" data-qm="save-quart-edit">Sauvegarder</button>
+      <button class="btn btn-s" data-qm="cancel-quart-edit">Annuler</button>
+    </div>
+  </div>
+  <div id="quart-modal-hist-wrap" style="display:none">
+    <div class="div"></div>
+    <div class="stitle" style="margin-top:0">Derniers quarts</div>
+    <div id="quart-modal-hist"></div>
+  </div>
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="console.warn('[LT] Supabase CDN indisponible')"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" onerror="console.warn('[LT] SheetJS CDN indisponible')"></script>
+<script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js" onerror="console.warn('[LT] jsPDF CDN indisponible')"></script>
+<script src="https://unpkg.com/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js" onerror="console.warn('[LT] AutoTable CDN indisponible')"></script>
+<script>
+'use strict';
+window.addEventListener('unhandledrejection',e=>e.preventDefault());
+
+// ── CONSTANTS ──────────────────────────────────────────────────────────────────
+const FED_BR=[{max:57375,r:.15},{max:114750,r:.205},{max:158519,r:.26},{max:220000,r:.29},{max:Infinity,r:.33}];
+const QC_BR=[{max:51780,r:.14},{max:103545,r:.19},{max:126000,r:.24},{max:Infinity,r:.2575}];
+const FED_BASIC=15705,QC_BASIC=17183,KM_R1=.70,KM_R2=.64,KM_THRESH=5000,TPS=.05,TVQ=.09975,TPS_SEUIL=30000;
+const _SVG_BOLT='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
+const _SVG_PHONE='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>';
+const _SVG_SHIELD='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+const _SVG_WRENCH='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z"/></svg>';
+const _SVG_CLIP='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>';
+const _SVG_CAR='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V9l2-5h14l2 5v6a2 2 0 0 1-2 2h-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>';
+const _SVG_PARK='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 18V6h4.5a3 3 0 0 1 0 6H9"/></svg>';
+const _SVG_TOOL='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>';
+const _SVG_BOX='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>';
+const _SVG_EDIT='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>';
+const _SVG_TRASH='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+const CAT_SVG={'Recharge VE':_SVG_BOLT,'Téléphone':_SVG_PHONE,'Assurance auto':_SVG_SHIELD,'Entretien véhicule':_SVG_WRENCH,'Immatriculation':_SVG_CLIP,'Leasing':_SVG_CAR,'Stationnement':_SVG_PARK,'Équipement':_SVG_TOOL,'Autre':_SVG_BOX};
+const PLAT_CLR={'Instacart':'#0AAD0A','DoorDash':'#FF3008','Uber Eats':'#142328','SkipTheDishes':'#F96816','Cornershop':'#1F5C2E'};
+const MIXED=['Téléphone','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
+const VEH=['Recharge VE','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
+const DATE_LABEL_CATS=['Téléphone','Assurance auto','Immatriculation','Leasing'];
+const TABS=['dashboard','livraisons','depenses','fiscal','outils','quart'];
+const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',outils:'Outils',quart:'Quart'};
+const LS_KEY='lt_v4';
+
+// ── STATE ──────────────────────────────────────────────────────────────────────
+const S={
+  tab:'dashboard', fsub:'revenus',
+  deliveries:[], expenses:[],
+  cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',driversnoteKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra'},
+  dFilt:{plat:'',date:''}, eFilt:'', eShowFilt:false,
+  dedDetailOpen:false,
+  exportDateFrom:'', exportDateTo:''
+};
+
+// ── STORAGE ────────────────────────────────────────────────────────────────────
+function loadLS(){
+  try{
+    const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    if(d.deliveries) S.deliveries=d.deliveries;
+    if(d.expenses)   S.expenses=d.expenses;
+    if(d.cfg)        S.cfg={...S.cfg,...d.cfg};
+  }catch(e){}
+}
+function saveLS(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify({deliveries:S.deliveries,expenses:S.expenses,cfg:S.cfg}));}catch(e){}
+}
+
+// ── SUPABASE ───────────────────────────────────────────────────────────────────
+let _sb=null, _sbCh=null;
+function sbClient(){
+  if(_sb) return _sb;
+  const{supabaseUrl:u,supabaseKey:k}=S.cfg;
+  if(!u||!k) return null;
+  try{_sb=window.supabase?.createClient(u,k);}catch(e){_sb=null;}
+  return _sb;
+}
+function sbReset(){
+  try{if(_sbCh)_sbCh.unsubscribe();}catch(e){}
+  _sbCh=null; _sb=null; connDot(null);
+}
+function connDot(ok){
+  const d=document.getElementById('conn-dot'), st=document.getElementById('conn-status');
+  if(d) d.style.background=ok===true?'#34C759':ok===false?'#FF3B30':'#8E8E93';
+  if(st) st.textContent=ok===true?'Connecté':ok===false?'Erreur':'Non configuré';
+}
+
+function dFromDB(r){return{id:r.id,plat:r.plateforme,rev:r.revenu||0,tip:r.pourboire||0,km:r.distance||0,dureeMin:r.duree||0,date:r.date,notes:r.notes||''};}
+function dToDB(d){return{id:d.id,plateforme:d.plat,revenu:d.rev||0,pourboire:d.tip||0,distance:d.km||0,duree:d.dureeMin||0,date:d.date,notes:d.notes||null};}
+function eFromDB(r){return{id:r.id,cat:r.categorie,amt:r.montant||0,desc:r.description||'',recu:r.note_recu||'',date:r.date,proRatioOverride:r.ratio_pro!=null?r.ratio_pro:null,kwh:r.kwh||0};}
+function eToDB(e){return{id:e.id,categorie:e.cat,montant:e.amt||0,montant_annuel:expAnnual(e),description:e.desc||null,note_recu:e.recu||null,date:e.date,ratio_pro:e.proRatioOverride,kwh:e.kwh||null};}
+async function sbLoad(){
+  const sb=sbClient();if(!sb){connDot(false);return false;}
+  try{
+    const[l,d]=await Promise.all([
+      sb.from('livraisons').select('*').order('created_at',{ascending:false}),
+      sb.from('depenses').select('*').order('created_at',{ascending:false})
+    ]);
+    if(l.error)throw l.error;
+    if(d.error)throw d.error;
+    S.deliveries=l.data.map(dFromDB);
+    S.expenses=d.data.map(eFromDB);
+    saveLS(); connDot(true); return true;
+  }catch(e){console.error('[SB load]',e.message); connDot(false); return false;}
+}
+
+function sbSubscribe(){
+  const sb=sbClient();if(!sb)return;
+  try{if(_sbCh)_sbCh.unsubscribe();}catch(e){}
+  try{
+    _sbCh=sb.channel('lt-rt')
+      .on('postgres_changes',{event:'*',schema:'public',table:'livraisons'},p=>onRT('livraisons',p))
+      .on('postgres_changes',{event:'*',schema:'public',table:'depenses'},p=>onRT('depenses',p))
+      .subscribe(st=>connDot(st==='SUBSCRIBED'?true:false));
+  }catch(e){console.warn('[LT] Realtime disabled:',e.message);_sbCh=null;}
+}
+
+function onRT(table,{eventType,new:nr,old:or}){
+  if(table==='livraisons'){
+    if(eventType==='DELETE')S.deliveries=S.deliveries.filter(x=>x.id!==or.id);
+    else{const v=dFromDB(nr);const i=S.deliveries.findIndex(x=>x.id===v.id);if(i>=0)S.deliveries[i]=v;else S.deliveries.unshift(v);}
+  }else if(table==='depenses'){
+    if(eventType==='DELETE')S.expenses=S.expenses.filter(x=>x.id!==or.id);
+    else{const v=eFromDB(nr);const i=S.expenses.findIndex(x=>x.id===v.id);if(i>=0)S.expenses[i]=v;else S.expenses.unshift(v);}
+  }
+  saveLS(); render();
+}
+
+async function sbUpsert(table,row){
+  const sb=sbClient();if(!sb)return;
+  try{const{error}=await sb.from(table).upsert(row);if(error)throw error;}catch(e){console.error('[SB upsert]',table,e.message);}
+}
+async function sbDelete(table,id){
+  const sb=sbClient();if(!sb)return;
+  try{const{error}=await sb.from(table).delete().eq('id',id);if(error)throw error;}catch(e){console.error('[SB delete]',table,e.message);}
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────────
+const uid=()=>typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():(Date.now().toString(36)+Math.random().toString(36).slice(2));
+const $f=n=>new Intl.NumberFormat('fr-CA',{style:'currency',currency:'CAD'}).format(n||0);
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const platIco=p=>{const c=PLAT_CLR[p]||'#007AFF';const l=(p||'?')[0].toUpperCase();return`<span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:${c};color:#fff;font-size:15px;font-weight:700;flex-shrink:0">${l}</span>`;}
+// Fix timezone: parse date strings as local time
+function parseDate(s){if(!s)return new Date(NaN);return s.includes('T')?new Date(s):new Date(s+'T00:00:00');}
+function fdate(s){try{const d=parseDate(s);return d.toLocaleDateString('fr-CA',{day:'numeric',month:'short'});}catch(e){return s||'';}}
+function fdateShort(s){try{const d=parseDate(s);return d.toLocaleDateString('fr-CA',{day:'2-digit',month:'2-digit',year:'2-digit'});}catch(e){return s||'';}}
+function fmtDur(min){if(!min||min<=0)return'';return min>=60?`${Math.floor(min/60)}h${String(min%60).padStart(2,'0')}`:`${min}min`;}
+function calcBracket(inc,brackets){let tax=0,prev=0;for(const b of brackets){if(inc<=prev)break;tax+=(Math.min(inc,b.max)-prev)*b.r;prev=b.max;}return tax;}
+
+function expAnnual(e){
+  if(e.cat==='Téléphone') return (e.amt||0)*12;
+  if(e.cat==='Leasing') return (e.amt||0)*26;
+  return e.amt||0;
+}
+function expDed(e,proRatio){
+  if(!MIXED.includes(e.cat)) return expAnnual(e);
+  const ratio=e.proRatioOverride!=null?e.proRatioOverride/100:(proRatio??1);
+  return expAnnual(e)*ratio;
+}
+
+function calcFiscal(){
+  const yr=S.cfg.year;
+  const divs=S.deliveries.filter(d=>parseDate(d.date).getFullYear()===yr);
+  const exps=S.expenses.filter(e=>parseDate(e.date).getFullYear()===yr);
+  const gross=divs.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
+  const km=divs.reduce((s,d)=>s+(d.km||0),0);
+  const kmPro=km;
+  const kmTotal=Math.max(0,(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0));
+  const proRatio=kmTotal>0&&kmPro>0?Math.min(1,kmPro/kmTotal):null;
+  const kmDed=km<=KM_THRESH?km*KM_R1:KM_THRESH*KM_R1+(km-KM_THRESH)*KM_R2;
+  const vehDed=exps.filter(e=>VEH.includes(e.cat)).reduce((s,e)=>s+expDed(e,proRatio),0);
+  const otherDed=exps.filter(e=>!VEH.includes(e.cat)).reduce((s,e)=>s+expDed(e,proRatio),0);
+  const method=S.cfg.deductionMethod||'cra';
+  const totDed=method==='cra'?(kmDed+otherDed):(vehDed+otherDed);
+  const net=Math.max(0,gross-totDed);
+  const fedOwed=Math.max(0,calcBracket(net,FED_BR)-FED_BASIC*.15);
+  const qcOwed=Math.max(0,calcBracket(net,QC_BR)-QC_BASIC*.14);
+  const rrq=net>3500?Math.min(Math.max(0,Math.min(net,73200)-3500)*.119,8316.05):0;
+  const total=fedOwed+qcOwed+rrq;
+  const vehExpTotal=exps.filter(e=>VEH.includes(e.cat)).reduce((s,e)=>s+expAnnual(e),0);
+  const autoKmCost=kmPro>0?vehExpTotal/kmPro:null;
+  return{gross,km,kmPro,kmTotal,kmDed,vehDed,otherDed,totDed,net,fedOwed,qcOwed,rrq,total,rate:gross>0?total/gross:0,divs,exps,proRatio,needsTPS:gross>=TPS_SEUIL,autoKmCost,vehExpTotal};
+}
+function calcProRatio(){return calcFiscal().proRatio;}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────────
+let _toastT;
+function toast(msg,dur=3000){
+  const el=document.getElementById('toast');if(!el)return;
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT=setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────────────────
+function goTab(tab){
+  S.tab=tab;
+  TABS.forEach(t=>document.getElementById('panel-'+t)?.classList.toggle('active',t===tab));
+  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  const hdr=document.getElementById('hdr-title');if(hdr)hdr.textContent=TAB_TITLES[tab]||tab;
+  document.getElementById('main-scroll').scrollTop=0;
+  render();
+}
+function render(){
+  ({dashboard:rDash,livraisons:rLiv,depenses:rDep,fiscal:rFisc,outils:rOutils,quart:rQuart})[S.tab]?.();
+}
+
+// ── SYNC ───────────────────────────────────────────────────────────────────────
+const _SYNC_SVG='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>';
+function setSyncSpin(on){
+  const spin=on?`<span class="spin">${_SYNC_SVG}</span>`:_SYNC_SVG;
+  const mob=document.getElementById('mob-sync');if(mob)mob.innerHTML=spin;
+  const ico=document.getElementById('sb-sync-ico');if(ico)ico.innerHTML=spin;
+}
+async function doSync(){
+  if(!S.cfg.supabaseUrl||!S.cfg.supabaseKey){toast('Configure Supabase dans Paramètres');return;}
+  setSyncSpin(true);
+  try{const ok=await sbLoad();if(ok){render();toast('Synchronisé');}else toast('Erreur de synchronisation');}
+  catch(e){toast(e.message);}
+  setSyncSpin(false);
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────────────────────────
+function rDash(){
+  const now=new Date(), todStr=now.toLocaleDateString('fr-CA');
+  const wkStart=new Date(now);wkStart.setDate(now.getDate()-now.getDay());wkStart.setHours(0,0,0,0);
+  const moStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const sum=arr=>arr.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
+  const tod=S.deliveries.filter(d=>d.date===todStr);
+  const wk=S.deliveries.filter(d=>parseDate(d.date)>=wkStart);
+  const mo=S.deliveries.filter(d=>parseDate(d.date)>=moStart);
+  const f=calcFiscal();
+  const alerts=[];
+  const _iWarn='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+  const _iInfo='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+  if(f.needsTPS) alerts.push({t:'w',i:_iWarn,m:`Tu dépasses ${$f(30000)} — inscription TPS/TVQ obligatoire !`});
+  else if(f.gross>24000) alerts.push({t:'w',i:_iWarn,m:`À ${$f(30000-f.gross)} du seuil TPS/TVQ`});
+  if(f.rate>0) alerts.push({t:'i',i:_iInfo,m:`Mets ~${Math.ceil(Math.max(f.rate,.25)*100)}% de côté (~${$f(f.gross*Math.max(f.rate,.25))})`});
+  const recent=[...S.deliveries].sort((a,b)=>parseDate(b.date)-parseDate(a.date)).slice(0,5);
+  document.getElementById('panel-dashboard').innerHTML=`
+    <div class="grid2">
+      <div class="scard"><div class="slabel">Aujourd'hui</div><div class="sval g">${$f(sum(tod))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${tod.length} livraison${tod.length!==1?'s':''}</div></div>
+      <div class="scard"><div class="slabel">Cette semaine</div><div class="sval b">${$f(sum(wk))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${wk.length} livraison${wk.length!==1?'s':''}</div></div>
+    </div>
+    <div class="grid2">
+      <div class="scard"><div class="slabel">Revenus ce mois</div><div class="sval">${$f(sum(mo))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${mo.length} livraison${mo.length!==1?'s':''}</div></div>
+      <div class="scard"><div class="slabel">Dépenses ce mois</div><div class="sval r">${$f(S.expenses.filter(e=>parseDate(e.date)>=moStart).reduce((s,e)=>s+expAnnual(e),0))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${S.expenses.filter(e=>parseDate(e.date)>=moStart).length} dépense${S.expenses.filter(e=>parseDate(e.date)>=moStart).length!==1?'s':''}</div></div>
+    </div>
+    <div class="grid2">
+      <div class="scard"><div class="slabel">Km pro ${S.cfg.year}</div><div class="sval y">${f.km.toFixed(0)}<span style="font-size:13px"> km</span></div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.divs.length} livraisons</div></div>
+      <div class="scard"><div class="slabel">Ratio pro</div><div class="sval b">${f.proRatio!=null?Math.round(f.proRatio*100)+'%':'—'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.proRatio!=null?'km pro / km total':'Configurer les km'}</div></div>
+    </div>
+    ${alerts.map(a=>`<div class="alert alert-${a.t}"><em>${a.i}</em><p>${a.m}</p></div>`).join('')}
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="card-title" style="margin-bottom:0">Quart rapide</div>
+        <span style="font-size:11px;font-weight:600;color:${_quartRunning?'var(--ok)':_quartSec>0?'var(--warn)':'var(--text2)'}">${_quartRunning?'En cours':_quartSec>0?'En pause':'Inactif'}</span>
+      </div>
+      <div style="font-size:36px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:3px;color:var(--text);margin-bottom:14px" id="dash-quart-timer">${_quartFmt(_quartSec)}</div>
+      <div style="display:flex;gap:8px">
+        ${!_quartRunning&&_quartSec===0?`<button class="btn btn-ok btn-sm" data-qaction="start">Démarrer</button>`:_quartRunning?`<button class="btn btn-s btn-sm" data-qaction="pause">Pause</button><button class="btn btn-d btn-sm" data-qaction="stop">Arrêter</button>`:`<button class="btn btn-ok btn-sm" data-qaction="start">Reprendre</button><button class="btn btn-d btn-sm" data-qaction="stop">Arrêter</button>`}
+      </div>
+    </div>
+    <div class="stitle">Dernières livraisons</div>
+    ${recent.length===0?`<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><p>Aucune livraison encore.</p></div>`:recent.map(d=>livCard(d,false)).join('')}
+  `;
+}
+
+// ── LIVRAISONS ─────────────────────────────────────────────────────────────────
+function rLiv(){
+  const plats=['Toutes',...S.cfg.platforms];
+  let filt=[...S.deliveries].sort((a,b)=>parseDate(b.date)-parseDate(a.date));
+  if(S.dFilt.plat&&S.dFilt.plat!=='Toutes') filt=filt.filter(d=>d.plat===S.dFilt.plat);
+  if(S.dFilt.date) filt=filt.filter(d=>d.date===S.dFilt.date);
+  document.getElementById('panel-livraisons').innerHTML=`
+    <div class="chips">${plats.map(p=>`<button class="chip${(S.dFilt.plat||'Toutes')===p?' active':''}" data-action="filt-plat" data-val="${esc(p)}">${esc(p)}</button>`).join('')}</div>
+    <div class="fg"><input type="date" class="fi" value="${S.dFilt.date}" data-action="filt-date"></div>
+    ${filt.length===0?`<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><p>Aucune livraison.<br>Appuie sur + pour en ajouter une.</p></div>`:filt.map(d=>livCard(d,true)).join('')}
+    <button class="fab" data-action="new-liv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+  `;
+}
+
+function livCard(d,acts=false){
+  const tot=(d.rev||0)+(d.tip||0), dur=fmtDur(d.dureeMin), hr=d.dureeMin>0?tot/(d.dureeMin/60):0;
+  return`<div class="li">
+    <div class="li-ico" style="background:none;border-radius:0">${platIco(d.plat)}</div>
+    <div class="li-body">
+      <div class="li-title">${esc(d.plat)}</div>
+      <div class="li-sub">${fdate(d.date)}${dur?' · '+dur:''}${d.km?' · '+d.km+' km':''}${hr>0?' · '+$f(hr)+'/h':''}</div>
+      ${d.notes?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(d.notes)}</div>`:''}
+    </div>
+    <div class="li-right">
+      <div class="li-amt">${$f(tot)}</div>
+      ${d.tip?`<div style="font-size:11px;color:var(--text2)">+${$f(d.tip)} tip</div>`:''}
+      ${acts?`<div class="li-acts"><button class="btn btn-xs btn-s" data-action="edit-liv" data-id="${d.id}">${_SVG_EDIT}</button><button class="btn btn-xs btn-d" data-action="del-liv" data-id="${d.id}">${_SVG_TRASH}</button></div>`:''}
+    </div>
+  </div>`;
+}
+
+function openLivModal(id=null){
+  const today=new Date().toLocaleDateString('fr-CA');
+  const sel=document.getElementById('liv-plat');
+  sel.innerHTML=S.cfg.platforms.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if(id){
+    const d=S.deliveries.find(x=>x.id===id);if(!d)return;
+    document.getElementById('liv-title').textContent='Modifier livraison';
+    document.getElementById('liv-id').value=id;
+    sel.value=d.plat;
+    document.getElementById('liv-rev').value=d.rev||'';
+    document.getElementById('liv-tip').value=d.tip||'';
+    document.getElementById('liv-km').value=d.km||'';
+    document.getElementById('liv-date').value=d.date||today;
+    document.getElementById('liv-duree').value=d.dureeMin||'';
+    document.getElementById('liv-notes').value=d.notes||'';
+  }else{
+    document.getElementById('liv-title').textContent='Nouvelle livraison';
+    document.getElementById('liv-id').value='';
+    sel.value=S.cfg.defaultPlat;
+    ['liv-rev','liv-tip','liv-km','liv-duree','liv-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('liv-date').value=today;
+  }
+  openM('m-liv');
+}
+
+function saveLiv(){
+  const id=document.getElementById('liv-id').value||uid();
+  const dateVal=document.getElementById('liv-date').value;
+  if(!dateVal){toast('Date requise');return;}
+  const d={id,plat:document.getElementById('liv-plat').value,rev:parseFloat(document.getElementById('liv-rev').value)||0,tip:parseFloat(document.getElementById('liv-tip').value)||0,km:parseFloat(document.getElementById('liv-km').value)||0,date:dateVal,dureeMin:parseInt(document.getElementById('liv-duree').value)||0,notes:document.getElementById('liv-notes').value};
+  const i=S.deliveries.findIndex(x=>x.id===id);
+  if(i>=0)S.deliveries[i]=d;else S.deliveries.unshift(d);
+  saveLS(); sbUpsert('livraisons',dToDB(d)); closeM('m-liv'); render(); toast('Livraison enregistrée');
+}
+function delLiv(id){
+  if(!confirm('Supprimer cette livraison ?'))return;
+  S.deliveries=S.deliveries.filter(d=>d.id!==id);
+  saveLS(); sbDelete('livraisons',id); render(); toast('Supprimé');
+}
+
+// ── DÉPENSES ───────────────────────────────────────────────────────────────────
+function rDep(){
+  const cats=Object.keys(CAT_SVG);
+  const proRatio=calcProRatio();
+  const now=new Date();
+  const moStart=new Date(now.getFullYear(),now.getMonth(),1);
+
+  // Totals par catégorie (annualisé)
+  const totals={};
+  cats.forEach(c=>{totals[c]=S.expenses.filter(e=>e.cat===c).reduce((s,e)=>s+expAnnual(e),0);});
+  const grand=S.expenses.reduce((s,e)=>s+expAnnual(e),0);
+
+  // Total ce mois
+  const moExps=S.expenses.filter(e=>parseDate(e.date)>=moStart);
+  const moTotal=moExps.reduce((s,e)=>s+expAnnual(e),0);
+
+  // Bar chart SVG par catégorie (celles avec >0 seulement)
+  const activeCats=cats.filter(c=>totals[c]>0);
+  const maxVal=activeCats.length>0?Math.max(...activeCats.map(c=>totals[c])):1;
+  const barChart=activeCats.length===0?`<p style="font-size:12px;color:var(--text2);margin-top:8px">Aucune dépense enregistrée.</p>`:`
+    <div class="dep-bar-wrap">
+      ${activeCats.map(c=>`
+        <div class="dep-bar-row">
+          <span class="dep-bar-label" style="display:flex;align-items:center;gap:5px"><span style="color:var(--text2);flex-shrink:0">${CAT_SVG[c]}</span>${c}</span>
+          <div class="dep-bar-track"><div class="dep-bar-fill" style="width:${Math.round(totals[c]/maxVal*100)}%"></div></div>
+          <span class="dep-bar-val">${$f(totals[c])}</span>
+        </div>`).join('')}
+    </div>`;
+
+  // Card résumé
+  const summaryCard=`
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px">
+        <div class="card-title">Total ce mois</div>
+        <button class="btn btn-xs btn-s" data-action="dep-toggle-filt" style="font-size:11px;min-height:26px;padding:4px 10px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Filtrer
+        </button>
+      </div>
+      <div class="card-value">${$f(moTotal)}</div>
+      <div class="card-sub">Total annualisé : ${$f(grand)}</div>
+      ${barChart}
+    </div>`;
+
+  // Chips de filtre (collapsibles)
+  const filterBar=S.eShowFilt?`
+    <div class="chips" style="margin-bottom:12px">
+      ${['Toutes',...cats].map(c=>`<button class="chip${(S.eFilt||'Toutes')===c?' active':''}" data-action="filt-dep" data-val="${esc(c)}">${esc(c)}</button>`).join('')}
+    </div>`:'';
+
+  // Liste filtrée + triée
+  let filt=[...S.expenses].sort((a,b)=>parseDate(b.date)-parseDate(a.date));
+  if(S.eFilt&&S.eFilt!=='Toutes') filt=filt.filter(e=>e.cat===S.eFilt);
+
+  // Groupement par date
+  const today=now.toLocaleDateString('fr-CA');
+  const yesterday=new Date(now);yesterday.setDate(now.getDate()-1);
+  const yestStr=yesterday.toLocaleDateString('fr-CA');
+  function dateLabel(d){
+    if(d===today) return "Aujourd'hui";
+    if(d===yestStr) return 'Hier';
+    return fdate(d);
+  }
+  let listHtml='';
+  if(filt.length===0){
+    listHtml=`<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><p>Aucune dépense enregistrée.</p></div>`;
+  } else {
+    let lastDate='';
+    filt.forEach(e=>{
+      if(e.date!==lastDate){
+        listHtml+=`<div class="dep-date-hdr">${dateLabel(e.date)}</div>`;
+        lastDate=e.date;
+      }
+      listHtml+=depCard(e,proRatio);
+    });
+  }
+
+  document.getElementById('panel-depenses').innerHTML=`
+    ${summaryCard}
+    ${filterBar}
+    ${listHtml}
+    <button class="fab" data-action="new-dep"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+  `;
+}
+
+function depCard(e,proRatio){
+  const annual=expAnnual(e), ded=expDed(e,proRatio), isMixed=MIXED.includes(e.cat);
+  const ratio=isMixed?(e.proRatioOverride!=null?e.proRatioOverride/100:(proRatio??1)):1;
+  const pct=Math.round(ratio*100);
+  return`<div class="li">
+    <div class="li-ico" style="color:var(--text2)">${CAT_SVG[e.cat]||_SVG_BOX}</div>
+    <div class="li-body">
+      <div class="li-title">${esc(e.desc||e.cat)}</div>
+      <div class="li-sub">${fdate(e.date)} · ${e.cat}${e.kwh?' · '+e.kwh+' kWh':''}${isMixed?' · '+pct+'% pro':''}</div>
+      ${isMixed?`<div class="ratio-row" style="max-width:100px"><div class="ratio-pro" style="flex:${pct}"></div><div class="ratio-perso" style="flex:${100-pct}"></div></div>`:''}
+    </div>
+    <div class="li-right">
+      <div class="li-amt" style="color:var(--warn)">${$f(annual)}</div>
+      ${isMixed&&ded<annual?`<div style="font-size:11px;color:var(--ok)">${$f(ded)}</div>`:''}
+      <div class="li-acts"><button class="btn btn-xs btn-s" data-action="edit-dep" data-id="${e.id}">${_SVG_EDIT}</button><button class="btn btn-xs btn-d" data-action="del-dep" data-id="${e.id}">${_SVG_TRASH}</button></div>
+    </div>
+  </div>`;
+}
+
+function openDepModal(id=null){
+  const today=new Date().toLocaleDateString('fr-CA');
+  if(id){
+    const e=S.expenses.find(x=>x.id===id);if(!e)return;
+    document.getElementById('dep-title').textContent='Modifier dépense';
+    document.getElementById('dep-id').value=id;
+    document.getElementById('dep-cat').value=e.cat;
+    document.getElementById('dep-amt').value=e.amt||'';
+    document.getElementById('dep-date').value=e.date||today;
+    document.getElementById('dep-desc').value=e.desc||'';
+    document.getElementById('dep-recu').value=e.recu||'';
+    document.getElementById('dep-kwh').value=e.kwh||'';
+    document.getElementById('dep-ratio').value=e.proRatioOverride!=null?e.proRatioOverride:'';
+  }else{
+    document.getElementById('dep-title').textContent='Nouvelle dépense';
+    document.getElementById('dep-id').value='';
+    document.getElementById('dep-cat').value='Recharge VE';
+    ['dep-amt','dep-desc','dep-recu','dep-kwh','dep-ratio'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('dep-date').value=today;
+  }
+  updateDepCat(); openM('m-dep');
+}
+
+function updateDepCat(){
+  const cat=document.getElementById('dep-cat').value;
+  const isEV=cat==='Recharge VE', isMixed=MIXED.includes(cat);
+  document.getElementById('ev-fields').style.display=isEV?'block':'none';
+  document.getElementById('ratio-fields').style.display=isMixed?'block':'none';
+  const lbl=document.getElementById('dep-amt-label');
+  const dlbl=document.getElementById('dep-date-label');
+  if(cat==='Téléphone'){lbl.textContent='Montant mensuel ($)';}
+  else if(cat==='Assurance auto'){lbl.textContent='Montant annuel ($)';}
+  else if(cat==='Immatriculation'){lbl.textContent='Montant annuel ($)';}
+  else if(cat==='Leasing'){lbl.textContent='Paiement aux 2 semaines ($)';}
+  else{lbl.textContent='Montant ($)';}
+  dlbl.textContent=DATE_LABEL_CATS.includes(cat)?'Date de début de paiement':'Date';
+  const proRatio=calcProRatio();
+  const hint=document.getElementById('auto-ratio-hint');
+  if(hint)hint.textContent=proRatio!=null?`Auto: ${Math.round(proRatio*100)}%`:'';
+  const rate=document.getElementById('dep-kwh-rate');
+  if(rate&&!rate.value)rate.value=S.cfg.kwhCost;
+}
+
+function updateKwh(){
+  const kwh=parseFloat(document.getElementById('dep-kwh').value)||0;
+  const amt=parseFloat(document.getElementById('dep-amt').value)||0;
+  const el=document.getElementById('dep-kwh-rate');
+  if(kwh>0&&amt>0)el.value=(amt/kwh).toFixed(4);else el.value=S.cfg.kwhCost;
+}
+
+function saveDep(){
+  const id=document.getElementById('dep-id').value||uid();
+  const cat=document.getElementById('dep-cat').value;
+  const dateVal=document.getElementById('dep-date').value;
+  if(!dateVal){toast('Date requise');return;}
+  const kwh=parseFloat(document.getElementById('dep-kwh').value)||0;
+  const amt=parseFloat(document.getElementById('dep-amt').value)||0;
+  const ratioVal=document.getElementById('dep-ratio').value;
+  const e={id,cat,amt,date:dateVal,desc:document.getElementById('dep-desc').value,recu:document.getElementById('dep-recu').value,kwh,proRatioOverride:MIXED.includes(cat)&&ratioVal!==''?parseFloat(ratioVal):null};
+  const i=S.expenses.findIndex(x=>x.id===id);
+  if(i>=0)S.expenses[i]=e;else S.expenses.unshift(e);
+  saveLS(); sbUpsert('depenses',eToDB(e)); closeM('m-dep'); render(); toast('Dépense enregistrée');
+}
+function delDep(id){
+  if(!confirm('Supprimer cette dépense ?'))return;
+  S.expenses=S.expenses.filter(e=>e.id!==id);
+  saveLS(); sbDelete('depenses',id); render(); toast('Supprimé');
+}
+
+// ── FISCAL ─────────────────────────────────────────────────────────────────────
+function rFisc(){
+  document.getElementById('panel-fiscal').innerHTML=`
+    <div class="subtabs">
+      <button class="stab${S.fsub==='revenus'?' active':''}" data-fsub="revenus">Revenus</button>
+      <button class="stab${S.fsub==='deductions'?' active':''}" data-fsub="deductions">Déductions</button>
+      <button class="stab${S.fsub==='vehicule'?' active':''}" data-fsub="vehicule">Véhicule</button>
+    </div>
+    <div id="fsub-content"></div>`;
+  rFsub();
+}
+
+function rFsub(){
+  const f=calcFiscal(), yr=S.cfg.year, el=document.getElementById('fsub-content');
+  if(!el)return;
+  if(S.fsub==='revenus'){
+    const setA=f.gross*Math.max(f.rate,.25);
+    el.innerHTML=`
+      <div class="card"><div class="card-title">Revenus bruts ${yr}</div><div class="card-value">${$f(f.gross)}</div><div class="card-sub">${f.divs.length} livraisons</div></div>
+      ${f.needsTPS?`<div class="alert alert-w"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></em><p>Tu dois percevoir et remettre la TPS/TVQ.</p></div><div class="grid2"><div class="scard"><div class="slabel">TPS (5%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TPS)}</div></div><div class="scard"><div class="slabel">TVQ (9.975%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TVQ)}</div></div></div>`
+      :`<div class="alert alert-i"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></em><p>Seuil TPS/TVQ : ${$f(f.gross)} / ${$f(30000)} (${$f(Math.max(0,30000-f.gross))} restant)</p></div><div class="pbar"><div class="pfill" style="width:${Math.min(100,f.gross/300).toFixed(1)}%"></div></div>`}
+      ${f.total>0?`<div class="stitle">Estimation impôt</div><div class="card"><table class="dtable"><tr><td>Revenu net imposable <span class="tip" title="Votre revenu brut moins toutes vos déductions admissibles. C'est sur ce montant que l'impôt est calculé.">?</span></td><td>${$f(f.net)}</td></tr><tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr><tr><td>Impôt provincial (QC)</td><td>${$f(f.qcOwed)}</td></tr><tr><td>Cotisation RRQ</td><td>${$f(f.rrq)}</td></tr><tr><td style="font-weight:700">Total estimé</td><td style="color:var(--err);font-weight:700">${$f(f.total)}</td></tr></table></div><div class="card" style="background:rgba(0,122,255,.06);border:1px solid rgba(0,122,255,.15)"><div class="card-title">Mise de côté recommandée</div><div class="card-value" style="color:var(--accent)">${$f(setA)}</div><div class="card-sub">${Math.ceil(Math.max(f.rate,.25)*100)}% des revenus bruts</div></div>`:''}
+    `;
+  }else if(S.fsub==='deductions'){
+    const many=f.exps.length>5;
+    const detailBtn=many?`<button class="btn btn-s btn-xs" id="ded-toggle">${S.dedDetailOpen?'Masquer le détail':'Afficher le détail ('+f.exps.length+' dépenses)'}</button>`:'';
+    const detailRows=(!many||S.dedDetailOpen)?`<div class="card" style="margin-top:10px"><table class="dtable"><thead><tr><th>Catégorie</th><th>Total</th><th>Déductible</th></tr></thead><tbody>${f.exps.map(e=>`<tr><td>${e.cat}</td><td style="text-align:right">${$f(expAnnual(e))}</td><td style="color:var(--ok)">${$f(expDed(e,f.proRatio))}</td></tr>`).join('')}</tbody></table></div>`:'';
+    el.innerHTML=`
+      <div class="card"><div class="card-title">Méthode de déduction véhicule</div>
+        <div class="subtabs" style="margin-top:8px;margin-bottom:8px">
+          <button class="stab${S.cfg.deductionMethod==='cra'?' active':''}" data-dedmethod="cra">Taux CRA (¢/km) <span class="tip" title="Méthode simplifiée : multiplie vos km professionnels par le taux fixe gouvernemental. Aucun reçu requis.">?</span></button>
+          <button class="stab${S.cfg.deductionMethod==='detailed'?' active':''}" data-dedmethod="detailed">Frais réels <span class="tip" title="Utilise vos dépenses véhicule réelles au prorata du % professionnel.">?</span></button>
+        </div>
+        ${S.cfg.deductionMethod==='detailed'?`<p class="note-sm">Si vos frais réels dépassent vos revenus, votre revenu net imposable est 0$ — vous ne payez pas d'impôt sur ces livraisons cette année.</p>`:''}
+      </div>
+      <div class="card"><div class="card-title">Déduction km CRA</div><div style="font-size:22px;font-weight:700">${$f(f.kmDed)}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${f.km.toFixed(1)} km · 0,70$/km ≤5 000 / 0,64$ après</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span class="stitle" style="margin:0">Dépenses</span>${detailBtn}</div>
+      ${f.exps.length===0?`<div class="alert alert-i"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></em><p>Aucune dépense pour ${yr}.</p></div>`:detailRows}
+      <div class="card"><table class="dtable"><tr><td>${S.cfg.deductionMethod==='cra'?'Déduction km CRA':'Frais véhicule réels'}</td><td>${$f(S.cfg.deductionMethod==='cra'?f.kmDed:f.vehDed)}</td></tr><tr><td>Autres dépenses</td><td>${$f(f.otherDed)}</td></tr><tr><td style="font-weight:700">Total déductions</td><td style="color:var(--ok);font-weight:700">${$f(f.totDed)}</td></tr><tr><td style="font-weight:700">Revenu net imposable <span class="tip" title="Revenu brut moins toutes les déductions. L'impôt est calculé sur ce montant.">?</span></td><td style="color:var(--accent);font-weight:700">${$f(f.net)}</td></tr></table></div>
+    `;
+  }else{
+    const pct=f.proRatio!=null?Math.round(f.proRatio*100):null;
+    const craWins=f.kmDed>=f.vehDed;
+    const kmCostStr=f.autoKmCost!=null?(f.autoKmCost*100).toFixed(1)+'¢/km':'Données insuffisantes';
+    el.innerHTML=`
+      <div class="card">
+        <div class="frow" style="margin-bottom:12px">
+          <div class="fg"><label class="fl">Km au 1er janv.</label><input type="number" inputmode="numeric" class="fi" id="v-km-jan" value="${S.cfg.vehicleKmJan||''}" placeholder="ex: 45000"></div>
+          <div class="fg"><label class="fl">Km maintenant</label><input type="number" inputmode="numeric" class="fi" id="v-km-now" value="${S.cfg.vehicleKmNow||''}" placeholder="ex: 62000"></div>
+        </div>
+        <button class="btn btn-s btn-sm btn-w" id="save-vkm">Enregistrer</button>
+        <div class="grid2" style="margin-top:12px">
+          <div class="scard"><div class="slabel">Km totaux</div><div class="sval">${f.kmTotal.toFixed(0)}</div></div>
+          <div class="scard"><div class="slabel">Km pro</div><div class="sval b">${f.kmPro.toFixed(0)}</div></div>
+        </div>
+        ${pct!=null?`<div style="font-size:14px;font-weight:600;margin:8px 0 4px">Ratio pro — ${pct}%</div><div class="ratio-row"><div class="ratio-pro" style="flex:${pct}"></div><div class="ratio-perso" style="flex:${100-pct}"></div></div>`:''}
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <div class="card-title">Coût moyen / km (calculé)</div>
+          <div style="font-size:22px;font-weight:700;color:var(--accent)">${kmCostStr}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${$f(f.vehExpTotal)} dépenses véhicule ÷ ${f.kmPro.toFixed(0)} km pro</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="scard" style="${craWins?'border:2px solid var(--ok)':''}"><div class="slabel">Taux CRA${craWins?' ✓':''}</div><div class="sval${craWins?' g':''}">${$f(f.kmDed)}</div></div>
+        <div class="scard" style="${!craWins?'border:2px solid var(--ok)':''}"><div class="slabel">Frais réels${!craWins?' ✓':''}</div><div class="sval${!craWins?' g':''}">${$f(f.vehDed)}</div></div>
+      </div>
+    `;
+  }
+}
+
+// ── OUTILS ─────────────────────────────────────────────────────────────────────
+function rOutils(){
+  const f=calcFiscal();
+  const kmPro=S.deliveries.reduce((s,d)=>s+(d.km||0),0);
+  document.getElementById('panel-outils').innerHTML=`
+    <div class="card">
+      <div class="card-title">Synchronisation</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Synchronise les données avec Supabase.</p>
+      <button class="btn btn-s btn-w" id="outils-sync-btn">Synchroniser maintenant</button>
+    </div>`+`
+    <div class="card">
+      <div class="card-title">Période</div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Du</label><input type="date" class="fi" id="exp-from" value="${S.exportDateFrom}"></div>
+        <div class="fg"><label class="fl">Au</label><input type="date" class="fi" id="exp-to" value="${S.exportDateTo}"></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="scard"><div class="slabel">Livraisons</div><div class="sval b">${S.deliveries.length}</div></div>
+      <div class="scard"><div class="slabel">Dépenses</div><div class="sval r">${S.expenses.length}</div></div>
+    </div>
+    <div class="grid2">
+      <div class="scard"><div class="slabel">Revenus bruts</div><div class="sval g" style="font-size:16px">${$f(f.gross)}</div></div>
+      <div class="scard"><div class="slabel">Km pro total</div><div class="sval y">${kmPro.toFixed(0)} km</div></div>
+    </div>
+    <div class="export-section">
+      <div class="stitle">Excel (.xlsx)</div>
+      <div class="card">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">4 feuilles : Livraisons, Dépenses, Fiscal, Résumé</p>
+        <button class="btn btn-ok btn-w" id="export-excel-btn">Exporter en Excel</button>
+      </div>
+    </div>
+    <div class="export-section">
+      <div class="stitle">PDF</div>
+      <div class="card">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Rapport complet : livraisons, dépenses, résumé fiscal</p>
+        <button class="btn btn-p btn-w" id="export-pdf-btn">Exporter en PDF</button>
+      </div>
+    </div>
+  `;
+}
+
+function getExportFilter(){
+  const from=document.getElementById('exp-from')?.value||'';
+  const to=document.getElementById('exp-to')?.value||'';
+  S.exportDateFrom=from; S.exportDateTo=to;
+  return{from,to};
+}
+function filterByPeriod(arr,dateKey){
+  const{from,to}=getExportFilter();
+  return arr.filter(r=>{
+    const d=r[dateKey]||'';
+    if(from&&d<from) return false;
+    if(to&&d>to) return false;
+    return true;
+  });
+}
+
+function exportExcel(){
+  if(!window.XLSX){toast('SheetJS non disponible');return;}
+  const XLSX=window.XLSX;
+  const livs=filterByPeriod(S.deliveries,'date');
+  const exps=filterByPeriod(S.expenses,'date');
+  const f=calcFiscal();
+
+  const livRows=[['Date','Plateforme','Revenu','Pourboire','Total','Distance (km)','Durée (min)','Notes'],
+    ...livs.map(d=>[d.date,d.plat,d.rev||0,d.tip||0,(d.rev||0)+(d.tip||0),d.km||0,d.dureeMin||0,d.notes||''])];
+  const depRows=[['Date','Catégorie','Montant','Annualisé','Ratio pro (%)','Description'],
+    ...exps.map(e=>[e.date,e.cat,e.amt||0,expAnnual(e),MIXED.includes(e.cat)?(e.proRatioOverride!=null?e.proRatioOverride:f.proRatio!=null?Math.round(f.proRatio*100):'Auto'):100,e.desc||''])];
+  const fiscRows=[['Indicateur','Valeur'],
+    ['Revenus bruts',$f(f.gross)],['Km pro',f.kmPro.toFixed(0)],['Déduction km CRA',$f(f.kmDed)],
+    ['Total déductions',$f(f.totDed)],['Revenu net imposable',$f(f.net)],
+    ['Impôt fédéral',$f(f.fedOwed)],['Impôt provincial',$f(f.qcOwed)],['RRQ',$f(f.rrq)],['Total impôt estimé',$f(f.total)]];
+  const kmPro=livs.reduce((s,d)=>s+(d.km||0),0);
+  const sumRows=[['Résumé',''],[`Période`,`${S.exportDateFrom||'Début'} — ${S.exportDateTo||'Maintenant'}`],
+    ['Livraisons',livs.length],['Dépenses',exps.length],['Km pro total',kmPro.toFixed(0)+' km'],['Revenus bruts',$f(f.gross)],
+    ['Net estimé',$f(f.net)],['Impôt total',$f(f.total)]];
+
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(livRows),'Livraisons');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(depRows),'Dépenses');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(fiscRows),'Fiscal');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sumRows),'Résumé');
+  XLSX.writeFile(wb,`livraisons-${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('Excel exporté');
+}
+
+function exportPDF(){
+  const jsPDF=window.jspdf?.jsPDF||window.jsPDF;
+  if(!jsPDF){toast('jsPDF non disponible');return;}
+  const livs=filterByPeriod(S.deliveries,'date');
+  const exps=filterByPeriod(S.expenses,'date');
+  const f=calcFiscal();
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const period=`${S.exportDateFrom||'Début'} — ${S.exportDateTo||'Maintenant'}`;
+
+  // Cover
+  doc.setFillColor(0,122,255);doc.rect(0,0,210,40,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(22);doc.setFont('helvetica','bold');
+  doc.text('Livraisons Tracker',14,18);
+  doc.setFontSize(11);doc.setFont('helvetica','normal');
+  doc.text(`Rapport fiscal · ${period}`,14,28);
+  doc.text(`Généré le ${new Date().toLocaleDateString('fr-CA')}`,14,36);
+  doc.setTextColor(0,0,0);
+
+  let y=52;
+  // Summary
+  doc.setFontSize(14);doc.setFont('helvetica','bold');doc.text('Résumé',14,y);y+=8;
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  const sumData=[['Livraisons',livs.length.toString()],['Dépenses',exps.length.toString()],['Km pro total',livs.reduce((s,d)=>s+(d.km||0),0).toFixed(0)+' km'],
+    ['Revenus bruts',$f(f.gross)],['Revenu net',$f(f.net)],['Impôt estimé',$f(f.total)]];
+  if(doc.autoTable){
+    doc.autoTable({startY:y,head:[['Indicateur','Valeur']],body:sumData,theme:'striped',margin:{left:14,right:14},headStyles:{fillColor:[0,122,255]}});
+    y=doc.lastAutoTable.finalY+10;
+  }
+
+  // Livraisons
+  if(y>240){doc.addPage();y=20;}
+  doc.setFontSize(14);doc.setFont('helvetica','bold');doc.text('Livraisons',14,y);y+=6;
+  if(doc.autoTable){
+    doc.autoTable({startY:y,head:[['Date','Plateforme','Total','Km']],
+      body:livs.slice(0,200).map(d=>[d.date,d.plat,$f((d.rev||0)+(d.tip||0)),(d.km||0).toFixed(1)+' km']),
+      theme:'striped',margin:{left:14,right:14},headStyles:{fillColor:[0,122,255]},styles:{fontSize:9}});
+    y=doc.lastAutoTable.finalY+10;
+  }
+
+  // Dépenses
+  if(y>220){doc.addPage();y=20;}
+  doc.setFontSize(14);doc.setFont('helvetica','bold');doc.text('Dépenses',14,y);y+=6;
+  if(doc.autoTable){
+    doc.autoTable({startY:y,head:[['Date','Catégorie','Annualisé','Déductible']],
+      body:exps.map(e=>[e.date,e.cat,$f(expAnnual(e)),$f(expDed(e,f.proRatio))]),
+      theme:'striped',margin:{left:14,right:14},headStyles:{fillColor:[0,122,255]},styles:{fontSize:9}});
+    y=doc.lastAutoTable.finalY+10;
+  }
+
+  // Fiscal
+  if(y>200){doc.addPage();y=20;}
+  doc.setFontSize(14);doc.setFont('helvetica','bold');doc.text('Résumé fiscal',14,y);y+=6;
+  if(doc.autoTable){
+    doc.autoTable({startY:y,head:[['Indicateur','Valeur']],
+      body:[['Revenus bruts',$f(f.gross)],['Déduction km CRA',$f(f.kmDed)],['Autres déductions',$f(f.otherDed)],['Total déductions',$f(f.totDed)],['Revenu net imposable',$f(f.net)],['Impôt fédéral',$f(f.fedOwed)],['Impôt provincial',$f(f.qcOwed)],['Cotisation RRQ',$f(f.rrq)],['TOTAL IMPÔT',$f(f.total)]],
+      theme:'striped',margin:{left:14,right:14},headStyles:{fillColor:[0,122,255]},styles:{fontSize:10}});
+  }
+
+  doc.save(`fiscal-${new Date().toISOString().slice(0,10)}.pdf`);
+  toast('PDF exporté');
+}
+
+// ── SETTINGS ───────────────────────────────────────────────────────────────────
+function openSettings(){
+  document.getElementById('s-sb-url').value=S.cfg.supabaseUrl||'';
+  document.getElementById('s-sb-key').value=S.cfg.supabaseKey||'';
+  document.getElementById('s-driversnote-key').value=S.cfg.driversnoteKey||'';
+  document.getElementById('s-year').value=S.cfg.year;
+  document.getElementById('s-kwh').value=S.cfg.kwhCost;
+  connDot(!!_sb||null);
+  renderPlatList();
+  // Auto km cost
+  const f=calcFiscal();
+  const wrap=document.getElementById('auto-km-cost-wrap');
+  if(wrap&&f.autoKmCost!=null){
+    wrap.style.display='block';
+    document.getElementById('auto-km-cost').textContent=(f.autoKmCost*100).toFixed(2)+'¢/km';
+  }
+  openM('m-settings');
+}
+
+function renderPlatList(){
+  const sel=document.getElementById('default-plat');
+  document.getElementById('plat-list').innerHTML=S.cfg.platforms.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+      <div style="flex:1;background:var(--card2);padding:10px 13px;border-radius:12px;font-size:14px">${esc(p)}</div>
+      ${i>0?`<button class="btn btn-xs btn-d" data-action="rm-plat" data-idx="${i}">✕</button>`:`<div style="width:30px"></div>`}
+    </div>`).join('');
+  sel.innerHTML=S.cfg.platforms.map(p=>`<option value="${esc(p)}"${p===S.cfg.defaultPlat?' selected':''}>${esc(p)}</option>`).join('');
+}
+
+function saveSettings(){
+  const newUrl=document.getElementById('s-sb-url').value.trim();
+  const newKey=document.getElementById('s-sb-key').value.trim();
+  const changed=newUrl!==S.cfg.supabaseUrl||newKey!==S.cfg.supabaseKey;
+  S.cfg.supabaseUrl=newUrl; S.cfg.supabaseKey=newKey;
+  const newDnKey=document.getElementById('s-driversnote-key').value.trim();
+  S.cfg.driversnoteKey=newDnKey;
+  S.cfg.year=parseInt(document.getElementById('s-year').value)||new Date().getFullYear();
+  S.cfg.kwhCost=parseFloat(document.getElementById('s-kwh').value)||.085;
+  S.cfg.defaultPlat=document.getElementById('default-plat').value;
+  saveLS();
+  // Save Driversnote key to Supabase parametres
+  if(newDnKey){const sbp=sbClient();if(sbp)sbp.from('parametres').upsert({cle:'driversnote_api_key',valeur:newDnKey}).then(()=>{});}
+  if(changed){
+    sbReset();
+    if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
+      setTimeout(async()=>{
+        const ok=await sbLoad();
+        if(ok){render();sbSubscribe();}
+      },0);
+    }
+  }
+  closeM('m-settings'); toast('Paramètres sauvegardés'); render();
+}
+
+async function testConn(){
+  const url=document.getElementById('s-sb-url').value.trim();
+  const key=document.getElementById('s-sb-key').value.trim();
+  if(!url||!key){toast('⚠️ Remplis URL et clé');return;}
+  const btn=document.getElementById('test-conn-btn');
+  btn.disabled=true; btn.textContent='Test…';
+  try{
+    const client=window.supabase?.createClient(url,key);
+    if(!client) throw new Error('Supabase non disponible');
+    const{error}=await client.from('livraisons').select('id').limit(1);
+    if(error) throw error;
+    toast('Connexion réussie'); connDot(true);
+  }catch(e){toast(e.message||'Connexion échouée'); connDot(false);}
+  btn.disabled=false; btn.textContent='Tester la connexion';
+}
+
+// ── DRAWER ─────────────────────────────────────────────────────────────────────
+function openDrawer(){
+  const ov=document.getElementById('drawer-overlay');
+  const dr=document.getElementById('drawer');
+  if(!ov||!dr)return;
+  ov.style.display='block';
+  requestAnimationFrame(()=>{ov.classList.add('open');dr.classList.add('open');});
+}
+function closeDrawer(){
+  const ov=document.getElementById('drawer-overlay');
+  const dr=document.getElementById('drawer');
+  if(!ov||!dr)return;
+  ov.classList.remove('open');dr.classList.remove('open');
+  setTimeout(()=>{if(!ov.classList.contains('open'))ov.style.display='none';},280);
+}
+
+// ── MODAL HELPERS ──────────────────────────────────────────────────────────────
+function openM(id){
+  const el=document.getElementById(id);if(!el)return;
+  el.style.display='flex';
+  requestAnimationFrame(()=>el.classList.add('open'));
+}
+function closeM(id){
+  const el=document.getElementById(id);if(!el)return;
+  el.classList.remove('open');
+  setTimeout(()=>{if(!el.classList.contains('open'))el.style.display='none';},50);
+}
+
+// ── EVENT DELEGATION ───────────────────────────────────────────────────────────
+function initEvents(){
+  document.getElementById('bnav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);});
+  document.getElementById('sb-nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);});
+  document.getElementById('mob-quart').addEventListener('click',()=>openQuartModal());
+  document.getElementById('sb-quart-btn').addEventListener('click',()=>openQuartModal());
+  document.getElementById('sb-sync').addEventListener('click',doSync);
+  document.getElementById('sb-settings').addEventListener('click',openSettings);
+  document.getElementById('mob-menu').addEventListener('click',openDrawer);
+  document.getElementById('drawer-close').addEventListener('click',closeDrawer);
+  document.getElementById('drawer-overlay').addEventListener('click',closeDrawer);
+  document.getElementById('drawer-sync').addEventListener('click',()=>{closeDrawer();doSync();});
+  document.getElementById('drawer-export').addEventListener('click',()=>{closeDrawer();goTab('outils');});
+  document.getElementById('drawer-settings').addEventListener('click',()=>{closeDrawer();openSettings();});
+  document.getElementById('drawer-fiscal').addEventListener('click',()=>{closeDrawer();goTab('fiscal');});
+  document.getElementById('drawer-quart').addEventListener('click',()=>{closeDrawer();openQuartModal();});
+
+  // Tooltip popup
+  const _tipPop=document.getElementById('tip-popup');
+  document.addEventListener('click',e=>{
+    const tipTgt=e.target.closest('.tip');
+    if(tipTgt&&_tipPop){
+      e.stopPropagation();
+      const txt=tipTgt.getAttribute('title')||tipTgt.dataset.tip||'';
+      if(!txt){_tipPop.classList.remove('show');return;}
+      _tipPop.textContent=txt;
+      const r=tipTgt.getBoundingClientRect();
+      let top=r.bottom+6, left=r.left;
+      if(top+_tipPop.offsetHeight+10>window.innerHeight) top=r.top-(_tipPop.offsetHeight||70)-6;
+      if(left+240>window.innerWidth) left=window.innerWidth-250;
+      _tipPop.style.top=Math.max(4,top)+'px';
+      _tipPop.style.left=Math.max(8,left)+'px';
+      _tipPop.classList.add('show');
+      return;
+    }
+    if(_tipPop)_tipPop.classList.remove('show');
+
+    const closeBtn=e.target.closest('[data-close]');
+    if(closeBtn){closeM(closeBtn.dataset.close);return;}
+    if(e.target.classList.contains('moverlay')){const id=e.target.id;if(id)closeM(id);return;}
+
+    // Livraisons
+    const lBtn=e.target.closest('#panel-livraisons [data-action]');
+    if(lBtn){const a=lBtn.dataset.action;
+      if(a==='new-liv')openLivModal();
+      else if(a==='edit-liv')openLivModal(lBtn.dataset.id);
+      else if(a==='del-liv')delLiv(lBtn.dataset.id);
+      else if(a==='filt-plat'){S.dFilt.plat=lBtn.dataset.val;rLiv();}
+      return;}
+
+    // Dépenses
+    const dBtn=e.target.closest('#panel-depenses [data-action]');
+    if(dBtn){const a=dBtn.dataset.action;
+      if(a==='new-dep')openDepModal();
+      else if(a==='edit-dep')openDepModal(dBtn.dataset.id);
+      else if(a==='del-dep')delDep(dBtn.dataset.id);
+      else if(a==='filt-dep'){S.eFilt=dBtn.dataset.val;rDep();}
+      else if(a==='dep-toggle-filt'){S.eShowFilt=!S.eShowFilt;rDep();}
+      return;}
+
+    // Fiscal
+    const fBtn=e.target.closest('#panel-fiscal [data-fsub]');
+    if(fBtn){S.fsub=fBtn.dataset.fsub;rFisc();return;}
+    const dmBtn=e.target.closest('#panel-fiscal [data-dedmethod]');
+    if(dmBtn){S.cfg.deductionMethod=dmBtn.dataset.dedmethod;saveLS();rFsub();return;}
+    if(e.target.id==='save-vkm'){
+      S.cfg.vehicleKmJan=parseFloat(document.getElementById('v-km-jan')?.value)||0;
+      S.cfg.vehicleKmNow=parseFloat(document.getElementById('v-km-now')?.value)||0;
+      saveLS();rFsub();toast('Km enregistrés');return;}
+    if(e.target.id==='ded-toggle'){S.dedDetailOpen=!S.dedDetailOpen;rFsub();return;}
+
+    // Quart (dashboard card)
+    const qBtn=e.target.closest('#panel-dashboard [data-qaction]');
+    if(qBtn){_quartHandleAction(qBtn.dataset.qaction);return;}
+
+    // Outils
+    if(e.target.id==='outils-sync-btn'){doSync();return;}
+    if(e.target.id==='export-excel-btn'){exportExcel();return;}
+    if(e.target.id==='export-pdf-btn'){exportPDF();return;}
+
+    // Modals
+    if(e.target.id==='liv-save'){saveLiv();return;}
+    if(e.target.id==='dep-save'){saveDep();return;}
+    if(e.target.id==='dep-ratio-clear'){document.getElementById('dep-ratio').value='';return;}
+    if(e.target.id==='settings-save'){saveSettings();return;}
+    if(e.target.id==='test-conn-btn'){testConn();return;}
+    if(e.target.id==='add-plat-btn'){
+      const v=document.getElementById('new-plat').value.trim();
+      if(!v)return;
+      if(S.cfg.platforms.includes(v)){toast('Plateforme déjà existante');return;}
+      S.cfg.platforms.push(v);document.getElementById('new-plat').value='';renderPlatList();return;}
+    if(e.target.id==='clear-all-btn'){
+      if(!confirm('⚠️ Supprimer TOUTES les données localement ?'))return;
+      S.deliveries=[];S.expenses=[];
+      saveLS();closeM('m-settings');render();toast('Données effacées');return;}
+    const rmBtn=e.target.closest('#plat-list [data-action="rm-plat"]');
+    if(rmBtn){S.cfg.platforms.splice(+rmBtn.dataset.idx,1);renderPlatList();return;}
+  });
+
+  document.addEventListener('change',e=>{
+    if(e.target.id==='dep-cat'){updateDepCat();return;}
+    if(e.target.closest('#panel-livraisons')&&e.target.dataset.action==='filt-date'){S.dFilt.date=e.target.value;rLiv();return;}
+  });
+
+  document.addEventListener('input',e=>{
+    if(e.target.id==='dep-kwh'||e.target.id==='dep-amt'){updateKwh();return;}
+  });
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){document.querySelectorAll('.moverlay.open').forEach(m=>closeM(m.id));closeDrawer();}
+  });
+}
+
+// ── PWA ICON ───────────────────────────────────────────────────────────────────
+function initPWAIcon(){
+  function makeIcon(size){
+    try{
+      const c=document.createElement('canvas');c.width=size;c.height=size;
+      const ctx=c.getContext('2d');if(!ctx)return null;
+      const rad=size*0.22;
+      ctx.beginPath();
+      ctx.moveTo(rad,0);ctx.lineTo(size-rad,0);ctx.quadraticCurveTo(size,0,size,rad);
+      ctx.lineTo(size,size-rad);ctx.quadraticCurveTo(size,size,size-rad,size);
+      ctx.lineTo(rad,size);ctx.quadraticCurveTo(0,size,0,size-rad);
+      ctx.lineTo(0,rad);ctx.quadraticCurveTo(0,0,rad,0);ctx.closePath();
+      const g=ctx.createLinearGradient(0,0,0,size);
+      g.addColorStop(0,'#007AFF');g.addColorStop(1,'#0051D5');
+      ctx.fillStyle=g;ctx.fill();
+      const pad=size*0.175;
+      const s=(size-pad*2)/24;
+      ctx.save();ctx.translate(pad,pad);ctx.scale(s,s);
+      ctx.fillStyle='rgba(255,255,255,0.95)';
+      ctx.beginPath();ctx.moveTo(2,4);ctx.lineTo(14,4);ctx.quadraticCurveTo(15,4,15,5);ctx.lineTo(15,16);ctx.lineTo(2,16);ctx.quadraticCurveTo(1,16,1,15);ctx.lineTo(1,5);ctx.quadraticCurveTo(1,4,2,4);ctx.closePath();ctx.fill();
+      ctx.beginPath();ctx.moveTo(16,9);ctx.lineTo(19.5,9);ctx.lineTo(23,12.5);ctx.lineTo(23,16);ctx.lineTo(16,16);ctx.closePath();ctx.fill();
+      ctx.fillStyle='rgba(0,81,213,0.8)';
+      ctx.beginPath();ctx.rect(1,15.5,22,2);ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.95)';
+      ctx.beginPath();ctx.arc(5.5,18.5,2.5,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(18.5,18.5,2.5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(0,81,213,0.9)';
+      ctx.beginPath();ctx.arc(5.5,18.5,0.8,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(18.5,18.5,0.8,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+      return c.toDataURL('image/png');
+    }catch(e){return null;}
+  }
+  const url192=makeIcon(192);
+  const url512=makeIcon(512);
+  if(url192){
+    const link=document.getElementById('pwa-icon-link');
+    if(link){link.href=url192;link.setAttribute('sizes','192x192');}
+  }
+  if(url192&&url512){
+    try{
+      const manifest={name:'Livraisons Tracker',short_name:'Livraisons',start_url:'.',display:'standalone',background_color:'#007AFF',theme_color:'#007AFF',icons:[{src:url192,sizes:'192x192',type:'image/png'},{src:url512,sizes:'512x512',type:'image/png'}]};
+      const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+      const ml=document.getElementById('pwa-manifest-link');
+      if(ml)ml.href=URL.createObjectURL(blob);
+    }catch(e){}
+  }
+}
+
+// ── QUART MODAL ────────────────────────────────────────────────────────────────
+let _qTimer = null;
+let _qHistData = [];
+let _qTrajets = [];
+let _qCurrentQuartId = null;
+let _qCurrentQuartFrom = null;
+let _qCurrentQuartTo = null;
+
+async function _qFetchDriversnote(from, to, apiKey) {
+  const query = `{ trips(filter: { startedAt: { gte: "${from}", lte: "${to}" } }) { nodes { id startedAt endedAt distance startLocation { address } endLocation { address } } } }`;
+  const resp = await fetch('https://api.driversnote.com/v1/driversnote', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','x-api-key':apiKey},
+    body: JSON.stringify({query})
+  });
+  if (!resp.ok) throw new Error(`Driversnote HTTP ${resp.status}`);
+  const json = await resp.json();
+  if (json.errors) throw new Error(json.errors[0]?.message || 'GraphQL error');
+  return json.data?.trips?.nodes || [];
+}
+
+function _qRenderTrajets(trips, state, errMsg) {
+  const wrap = document.getElementById('trajets-wrap');
+  const list = document.getElementById('trajets-list');
+  if (!wrap || !list) return;
+  wrap.style.display = 'block';
+  if (state === 'loading') {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2)"><span class="spin" style="font-size:22px">↻</span><div style="margin-top:8px;font-size:13px">Chargement des trajets…</div></div>';
+    return;
+  }
+  if (state === 'error') {
+    list.innerHTML = `<div class="alert alert-w"><p>Erreur Driversnote : ${esc(errMsg||'')}</p></div>`;
+    return;
+  }
+  if (!trips || trips.length === 0) {
+    list.innerHTML = '<div class="empty" style="padding:20px 0"><p>Aucun trajet trouvé pour ce quart.</p></div>';
+    return;
+  }
+  list.innerHTML = trips.map((t, i) => {
+    const heure = t.startedAt ? new Date(t.startedAt).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}) : '—';
+    const dist = t.distance != null ? (+t.distance).toFixed(1) : '?';
+    const dep = t.startLocation?.address || '—';
+    const arr = t.endLocation?.address || '—';
+    const cl = t.classif;
+    return `<div class="li" style="flex-direction:column;gap:8px;align-items:stretch">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div class="li-ico" style="color:var(--accent);flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div>
+        <div class="li-body">
+          <div class="li-title" style="font-size:13px">${heure} · ${dist} km</div>
+          <div class="li-sub" style="font-size:11px;margin-top:2px">${esc(dep)}</div>
+          <div class="li-sub" style="font-size:11px">→ ${esc(arr)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-xs${cl==='pro'?' btn-ok':' btn-s'}" data-qm="pro-trajet" data-ti="${i}" style="flex:1">Pro${cl==='pro'?' ✓':''}</button>
+        <button class="btn btn-xs${cl==='perso'?' btn-d':' btn-s'}" data-qm="perso-trajet" data-ti="${i}" style="flex:1">Perso${cl==='perso'?' ✓':''}</button>
+        <button class="btn btn-xs btn-s" data-qm="ignore-trajet" data-ti="${i}" style="flex:1${cl==='ignore'?';opacity:.4':''}">Ignorer${cl==='ignore'?' ✓':''}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function _qGetState() {
+  return {
+    etat: localStorage.getItem('quart_etat') || 'arrete',
+    debut: parseInt(localStorage.getItem('quart_debut') || '0'),
+    elapsed: parseInt(localStorage.getItem('quart_pause_elapsed') || '0'),
+    debutISO: localStorage.getItem('quart_debut_iso') || null,
+    stopISO: localStorage.getItem('quart_stop_iso') || null
+  };
+}
+
+function _qElapsedMs() {
+  const st = _qGetState();
+  if (st.etat === 'en_cours') return st.elapsed + (Date.now() - st.debut);
+  return st.elapsed;
+}
+
+function _qFmt(ms) {
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+}
+
+// Compat: _quartFmt/_quartSec/_quartRunning/_quartStartTime still used by dashboard card
+function _quartFmt(s){return _qFmt(s*1000);}
+Object.defineProperty(window,'_quartSec',{get(){return Math.floor(_qElapsedMs()/1000);}});
+Object.defineProperty(window,'_quartRunning',{get(){return _qGetState().etat==='en_cours';}});
+Object.defineProperty(window,'_quartStartTime',{get(){return _qGetState().debutISO;}});
+
+function _qUpdateDisplay() {
+  const ms = _qElapsedMs();
+  const fmt = _qFmt(ms);
+  const t1 = document.getElementById('quart-modal-timer'); if(t1) t1.textContent = fmt;
+  const t2 = document.getElementById('dash-quart-timer'); if(t2) t2.textContent = fmt;
+}
+
+function _qStartTick() {
+  _qStopTick();
+  _qTimer = setInterval(_qUpdateDisplay, 1000);
+}
+
+function _qStopTick() {
+  if (_qTimer) { clearInterval(_qTimer); _qTimer = null; }
+}
+
+function _qRenderButtons() {
+  const st = _qGetState();
+  const btnEl = document.getElementById('quart-modal-btns');
+  const statusEl = document.getElementById('quart-modal-status');
+  const kmWrap = document.getElementById('quart-modal-km-wrap');
+  if (!btnEl) return;
+  if (st.etat === 'arrete' && st.elapsed === 0) {
+    btnEl.innerHTML = `<button class="btn btn-ok" style="flex:1" data-qm="start">Démarrer</button>`;
+    if(statusEl){statusEl.textContent='Inactif';statusEl.style.color='var(--text2)';}
+    if(kmWrap) kmWrap.style.display='none';
+  } else if (st.etat === 'en_cours') {
+    btnEl.innerHTML = `<button class="btn btn-s" style="flex:1" data-qm="pause">Pause</button><button class="btn btn-d" style="flex:1" data-qm="stop">Arrêter</button>`;
+    if(statusEl){statusEl.textContent='En cours';statusEl.style.color='var(--ok)';}
+    if(kmWrap) kmWrap.style.display='none';
+  } else if (st.etat === 'pause') {
+    btnEl.innerHTML = `<button class="btn btn-ok" style="flex:1" data-qm="start">Reprendre</button><button class="btn btn-d" style="flex:1" data-qm="stop">Arrêter</button>`;
+    if(statusEl){statusEl.textContent='En pause';statusEl.style.color='var(--warn)';}
+    if(kmWrap) kmWrap.style.display='none';
+  } else if (st.etat === 'confirmer') {
+    btnEl.innerHTML = '';
+    if(statusEl){statusEl.textContent='Arrêté — en attente de confirmation';statusEl.style.color='var(--warn)';}
+    if(kmWrap) kmWrap.style.display='block';
+  }
+}
+
+async function _qLoadHistory() {
+  const sb = sbClient(); if(!sb) return;
+  try {
+    const{data,error}=await sb.from('quarts').select('*').order('date',{ascending:false}).limit(5);
+    if(!error&&data) _qRenderHistory(data);
+  } catch(e){}
+}
+
+function _qRenderHistory(data) {
+  _qHistData = data || [];
+  const wrap = document.getElementById('quart-modal-hist-wrap');
+  const el = document.getElementById('quart-modal-hist');
+  if(!el||!wrap) return;
+  if(!data||data.length===0){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  el.innerHTML = data.map(q=>`<div class="li">
+    <div class="li-ico" style="color:var(--accent)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg></div>
+    <div class="li-body">
+      <div class="li-title">${esc(q.date||'')}</div>
+      <div class="li-sub">${q.duree!=null?q.duree+' min':'—'}${q.distance?` · ${(+q.distance).toFixed(1)} km`:''}${q.heure_debut?' · '+new Date(q.heure_debut).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):''}</div>
+    </div>
+    <div class="li-right"><div class="li-acts">
+      <button class="btn btn-xs btn-s" data-qm="edit-quart" data-qid="${esc(String(q.id))}">${_SVG_EDIT}</button>
+      <button class="btn btn-xs btn-d" data-qm="del-quart" data-qid="${esc(String(q.id))}">${_SVG_TRASH}</button>
+    </div></div>
+  </div>`).join('');
+}
+
+function openQuartModal() {
+  const st = _qGetState();
+  _qUpdateDisplay();
+  _qRenderButtons();
+  _qLoadHistory();
+  openM('quart-modal');
+  if (st.etat === 'en_cours') _qStartTick();
+}
+
+function closeQuartModal() {
+  _qStopTick();
+  closeM('quart-modal');
+}
+
+// Event delegation on #quart-modal
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('quart-modal');
+  if (!modal) return;
+
+  modal.addEventListener('click', async e => {
+    const closeBtn = e.target.closest('#quart-modal-close');
+    if (closeBtn || e.target === modal) { closeQuartModal(); return; }
+
+    const btn = e.target.closest('[data-qm]');
+    if (!btn) return;
+    const action = btn.dataset.qm;
+
+    if (action === 'start') {
+      const st = _qGetState();
+      if (st.etat === 'en_cours') return;
+      const now = Date.now();
+      localStorage.setItem('quart_debut', now);
+      localStorage.setItem('quart_etat', 'en_cours');
+      if (!st.debutISO) localStorage.setItem('quart_debut_iso', new Date(now).toISOString());
+      _qStartTick();
+      _qRenderButtons();
+
+    } else if (action === 'pause') {
+      const st = _qGetState();
+      if (st.etat !== 'en_cours') return;
+      const accumulated = st.elapsed + (Date.now() - st.debut);
+      localStorage.setItem('quart_pause_elapsed', accumulated);
+      localStorage.setItem('quart_etat', 'pause');
+      _qStopTick();
+      _qRenderButtons();
+
+    } else if (action === 'stop') {
+      const st = _qGetState();
+      if (st.elapsed === 0 && st.etat !== 'en_cours') return;
+      let accumulated = st.elapsed;
+      if (st.etat === 'en_cours') accumulated += Date.now() - st.debut;
+      localStorage.setItem('quart_pause_elapsed', accumulated);
+      localStorage.setItem('quart_stop_iso', new Date().toISOString());
+      localStorage.setItem('quart_etat', 'confirmer');
+      _qStopTick();
+      _qUpdateDisplay();
+      _qRenderButtons();
+
+    } else if (action === 'confirm') {
+      const st = _qGetState();
+      const sb = sbClient();
+      if (!sb) { toast('Supabase non configuré'); return; }
+      const km = parseFloat(document.getElementById('quart-modal-km')?.value) || 0;
+      const dureeMin = Math.round(st.elapsed / 60000);
+      const todStr = new Date().toLocaleDateString('fr-CA');
+      const quartFrom = st.debutISO;
+      const quartTo = st.stopISO || new Date().toISOString();
+      btn.disabled = true; btn.textContent = 'Sauvegarde…';
+      try {
+        const {data:inserted, error} = await sb.from('quarts').insert({
+          date: todStr,
+          heure_debut: quartFrom,
+          heure_fin: quartTo,
+          duree: dureeMin,
+          distance: km
+        }).select().single();
+        if (error) throw error;
+        _qCurrentQuartId = inserted?.id || null;
+        _qCurrentQuartFrom = quartFrom;
+        _qCurrentQuartTo = quartTo;
+        localStorage.removeItem('quart_etat');
+        localStorage.removeItem('quart_debut');
+        localStorage.removeItem('quart_debut_iso');
+        localStorage.removeItem('quart_stop_iso');
+        localStorage.setItem('quart_pause_elapsed', '0');
+        document.getElementById('quart-modal-km-wrap').style.display = 'none';
+        _qUpdateDisplay();
+        _qRenderButtons();
+        toast('Quart sauvegardé ✓');
+        _qLoadHistory();
+        // Driversnote
+        const apiKey = S.cfg.driversnoteKey;
+        if (apiKey && quartFrom && quartTo) {
+          _qTrajets = [];
+          _qRenderTrajets(null, 'loading');
+          setTimeout(() => document.getElementById('trajets-wrap')?.scrollIntoView({behavior:'smooth',block:'nearest'}), 60);
+          try {
+            const trips = await _qFetchDriversnote(quartFrom, quartTo, apiKey);
+            _qTrajets = trips.map(t => ({...t, classif: null}));
+            _qRenderTrajets(_qTrajets);
+          } catch(derr) {
+            _qRenderTrajets(null, 'error', derr.message);
+          }
+        } else {
+          closeQuartModal();
+        }
+      } catch(err) {
+        toast('Erreur : ' + err.message);
+        btn.disabled = false; btn.textContent = 'Confirmer et sauvegarder';
+      }
+
+    } else if (action === 'cancel') {
+      // Remet le quart en cours et relance le chronomètre
+      const now = Date.now();
+      localStorage.setItem('quart_debut', now);
+      localStorage.setItem('quart_etat', 'en_cours');
+      localStorage.removeItem('quart_stop_iso');
+      document.getElementById('quart-modal-km-wrap').style.display = 'none';
+      document.getElementById('quart-modal-km').value = '';
+      _qStartTick();
+      _qRenderButtons();
+
+    } else if (action === 'edit-quart') {
+      const qid = btn.dataset.qid;
+      const q = _qHistData.find(x => String(x.id) === qid);
+      if (!q) return;
+      const toTime = iso => {
+        if (!iso) return '';
+        try { const d = new Date(iso); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); } catch(e){return '';}
+      };
+      document.getElementById('quart-edit-id').value = qid;
+      document.getElementById('quart-edit-date').value = q.date || '';
+      document.getElementById('quart-edit-hdebut').value = toTime(q.heure_debut);
+      document.getElementById('quart-edit-hfin').value = toTime(q.heure_fin);
+      document.getElementById('quart-edit-duree').value = q.duree != null ? q.duree : '';
+      document.getElementById('quart-edit-km').value = q.distance != null ? q.distance : '';
+      const editWrap = document.getElementById('quart-edit-wrap');
+      editWrap.style.display = 'block';
+      setTimeout(() => editWrap.scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
+
+    } else if (action === 'del-quart') {
+      const qid = btn.dataset.qid;
+      if (!confirm('Supprimer ce quart ?')) return;
+      const sb = sbClient();
+      if (!sb) { toast('Supabase non configuré'); return; }
+      try {
+        const {error} = await sb.from('quarts').delete().eq('id', qid);
+        if (error) throw error;
+        toast('Quart supprimé');
+        await _qLoadHistory();
+      } catch(err) { toast('Erreur : ' + err.message); }
+
+    } else if (action === 'save-quart-edit') {
+      const qid = document.getElementById('quart-edit-id').value;
+      const sb = sbClient();
+      if (!sb) { toast('Supabase non configuré'); return; }
+      const dateVal = document.getElementById('quart-edit-date').value;
+      const hdebut = document.getElementById('quart-edit-hdebut').value;
+      const hfin = document.getElementById('quart-edit-hfin').value;
+      const duree = parseInt(document.getElementById('quart-edit-duree').value);
+      const km = parseFloat(document.getElementById('quart-edit-km').value);
+      const toISO = (date, time) => (date && time) ? new Date(date + 'T' + time + ':00').toISOString() : null;
+      btn.disabled = true; btn.textContent = 'Sauvegarde…';
+      try {
+        const {error} = await sb.from('quarts').update({
+          date: dateVal || null,
+          heure_debut: toISO(dateVal, hdebut),
+          heure_fin: toISO(dateVal, hfin),
+          duree: isNaN(duree) ? null : duree,
+          distance: isNaN(km) ? null : km
+        }).eq('id', qid);
+        if (error) throw error;
+        document.getElementById('quart-edit-wrap').style.display = 'none';
+        toast('Quart modifié ✓');
+        await _qLoadHistory();
+      } catch(err) {
+        toast('Erreur : ' + err.message);
+        btn.disabled = false; btn.textContent = 'Sauvegarder';
+      }
+
+    } else if (action === 'cancel-quart-edit') {
+      document.getElementById('quart-edit-wrap').style.display = 'none';
+
+    } else if (action === 'pro-trajet' || action === 'perso-trajet' || action === 'ignore-trajet') {
+      const ti = parseInt(btn.dataset.ti);
+      if (!_qTrajets || isNaN(ti) || ti < 0 || ti >= _qTrajets.length) return;
+      _qTrajets[ti].classif = action === 'pro-trajet' ? 'pro' : action === 'perso-trajet' ? 'perso' : 'ignore';
+      _qRenderTrajets(_qTrajets);
+
+    } else if (action === 'terminer-trajets') {
+      const sb = sbClient();
+      if (!sb) { toast('Supabase non configuré'); return; }
+      btn.disabled = true; btn.textContent = 'Finalisation…';
+      const proTrajets = (_qTrajets || []).filter(t => t.classif === 'pro');
+      const kmPro = proTrajets.reduce((s, t) => s + (t.distance != null ? +t.distance : 0), 0);
+      try {
+        for (const t of proTrajets) {
+          await sb.from('trajets').insert({
+            driversnote_id: t.id || null,
+            date: t.startedAt ? new Date(t.startedAt).toLocaleDateString('fr-CA') : null,
+            heure_debut: t.startedAt || null,
+            heure_fin: t.endedAt || null,
+            distance: t.distance != null ? +t.distance : null,
+            depart: t.startLocation?.address || null,
+            arrivee: t.endLocation?.address || null,
+            type: 'pro',
+            livraison_id: null
+          });
+        }
+        if (_qCurrentQuartId) {
+          await sb.from('quarts').update({distance: kmPro}).eq('id', _qCurrentQuartId);
+        }
+        toast(`Classification terminée · ${kmPro.toFixed(1)} km pro`);
+        _qTrajets = [];
+        _qCurrentQuartId = null;
+        document.getElementById('trajets-wrap').style.display = 'none';
+        closeQuartModal();
+      } catch(err) {
+        toast('Erreur : ' + err.message);
+        btn.disabled = false; btn.textContent = 'Terminer la classification';
+      }
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && _qGetState().etat === 'en_cours') _qUpdateDisplay();
+  });
+});
+
+// Legacy compat for dashboard quart card
+async function _quartHandleAction(action) {
+  const fakeBtn = {dataset:{qm:action}};
+  // reuse same logic via dispatch
+  const st = _qGetState();
+  if(action==='start'){
+    if(st.etat==='en_cours')return;
+    const now=Date.now();
+    localStorage.setItem('quart_debut',now);
+    localStorage.setItem('quart_etat','en_cours');
+    if(!st.debutISO)localStorage.setItem('quart_debut_iso',new Date(now).toISOString());
+    _qStartTick();
+  } else if(action==='pause'){
+    if(st.etat!=='en_cours')return;
+    const acc=st.elapsed+(Date.now()-st.debut);
+    localStorage.setItem('quart_pause_elapsed',acc);
+    localStorage.setItem('quart_etat','pause');
+    _qStopTick();
+  } else if(action==='stop'){
+    openQuartModal();
+    return;
+  }
+  render();
+}
+
+function rQuart(){
+  document.getElementById('panel-quart').innerHTML='';
+}
+
+
+// ── INIT ───────────────────────────────────────────────────────────────────────
+function init(){
+  loadLS();
+  initPWAIcon();
+  initEvents();
+  rDash();
+  if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
+    setTimeout(async()=>{
+      const ok=await sbLoad();
+      if(ok){render();sbSubscribe();}
+    },0);
+  }
+  if(!S.cfg.supabaseUrl){
+    console.log('%c[LT] SQL Supabase setup:','color:#007AFF;font-weight:bold');
+    console.log(`create table livraisons (id uuid default gen_random_uuid() primary key, plateforme text, revenu numeric, pourboire numeric, distance numeric, duree integer, date text, notes text, created_at timestamptz default now());
+create table depenses (id uuid default gen_random_uuid() primary key, categorie text, montant numeric, montant_annuel numeric, description text, note_recu text, date text, ratio_pro numeric, kwh numeric, created_at timestamptz default now());
+create table parametres (cle text primary key, valeur text);
+alter table livraisons enable row level security;
+alter table depenses enable row level security;
+alter table parametres enable row level security;
+create policy "Public" on livraisons for all using (true);
+create policy "Public" on depenses for all using (true);
+create policy "Public" on parametres for all using (true);`);
+  }
+}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
