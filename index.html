@@ -620,14 +620,25 @@ async function buildFiscalSnapshot(annee,mois,isAuto){
     const totDed=r2(method==='cra'?(kmDed+otherDed):(vehDed+otherDed));
     const net=r2(Math.max(0,gross-totDed));
     const depensesDetail=exps.map(e=>({cat:e.cat,desc:e.desc||'',amt:e.amt,annual:expAnnual(e),ded:expDed(e,proRatio)}));
-    let userId=null;
-    try{const{data:au}=await sb.auth.getUser();userId=au?.user?.id||null;}catch(_){}
-    const row={annee,mois,type_snapshot:'mensuel',revenu_brut:gross,total_pourboires:tips,nombre_livraisons:divs.length,km_pro:kmPro,km_total:kmTotal,ratio_pro:proRatio,odometer_start:S.cfg.vehicleKmJan||0,odometer_current:S.cfg.vehicleKmNow||0,deduction_km_cra:kmDed,autres_deductions:otherDed,total_deductions:totDed,revenu_net_imposable:net,depenses_detail:depensesDetail,methode_deduction:method,taux_km_cra:KM_R1,sauvegarde_auto:isAuto};
-    if(userId) row.user_id=userId;
-    console.log('[LT] buildFiscalSnapshot payload',JSON.stringify(row));
+    const{data:{user},error:authError}=await sb.auth.getUser();
+    if(authError||!user){
+      console.error('[LT] Auth error:',authError);
+      const session=await sb.auth.getSession();
+      console.log('[LT] getSession pour debug:',session);
+      toast('⚠ Non authentifié — snapshot impossible');
+      return false;
+    }
+    const user_id=user.id;
+    console.log('[LT] user_id utilisé pour upsert:',user_id);
+    const row={user_id,annee,mois,type_snapshot:'mensuel',revenu_brut:gross,total_pourboires:tips,nombre_livraisons:divs.length,km_pro:kmPro,km_total:kmTotal,ratio_pro:proRatio,odometer_start:S.cfg.vehicleKmJan||0,odometer_current:S.cfg.vehicleKmNow||0,deduction_km_cra:kmDed,autres_deductions:otherDed,total_deductions:totDed,revenu_net_imposable:net,depenses_detail:depensesDetail,methode_deduction:method,taux_km_cra:KM_R1,sauvegarde_auto:isAuto};
+    console.log('[LT] payload snapshot:',JSON.stringify(row));
     const result=await sb.from('fiscal_snapshots').upsert(row);
     console.log('[LT] buildFiscalSnapshot result',result);
-    if(result.error)throw result.error;
+    if(result.error){
+      const session2=await sb.auth.getSession();
+      console.log('[LT] getSession après erreur upsert:',session2);
+      throw result.error;
+    }
     return true;
   }catch(e){console.error('[LT] snapshot error',e.message);return false;}
 }
@@ -789,7 +800,7 @@ function rLiv(){
   if(S.dFilt.dateTo) filt=filt.filter(d=>d.date<=S.dFilt.dateTo);
   document.getElementById('panel-livraisons').innerHTML=`
     <div class="chips">${plats.map(p=>`<button class="chip${(S.dFilt.plat||'Toutes')===p?' active':''}" data-action="filt-plat" data-val="${esc(p)}">${esc(p)}</button>`).join('')}</div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;align-items:flex-end"><div style="flex:1"><label class="fl">Du</label><input type="date" id="filt-date-from" value="${S.dFilt.dateFrom}" style="display:block;opacity:1;visibility:visible;font-size:16px;width:100%;height:auto;-webkit-appearance:none;appearance:none;background:white;border:1px solid #ccc;border-radius:8px;padding:8px;color:#000;box-sizing:border-box"></div><div style="flex:1"><label class="fl">Au</label><input type="date" id="filt-date-to" value="${S.dFilt.dateTo}" style="display:block;opacity:1;visibility:visible;font-size:16px;width:100%;height:auto;-webkit-appearance:none;appearance:none;background:white;border:1px solid #ccc;border-radius:8px;padding:8px;color:#000;box-sizing:border-box"></div><button class="btn btn-s btn-sm" data-action="filt-date-reset" style="flex-shrink:0;align-self:flex-end">Réinitialiser</button></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:flex-end"><div style="flex:1;min-width:130px"><label class="fl">Du</label><input type="date" id="filt-date-from" value="${S.dFilt.dateFrom}" class="fi" style="font-size:16px;min-width:130px;padding:10px 8px;-webkit-appearance:none;appearance:none"></div><div style="flex:1;min-width:130px"><label class="fl">Au</label><input type="date" id="filt-date-to" value="${S.dFilt.dateTo}" class="fi" style="font-size:16px;min-width:130px;padding:10px 8px;-webkit-appearance:none;appearance:none"></div><button class="btn btn-s btn-sm" data-action="filt-date-reset" style="flex-shrink:0;align-self:flex-end;white-space:nowrap">Réinitialiser</button></div>
     ${filt.length===0?`<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><p>Aucune livraison.<br>Appuie sur + pour en ajouter une.</p></div>`:filt.map(d=>livCard(d,true)).join('')}
     <button class="fab" data-action="new-liv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
   `;
