@@ -192,6 +192,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
     <button class="sb-btn" data-tab="depenses"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Dépenses</button>
     <button class="sb-btn" data-tab="fiscal"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></span>Fiscal</button>
     <button class="sb-btn" data-tab="outils"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></span>Outils</button>
+    <button class="sb-btn" data-tab="quart"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg></span>Quart</button>
   </nav>
   <div class="sb-footer">
     <button class="sb-btn" id="sb-sync"><span class="ico" id="sb-sync-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>Synchroniser</button>
@@ -1386,19 +1387,50 @@ function initPWAIcon(){
 }
 
 // ── QUART ─────────────────────────────────────────────────────────────────────
-let _quartSec=0,_quartInterval=null,_quartRunning=false,_quartStartTime=null;
+const QLS='lt_quart';
+let _quartInterval=null,_quartRunning=false,_quartStartTime=null,_quartPausedMs=0,_quartPauseStartAt=null;
 let _quartHistory=[];
 let _quartTrajets=[];
 let _quartTrajetsDecision={};
 let _quartPendingDebut=null,_quartPendingFin=null,_quartPendingDuree=0;
 
+function _quartSaveLS(){
+  try{localStorage.setItem(QLS,JSON.stringify({running:_quartRunning,startTime:_quartStartTime,pausedMs:_quartPausedMs,pendingDebut:_quartPendingDebut,pendingFin:_quartPendingFin,pendingDuree:_quartPendingDuree}));}catch(e){}
+}
+function _quartClearLS(){try{localStorage.removeItem(QLS);}catch(e){}}
+function _quartElapsedSec(){
+  if(!_quartStartTime)return 0;
+  return Math.floor((Date.now()-new Date(_quartStartTime).getTime()-_quartPausedMs)/1000);
+}
+// _quartSec is now a getter-style computed value; kept as alias for rDash compatibility
+Object.defineProperty(window,'_quartSec',{get(){return _quartElapsedSec();},configurable:true});
+
 function _quartFmt(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');}
 function _quartTick(){
-  _quartSec++;
-  const fmt=_quartFmt(_quartSec);
+  const fmt=_quartFmt(_quartElapsedSec());
   const t1=document.getElementById('quart-page-timer');if(t1)t1.textContent=fmt;
   const t2=document.getElementById('dash-quart-timer');if(t2)t2.textContent=fmt;
 }
+function _quartRestoreFromLS(){
+  try{
+    const d=JSON.parse(localStorage.getItem(QLS)||'null');
+    if(!d)return;
+    _quartRunning=d.running||false;
+    _quartStartTime=d.startTime||null;
+    _quartPausedMs=d.pausedMs||0;
+    _quartPendingDebut=d.pendingDebut||null;
+    _quartPendingFin=d.pendingFin||null;
+    _quartPendingDuree=d.pendingDuree||0;
+    if(_quartRunning&&_quartStartTime){
+      _quartInterval=setInterval(_quartTick,1000);
+    }
+  }catch(e){}
+}
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&_quartRunning){
+    _quartTick();
+  }
+});
 async function _quartLoadHistory(){
   const sb=sbClient();if(!sb)return;
   try{
@@ -1426,19 +1458,25 @@ async function _quartHandleAction(action){
   if(action==='start'){
     if(_quartRunning)return;
     _quartRunning=true;
-    if(!_quartStartTime)_quartStartTime=new Date().toISOString();
+    if(!_quartStartTime){_quartStartTime=new Date().toISOString();_quartPausedMs=0;}
+    else{_quartPausedMs+=Date.now()-(_quartPauseStartAt||Date.now());}
+    _quartPauseStartAt=null;
     _quartInterval=setInterval(_quartTick,1000);
+    _quartSaveLS();
   } else if(action==='pause'){
     if(!_quartRunning)return;
     _quartRunning=false;clearInterval(_quartInterval);_quartInterval=null;
+    _quartPauseStartAt=Date.now();
+    _quartSaveLS();
   } else if(action==='stop'){
     if(!confirm('Terminer ce quart ?'))return;
     _quartRunning=false;clearInterval(_quartInterval);_quartInterval=null;
     _quartPendingDebut=_quartStartTime;
     _quartPendingFin=new Date().toISOString();
-    _quartPendingDuree=_quartSec;
-    _quartSec=0;_quartStartTime=null;
+    _quartPendingDuree=_quartElapsedSec();
+    _quartStartTime=null;_quartPausedMs=0;_quartPauseStartAt=null;
     _quartTrajets=[];_quartTrajetsDecision={};
+    _quartSaveLS();
     render();
     if(S.cfg.driversnoteKey&&_quartPendingDebut){
       _quartFetchDN(_quartPendingDebut,_quartPendingFin);
@@ -1465,6 +1503,7 @@ async function _quartHandleAction(action){
         toast('Quart sauvegardé ✓');
         _quartPendingDebut=null;_quartPendingFin=null;_quartPendingDuree=0;
         _quartTrajets=[];_quartTrajetsDecision={};
+        _quartClearLS();
       }catch(e){toast('Erreur sauvegarde: '+e.message);}
     } else {
       toast(debut?'Supabase non configuré':'Aucun quart à confirmer');
@@ -1472,6 +1511,7 @@ async function _quartHandleAction(action){
   } else if(action==='cancel-quart'){
     _quartPendingDebut=null;_quartPendingFin=null;_quartPendingDuree=0;
     _quartTrajets=[];_quartTrajetsDecision={};
+    _quartClearLS();
   }
   render();
 }
@@ -1586,9 +1626,10 @@ function rQuart(){
 // ── INIT ───────────────────────────────────────────────────────────────────────
 function init(){
   loadLS();
+  _quartRestoreFromLS();
   initPWAIcon();
   initEvents();
-  rDash();
+  if(_quartRunning||_quartPendingDebut){goTab('quart');}else{rDash();}
   if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
     setTimeout(async()=>{
       const ok=await sbLoad();
