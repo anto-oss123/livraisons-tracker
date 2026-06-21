@@ -134,6 +134,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
 .modal{background:#ffffff;border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding:12px 16px calc(24px + var(--sb))}
 @media(prefers-color-scheme:dark){.modal{background:#1c1c1e;}}
 @media(prefers-color-scheme:dark){#quart-modal-inner{background:#1c1c1e!important;}}
+@media(prefers-color-scheme:dark){#dn-import-modal-inner{background:#1c1c1e!important;}}
 .mhandle{width:36px;height:4px;background:var(--card2);border-radius:2px;margin:0 auto 16px}
 .mtitle{font-size:18px;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
 .mclose{background:var(--card2);border:none;color:var(--text2);font-size:15px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
@@ -270,6 +271,10 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
   <button class="drawer-btn" id="drawer-quart">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg>
     Quart
+  </button>
+  <button class="drawer-btn" id="drawer-dn-import">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Importer trajets Driversnote
   </button>
 </div>
 
@@ -422,6 +427,30 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
     <div class="stitle" style="margin-top:0">Derniers quarts</div>
     <div id="quart-modal-hist"></div>
   </div>
+</div></div>
+
+<!-- MODAL IMPORT DRIVERSNOTE -->
+<div class="moverlay" id="dn-import-modal" style="background:rgba(0,0,0,.5)">
+<div class="modal" style="background:#ffffff;-webkit-backdrop-filter:none;backdrop-filter:none" id="dn-import-modal-inner">
+  <div class="mhandle"></div>
+  <div class="mtitle"><span>Importer trajets Driversnote</span><button class="mclose" id="dn-import-close">✕</button></div>
+  <p style="font-size:14px;color:var(--text2);margin-bottom:16px">Sélectionnez l'export Excel Driversnote. Les trajets <strong>Professionnel</strong> seront importés automatiquement.</p>
+  <div style="margin-bottom:16px">
+    <label class="btn btn-s btn-w" style="cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Choisir un fichier Excel
+      <input type="file" id="dn-file-input" accept=".xlsx,.xls" style="display:none">
+    </label>
+    <div id="dn-file-name" style="font-size:12px;color:var(--text2);text-align:center;margin-top:6px"></div>
+  </div>
+  <div id="dn-trajets-wrap" style="display:none">
+    <div class="div" style="margin-top:0"></div>
+    <div id="dn-trajets-list"></div>
+    <div style="margin-top:12px">
+      <button class="btn btn-p btn-w" id="dn-import-btn">Importer les trajets sélectionnés</button>
+    </div>
+  </div>
+  <div id="dn-import-result" style="display:none;margin-top:12px"></div>
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="console.warn('[LT] Supabase CDN indisponible')"></script>
@@ -1241,6 +1270,7 @@ function initEvents(){
   document.getElementById('drawer-settings').addEventListener('click',()=>{closeDrawer();openSettings();});
   document.getElementById('drawer-fiscal').addEventListener('click',()=>{closeDrawer();goTab('fiscal');});
   document.getElementById('drawer-quart').addEventListener('click',()=>{closeDrawer();openQuartModal();});
+  document.getElementById('drawer-dn-import').addEventListener('click',()=>{closeDrawer();openDnImportModal();});
 
   // Tooltip popup
   const _tipPop=document.getElementById('tip-popup');
@@ -1648,9 +1678,202 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && _qGetState().etat === 'en_cours') _qUpdateDisplay();
+    if (!document.hidden) _qUpdateHeaderTimer();
   });
 });
+
+// ── IMPORT DRIVERSNOTE EXCEL ───────────────────────────────────────────────────
+let _dnTrajets = []; // {date, heure_debut, heure_fin, depart, arrivee, distance, selected}
+
+function openDnImportModal() {
+  _dnTrajets = [];
+  document.getElementById('dn-trajets-wrap').style.display = 'none';
+  document.getElementById('dn-import-result').style.display = 'none';
+  document.getElementById('dn-file-name').textContent = '';
+  document.getElementById('dn-file-input').value = '';
+  document.getElementById('dn-trajets-list').innerHTML = '';
+  document.getElementById('dn-import-btn').disabled = false;
+  document.getElementById('dn-import-btn').textContent = 'Importer les trajets sélectionnés';
+  openM('dn-import-modal');
+}
+
+function closeDnImportModal() { closeM('dn-import-modal'); }
+
+function _dnRenderTrajets() {
+  const wrap = document.getElementById('dn-trajets-wrap');
+  const list = document.getElementById('dn-trajets-list');
+  if (!_dnTrajets.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = _dnTrajets.map((t, i) => `
+    <div class="li" style="align-items:flex-start;gap:10px;padding:10px 0">
+      <input type="checkbox" data-dn-idx="${i}" ${t.selected?'checked':''} style="margin-top:3px;width:18px;height:18px;flex-shrink:0;accent-color:var(--accent)">
+      <div class="li-body" style="min-width:0">
+        <div class="li-title" style="font-size:13px">${esc(t.date||'')} · ${esc(t.heure_debut||'')}→${esc(t.heure_fin||'')} · ${t.distance!=null?(+t.distance).toFixed(1)+' km':'—'}</div>
+        <div class="li-sub" style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.depart||'—')} → ${esc(t.arrivee||'—')}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function _dnParseExcel(file) {
+  return new Promise((resolve, reject) => {
+    if (typeof XLSX === 'undefined') { reject(new Error('SheetJS non disponible')); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
+        // Chercher la feuille "Rapport kilométrique" ou prendre la première
+        const sheetName = wb.SheetNames.find(n => n.toLowerCase().includes('rapport') || n.toLowerCase().includes('km')) || wb.SheetNames[0];
+        const ws = wb.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+        // Détecter les colonnes dynamiquement (insensible à la casse et aux espaces)
+        const norm = s => String(s||'').toLowerCase().replace(/\s+/g,'').replace(/[éèê]/g,'e').replace(/[àâ]/g,'a').replace(/[î]/g,'i').replace(/[ô]/g,'o').replace(/[ù]/g,'u');
+        const findCol = (row, candidates) => {
+          const keys = Object.keys(row);
+          for (const c of candidates) {
+            const k = keys.find(k => norm(k) === norm(c));
+            if (k) return k;
+          }
+          return null;
+        };
+        if (!rows.length) { resolve([]); return; }
+        const sample = rows[0];
+        const colDebut = findCol(sample, ['Début','Debut','Start','Date début','DateDebut']);
+        const colFin = findCol(sample, ['Fin','End','Date fin','DateFin']);
+        const colDe = findCol(sample, ['De','From','Départ','Depart','Origine','StartAddress']);
+        const colA = findCol(sample, ['À','A','To','Arrivée','Arrivee','Destination','EndAddress']);
+        const colRaison = findCol(sample, ['Raison','Reason','Type','Categorie','Catégorie','Purpose']);
+        const colDist = findCol(sample, ['Distance','Km','Kilometres','Kilomètres','Dist']);
+        const fmt = v => {
+          if (!v) return '';
+          if (v instanceof Date) return String(v.getHours()).padStart(2,'0')+':'+String(v.getMinutes()).padStart(2,'0');
+          const s = String(v);
+          // handles "2024-01-15 08:30" or "08:30" or "08:30:00"
+          const m = s.match(/(\d{1,2}):(\d{2})/);
+          return m ? m[1].padStart(2,'0')+':'+m[2] : s;
+        };
+        const fmtDate = v => {
+          if (!v) return '';
+          if (v instanceof Date) return v.toLocaleDateString('fr-CA');
+          return String(v).slice(0,10);
+        };
+        const trajets = [];
+        for (const row of rows) {
+          const raison = colRaison ? String(row[colRaison]||'').toLowerCase() : '';
+          if (colRaison && !raison.includes('pro') && !raison.includes('profes')) continue;
+          const debutVal = colDebut ? row[colDebut] : '';
+          const finVal = colFin ? row[colFin] : '';
+          const dist = colDist ? parseFloat(String(row[colDist]).replace(',','.')) : null;
+          trajets.push({
+            date: fmtDate(debutVal),
+            heure_debut: fmt(debutVal),
+            heure_fin: fmt(finVal),
+            depart: colDe ? String(row[colDe]||'') : '',
+            arrivee: colA ? String(row[colA]||'') : '',
+            distance: isNaN(dist) ? null : dist,
+            selected: true
+          });
+        }
+        resolve(trajets);
+      } catch(err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('Erreur lecture fichier'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const dnModal = document.getElementById('dn-import-modal');
+  if (!dnModal) return;
+
+  // Fermer modal
+  dnModal.addEventListener('click', e => {
+    if (e.target === dnModal || e.target.closest('#dn-import-close')) closeDnImportModal();
+  });
+
+  // Sélection fichier
+  document.getElementById('dn-file-input').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    document.getElementById('dn-file-name').textContent = file.name;
+    document.getElementById('dn-trajets-wrap').style.display = 'none';
+    document.getElementById('dn-import-result').style.display = 'none';
+    try {
+      _dnTrajets = await _dnParseExcel(file);
+      if (!_dnTrajets.length) {
+        document.getElementById('dn-import-result').style.display = 'block';
+        document.getElementById('dn-import-result').innerHTML = '<div class="alert alert-w"><p>Aucun trajet professionnel trouvé dans ce fichier.</p></div>';
+        return;
+      }
+      _dnRenderTrajets();
+    } catch(err) {
+      document.getElementById('dn-import-result').style.display = 'block';
+      document.getElementById('dn-import-result').innerHTML = `<div class="alert alert-w"><p>Erreur : ${esc(err.message)}</p></div>`;
+    }
+  });
+
+  // Toggle checkbox via event delegation
+  document.getElementById('dn-trajets-list').addEventListener('change', e => {
+    const cb = e.target.closest('input[data-dn-idx]');
+    if (!cb) return;
+    const idx = parseInt(cb.dataset.dnIdx);
+    if (!isNaN(idx) && _dnTrajets[idx]) _dnTrajets[idx].selected = cb.checked;
+  });
+
+  // Import
+  document.getElementById('dn-import-btn').addEventListener('click', async () => {
+    const sb = sbClient();
+    if (!sb) { toast('Supabase non configuré'); return; }
+    const selected = _dnTrajets.filter(t => t.selected);
+    if (!selected.length) { toast('Aucun trajet sélectionné'); return; }
+    const btn = document.getElementById('dn-import-btn');
+    btn.disabled = true; btn.textContent = 'Import en cours…';
+    let ok = 0, err = 0;
+    for (const t of selected) {
+      try {
+        const toISO = (date, time) => (date && time) ? new Date(date+'T'+time+':00').toISOString() : null;
+        const {error} = await sb.from('trajets').insert({
+          date: t.date || null,
+          heure_debut: toISO(t.date, t.heure_debut),
+          heure_fin: toISO(t.date, t.heure_fin),
+          distance: t.distance,
+          depart: t.depart || null,
+          arrivee: t.arrivee || null,
+          type: 'pro',
+          livraison_id: null
+        });
+        if (error) throw error;
+        ok++;
+      } catch(e) { err++; }
+    }
+    btn.disabled = false; btn.textContent = 'Importer les trajets sélectionnés';
+    const res = document.getElementById('dn-import-result');
+    res.style.display = 'block';
+    res.innerHTML = `<div class="alert alert-${err?'w':'ok'}"><p>${ok} trajet${ok>1?'s':''} importé${ok>1?'s':''}${err?' · '+err+' erreur'+(err>1?'s':''):''}.</p></div>`;
+    toast(`${ok} trajet${ok>1?'s':''} importé${ok>1?'s':''} ✓`);
+    if (!err) { setTimeout(closeDnImportModal, 1500); }
+  });
+});
+
+function _qUpdateHeaderTimer() {
+  const hdrTime = document.getElementById('hdr-quart-time');
+  if (!hdrTime) return;
+  const etat = localStorage.getItem('quart_etat') || 'arrete';
+  const elapsed = parseInt(localStorage.getItem('quart_pause_elapsed') || '0');
+  if (etat === 'en_cours' || (etat !== 'arrete' && elapsed > 0)) {
+    let ms = elapsed;
+    if (etat === 'en_cours') {
+      const debut = parseInt(localStorage.getItem('quart_debut') || '0');
+      ms = elapsed + (Date.now() - debut);
+    }
+    const totalSec = Math.floor(ms / 1000);
+    const mm = Math.floor(totalSec / 60), ss = totalSec % 60;
+    hdrTime.textContent = String(mm).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
+    hdrTime.style.display = 'inline';
+  } else {
+    hdrTime.style.display = 'none';
+  }
+}
 
 function rQuart(){
   document.getElementById('panel-quart').innerHTML='';
@@ -1662,6 +1885,9 @@ function init(){
   loadLS();
   initPWAIcon();
   initEvents();
+  // Timer header global — tourne toujours, peu importe l'onglet actif
+  _qUpdateHeaderTimer();
+  setInterval(_qUpdateHeaderTimer, 1000);
   rDash();
   if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
     setTimeout(async()=>{
