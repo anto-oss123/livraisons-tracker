@@ -216,6 +216,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
     <div id="panel-depenses" class="panel"></div>
     <div id="panel-fiscal" class="panel"></div>
     <div id="panel-outils" class="panel"></div>
+    <div id="panel-quart" class="panel"></div>
   </main>
 </div>
 </div>
@@ -241,7 +242,6 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
 
 <div id="toast"></div>
 <div class="tip-popup" id="tip-popup"></div>
-<div id="quart-panel" style="display:none;position:fixed;top:calc(56px + env(safe-area-inset-top,0px));left:0;right:0;z-index:150;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,.1)"><div style="font-size:13px;color:var(--text2);margin-bottom:8px" id="quart-status">Aucun quart en cours</div><div style="font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:2px;margin-bottom:12px;color:var(--text)" id="quart-timer">00:00:00</div><div style="display:flex;gap:8px"><button class="btn btn-ok btn-sm" id="quart-start">Démarrer</button><button class="btn btn-s btn-sm" id="quart-pause" style="display:none">Pause</button><button class="btn btn-d btn-sm" id="quart-stop" style="display:none">Arrêter</button></div></div>
 
 <div id="drawer-overlay"></div>
 <div id="drawer">
@@ -407,8 +407,8 @@ const PLAT_CLR={'Instacart':'#0AAD0A','DoorDash':'#FF3008','Uber Eats':'#142328'
 const MIXED=['Téléphone','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
 const VEH=['Recharge VE','Assurance auto','Entretien véhicule','Immatriculation','Leasing'];
 const DATE_LABEL_CATS=['Téléphone','Assurance auto','Immatriculation','Leasing'];
-const TABS=['dashboard','livraisons','depenses','fiscal','outils'];
-const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',outils:'Outils'};
+const TABS=['dashboard','livraisons','depenses','fiscal','outils','quart'];
+const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',outils:'Outils',quart:'Quart'};
 const LS_KEY='lt_v4';
 
 // ── STATE ──────────────────────────────────────────────────────────────────────
@@ -570,7 +570,7 @@ function goTab(tab){
   render();
 }
 function render(){
-  ({dashboard:rDash,livraisons:rLiv,depenses:rDep,fiscal:rFisc,outils:rOutils})[S.tab]?.();
+  ({dashboard:rDash,livraisons:rLiv,depenses:rDep,fiscal:rFisc,outils:rOutils,quart:rQuart})[S.tab]?.();
 }
 
 // ── SYNC ───────────────────────────────────────────────────────────────────────
@@ -619,6 +619,16 @@ function rDash(){
       <div class="scard"><div class="slabel">Ratio pro</div><div class="sval b">${f.proRatio!=null?Math.round(f.proRatio*100)+'%':'—'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.proRatio!=null?'km pro / km total':'Configurer les km'}</div></div>
     </div>
     ${alerts.map(a=>`<div class="alert alert-${a.t}"><em>${a.i}</em><p>${a.m}</p></div>`).join('')}
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="card-title" style="margin-bottom:0">Quart rapide</div>
+        <span style="font-size:11px;font-weight:600;color:${_quartRunning?'var(--ok)':_quartSec>0?'var(--warn)':'var(--text2)'}">${_quartRunning?'En cours':_quartSec>0?'En pause':'Inactif'}</span>
+      </div>
+      <div style="font-size:36px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:3px;color:var(--text);margin-bottom:14px" id="dash-quart-timer">${_quartFmt(_quartSec)}</div>
+      <div style="display:flex;gap:8px">
+        ${!_quartRunning&&_quartSec===0?`<button class="btn btn-ok btn-sm" data-qaction="start">Démarrer</button>`:_quartRunning?`<button class="btn btn-s btn-sm" data-qaction="pause">Pause</button><button class="btn btn-d btn-sm" data-qaction="stop">Arrêter</button>`:`<button class="btn btn-ok btn-sm" data-qaction="start">Reprendre</button><button class="btn btn-d btn-sm" data-qaction="stop">Arrêter</button>`}
+      </div>
+    </div>
     <div class="stitle">Dernières livraisons</div>
     ${recent.length===0?`<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><p>Aucune livraison encore.</p></div>`:recent.map(d=>livCard(d,false)).join('')}
   `;
@@ -1183,7 +1193,7 @@ function closeM(id){
 function initEvents(){
   document.getElementById('bnav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);});
   document.getElementById('sb-nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);});
-  document.getElementById('mob-quart').addEventListener('click',()=>{const p=document.getElementById('quart-panel');if(p)p.style.display=p.style.display==='none'?'block':'none';});
+  document.getElementById('mob-quart').addEventListener('click',()=>goTab('quart'));
   document.getElementById('sb-sync').addEventListener('click',doSync);
   document.getElementById('sb-settings').addEventListener('click',openSettings);
   document.getElementById('mob-menu').addEventListener('click',openDrawer);
@@ -1247,6 +1257,10 @@ function initEvents(){
       S.cfg.vehicleKmNow=parseFloat(document.getElementById('v-km-now')?.value)||0;
       saveLS();rFsub();toast('Km enregistrés');return;}
     if(e.target.id==='ded-toggle'){S.dedDetailOpen=!S.dedDetailOpen;rFsub();return;}
+
+    // Quart (dashboard card)
+    const qBtn=e.target.closest('#panel-dashboard [data-qaction]');
+    if(qBtn){_quartHandleAction(qBtn.dataset.qaction);return;}
 
     // Outils
     if(e.target.id==='outils-sync-btn'){doSync();return;}
@@ -1338,33 +1352,41 @@ function initPWAIcon(){
 // ── QUART ─────────────────────────────────────────────────────────────────────
 let _quartSec=0,_quartInterval=null,_quartRunning=false;
 function _quartFmt(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');}
-function _quartTick(){_quartSec++;const t=document.getElementById('quart-timer');if(t)t.textContent=_quartFmt(_quartSec);}
-document.addEventListener('click',e=>{
-  if(e.target.id==='quart-start'){
-    if(_quartRunning)return;
-    _quartRunning=true;_quartInterval=setInterval(_quartTick,1000);
-    const st=document.getElementById('quart-status');if(st)st.textContent='Quart en cours';
-    const s=document.getElementById('quart-start'),p=document.getElementById('quart-pause'),sp=document.getElementById('quart-stop');
-    if(s)s.style.display='none';if(p)p.style.display='';if(sp)sp.style.display='';
-    return;
-  }
-  if(e.target.id==='quart-pause'){
-    if(!_quartRunning)return;
-    _quartRunning=false;clearInterval(_quartInterval);_quartInterval=null;
-    const st=document.getElementById('quart-status');if(st)st.textContent='Quart en pause';
-    const s=document.getElementById('quart-start'),p=document.getElementById('quart-pause');
-    if(s){s.style.display='';s.textContent='Reprendre';}if(p)p.style.display='none';
-    return;
-  }
-  if(e.target.id==='quart-stop'){
-    _quartRunning=false;clearInterval(_quartInterval);_quartInterval=null;_quartSec=0;
-    const st=document.getElementById('quart-status');if(st)st.textContent='Aucun quart en cours';
-    const t=document.getElementById('quart-timer');if(t)t.textContent='00:00:00';
-    const s=document.getElementById('quart-start'),p=document.getElementById('quart-pause'),sp=document.getElementById('quart-stop');
-    if(s){s.style.display='';s.textContent='Démarrer';}if(p)p.style.display='none';if(sp)sp.style.display='none';
-    return;
-  }
-});
+function _quartTick(){
+  _quartSec++;
+  const fmt=_quartFmt(_quartSec);
+  const t1=document.getElementById('quart-page-timer');if(t1)t1.textContent=fmt;
+  const t2=document.getElementById('dash-quart-timer');if(t2)t2.textContent=fmt;
+}
+function _quartHandleAction(action){
+  if(action==='start'){if(_quartRunning)return;_quartRunning=true;_quartInterval=setInterval(_quartTick,1000);}
+  else if(action==='pause'){if(!_quartRunning)return;_quartRunning=false;clearInterval(_quartInterval);_quartInterval=null;}
+  else if(action==='stop'){_quartRunning=false;clearInterval(_quartInterval);_quartInterval=null;_quartSec=0;}
+  render();
+}
+function rQuart(){
+  const statusColor=_quartRunning?'var(--ok)':_quartSec>0?'var(--warn)':'var(--text2)';
+  const statusText=_quartRunning?'Quart en cours':_quartSec>0?'Quart en pause':'Aucun quart en cours';
+  const btns=!_quartRunning&&_quartSec===0
+    ?`<button class="btn btn-ok" style="flex:1" data-qaction="start">Démarrer</button>`
+    :_quartRunning
+    ?`<button class="btn btn-s" style="flex:1" data-qaction="pause">Pause</button><button class="btn btn-d" style="flex:1" data-qaction="stop">Arrêter</button>`
+    :`<button class="btn btn-ok" style="flex:1" data-qaction="start">Reprendre</button><button class="btn btn-d" style="flex:1" data-qaction="stop">Arrêter</button>`;
+  document.getElementById('panel-quart').innerHTML=`<div id="quart-page">
+    <div class="card" style="text-align:center;padding:32px 20px 24px">
+      <div style="display:flex;justify-content:center;margin-bottom:16px;color:var(--accent)"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/><path d="M12 3v2"/></svg></div>
+      <div class="card-title">Statut</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:20px;color:${statusColor}">${statusText}</div>
+      <div style="font-size:60px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:4px;color:var(--text);margin-bottom:28px;line-height:1" id="quart-page-timer">${_quartFmt(_quartSec)}</div>
+      <div style="display:flex;gap:10px">${btns}</div>
+    </div>
+  </div>`;
+  document.getElementById('quart-page').addEventListener('click',e=>{
+    const btn=e.target.closest('[data-qaction]');if(btn)_quartHandleAction(btn.dataset.qaction);
+  });
+}
+// Dashboard quart card delegation (via existing document handler — see initEvents)
+
 
 // ── INIT ───────────────────────────────────────────────────────────────────────
 function init(){
