@@ -460,12 +460,18 @@ function loadLS(){
     const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
     if(d.deliveries) S.deliveries=d.deliveries;
     if(d.expenses)   S.expenses=d.expenses;
-    if(d.cfg)        S.cfg={...S.cfg,...d.cfg};
+    if(d.cfg){
+      const{vehicleKmJan:_a,vehicleKmNow:_b,...cfgWithout}=d.cfg;
+      S.cfg={...S.cfg,...cfgWithout};
+    }
   }catch(e){}
   refreshProRatio();
 }
 function saveLS(){
-  try{localStorage.setItem(LS_KEY,JSON.stringify({deliveries:S.deliveries,expenses:S.expenses,cfg:S.cfg}));}catch(e){}
+  try{
+    const{vehicleKmJan:_a,vehicleKmNow:_b,...cfgWithout}=S.cfg;
+    localStorage.setItem(LS_KEY,JSON.stringify({deliveries:S.deliveries,expenses:S.expenses,cfg:cfgWithout}));
+  }catch(e){}
 }
 
 // ── SUPABASE ───────────────────────────────────────────────────────────────────
@@ -1534,7 +1540,17 @@ function initEvents(){
     if(e.target.id==='save-vkm'){
       S.cfg.vehicleKmJan=parseFloat(document.getElementById('v-km-jan')?.value)||0;
       S.cfg.vehicleKmNow=parseFloat(document.getElementById('v-km-now')?.value)||0;
-      refreshProRatio();saveLS();rFsub();toast('Km enregistrés');return;}
+      refreshProRatio();saveLS();rFsub();
+      const sb=sbClient();
+      if(sb){
+        sb.from('parametres').upsert([
+          {cle:'odometer_start',valeur:String(S.cfg.vehicleKmJan)},
+          {cle:'odometer_current',valeur:String(S.cfg.vehicleKmNow)}
+        ],{onConflict:'cle'}).then(({error})=>{
+          if(error) console.error('[SB] save odometer error',error.message);
+        });
+      }
+      toast('Km enregistrés');return;}
     if(e.target.id==='ded-toggle'){S.dedDetailOpen=!S.dedDetailOpen;rFsub();return;}
     if(e.target.id==='save-snap-btn'){
       const now=new Date(); const btn=e.target;
