@@ -23,7 +23,7 @@
   --sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);
 }
 @media(prefers-color-scheme:dark){
-  :root{--bg:#000;--card:#1c1c1e;--card2:#2c2c2e;--border:rgba(255,255,255,0.1);--text:#fff;--text2:rgba(235,235,245,0.6);--text3:#636366;--grad:linear-gradient(135deg,rgba(50,0,80,.25),rgba(0,20,80,.25));}
+  :root{--bg:#000;--card:#1E1E1E;--card2:#2A2A2A;--border:rgba(255,255,255,0.12);--text:#E5E5E5;--text2:#A0A0A0;--text3:#6B6B6B;--ok:#4ADE80;--accent:#60A5FA;--grad:linear-gradient(135deg,rgba(50,0,80,.25),rgba(0,20,80,.25));}
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;font-size:16px;-webkit-font-smoothing:antialiased}
 body{background-image:var(--grad);background-attachment:fixed}
@@ -145,8 +145,10 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
 .conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#8E8E93;flex-shrink:0}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-/* Safari/iOS: preserve native date picker */
+/* Safari/iOS: preserve native date picker for filter inputs */
 input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cursor:pointer}
+/* Modal date inputs: match other fi inputs exactly */
+#m-liv input[type="date"].fi,#m-dep input[type="date"].fi{-webkit-appearance:none;appearance:none;min-height:unset;line-height:normal;box-sizing:border-box}
 /* Phase 2: ensure date input is never clipped by stacking contexts */
 #panel-livraisons input[type="date"]{position:relative;z-index:2}
 /* Print styles */
@@ -192,6 +194,14 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
   #toast{bottom:24px}
   .modal{max-width:540px;margin:0 auto;border-radius:20px}
   .moverlay{align-items:center;justify-content:center;padding:20px}
+  #dash-chart{max-height:300px}
+}
+@media(prefers-color-scheme:dark){
+  .fi,.fs,.fta{background:#2A2A2A;color:#E5E5E5;}
+  .fi::placeholder,.fta::placeholder{color:#6B6B6B;}
+  .btn:disabled{opacity:.6;cursor:not-allowed;}
+  .modal{background:#1E1E1E;}
+  .scard{background:rgba(30,30,30,0.9);border-color:rgba(255,255,255,0.12);}
 }
 </style>
 </head>
@@ -397,6 +407,7 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" onerror="console.warn('[LT] SheetJS CDN indisponible')"></script>
 <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js" onerror="console.warn('[LT] jsPDF CDN indisponible')"></script>
 <script src="https://unpkg.com/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js" onerror="console.warn('[LT] AutoTable CDN indisponible')"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" onerror="console.warn('[LT] Chart.js CDN indisponible')"></script>
 <script>
 'use strict';
 window.addEventListener('unhandledrejection',e=>e.preventDefault());
@@ -426,6 +437,7 @@ const MONTH_NAMES=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct'
 const TABS=['dashboard','livraisons','depenses','fiscal','outils'];
 const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',outils:'Outils'};
 const LS_KEY='lt_v4';
+let _dashMode='semaine';
 
 // ── HELPERS (rounding) ─────────────────────────────────────────────────────────
 const r2=x=>Math.round((x||0)*100)/100;
@@ -751,13 +763,15 @@ function rDash(){
   const wk=S.deliveries.filter(d=>parseDate(d.date)>=wkStart);
   const mo=S.deliveries.filter(d=>parseDate(d.date)>=moStart);
   const f=calcFiscal();
+  const durTodMin=tod.reduce((s,d)=>s+(d.dureeMin||0),0);
+  const durAllMin=S.deliveries.reduce((s,d)=>s+(d.dureeMin||0),0);
+  const fmtD=m=>m<=0?'—':m>=60?`${Math.floor(m/60)}h ${m%60}min`:`${m}min`;
   const alerts=[];
   const _iWarn='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
   const _iInfo='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
   if(f.needsTPS) alerts.push({t:'w',i:_iWarn,m:`Tu dépasses ${$f(30000)} — inscription TPS/TVQ obligatoire !`});
   else if(f.gross>24000) alerts.push({t:'w',i:_iWarn,m:`À ${$f(30000-f.gross)} du seuil TPS/TVQ`});
   if(f.rate>0) alerts.push({t:'i',i:_iInfo,m:`Mets ~${Math.ceil(Math.max(f.rate,.25)*100)}% de côté (~${$f(f.gross*Math.max(f.rate,.25))})`});
-  const recent=[...S.deliveries].sort((a,b)=>parseDate(b.date)-parseDate(a.date)).slice(0,5);
   document.getElementById('panel-dashboard').innerHTML=`
     <div class="grid2">
       <div class="scard"><div class="slabel">Aujourd'hui</div><div class="sval g">${$f(sum(tod))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${tod.length} livraison${tod.length!==1?'s':''}</div></div>
@@ -771,10 +785,88 @@ function rDash(){
       <div class="scard"><div class="slabel">Km pro ${S.cfg.year}</div><div class="sval y">${f.km.toFixed(0)}<span style="font-size:13px"> km</span></div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.divs.length} livraisons</div></div>
       <div class="scard"><div class="slabel">Ratio pro</div><div class="sval b">${f.proRatio!=null?Math.round(f.proRatio*100)+'%':'—'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.proRatio!=null?'km pro / km total':'Configurer les km'}</div></div>
     </div>
+    <div class="grid2">
+      <div class="scard"><div class="slabel">Temps aujourd'hui</div><div class="sval" style="font-size:18px">${fmtD(durTodMin)}</div></div>
+      <div class="scard"><div class="slabel">Temps cumulé</div><div class="sval" style="font-size:18px">${fmtD(durAllMin)}</div></div>
+    </div>
     ${alerts.map(a=>`<div class="alert alert-${a.t}"><em>${a.i}</em><p>${a.m}</p></div>`).join('')}
-    <div class="stitle">Dernières livraisons</div>
-    ${recent.length===0?`<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><p>Aucune livraison encore.</p></div>`:recent.map(d=>livCard(d,false)).join('')}
+    <div class="stitle">Gains par période</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button class="chip${_dashMode==='semaine'?' active':''}" data-dashmode="semaine">Semaine</button>
+      <button class="chip${_dashMode==='mois'?' active':''}" data-dashmode="mois">Mois</button>
+      <button class="chip${_dashMode==='annee'?' active':''}" data-dashmode="annee">Année</button>
+    </div>
+    <div id="dash-chart-wrap" class="card" style="padding:12px;margin-bottom:12px">
+      <canvas id="dash-chart" style="width:100%;max-height:220px"></canvas>
+    </div>
   `;
+  requestAnimationFrame(()=>renderDashChart());
+}
+
+function renderDashChart(){
+  const wrap=document.getElementById('dash-chart-wrap');
+  const canvas=document.getElementById('dash-chart');
+  if(!canvas||!wrap)return;
+  if(!window.Chart){
+    wrap.innerHTML='<p style="text-align:center;color:var(--text2);padding:30px 20px;font-size:13px">Graphique indisponible</p>';
+    return;
+  }
+  const now=new Date();
+  let labels=[], barData=[];
+  if(_dashMode==='semaine'){
+    for(let i=6;i>=0;i--){
+      const d=new Date(now);d.setDate(now.getDate()-i);
+      const str=d.toLocaleDateString('fr-CA');
+      const total=S.deliveries.filter(x=>x.date===str).reduce((s,x)=>s+(x.rev||0)+(x.tip||0),0);
+      labels.push(d.toLocaleDateString('fr-CA',{weekday:'short'}));
+      barData.push(r2(total));
+    }
+  }else if(_dashMode==='mois'){
+    const yr=now.getFullYear(), mo=now.getMonth();
+    const days=new Date(yr,mo+1,0).getDate();
+    for(let d=1;d<=days;d+=7){
+      const wEnd=Math.min(d+6,days);
+      const pfx=`${yr}-${String(mo+1).padStart(2,'0')}`;
+      const total=S.deliveries.filter(x=>{if(!x.date||!x.date.startsWith(pfx))return false;const day=parseInt(x.date.slice(8));return day>=d&&day<=wEnd;}).reduce((s,x)=>s+(x.rev||0)+(x.tip||0),0);
+      labels.push(`S${Math.ceil(d/7)}`);
+      barData.push(r2(total));
+    }
+  }else{
+    const yr=now.getFullYear();
+    for(let m=0;m<12;m++){
+      const pfx=`${yr}-${String(m+1).padStart(2,'0')}`;
+      const total=S.deliveries.filter(x=>x.date&&x.date.startsWith(pfx)).reduce((s,x)=>s+(x.rev||0)+(x.tip||0),0);
+      labels.push(MONTH_NAMES[m]);
+      barData.push(r2(total));
+    }
+  }
+  if(barData.every(v=>v===0)){
+    wrap.innerHTML='<p style="text-align:center;color:var(--text2);padding:30px 20px;font-size:13px">Aucune livraison sur cette période</p>';
+    return;
+  }
+  let cum=0;
+  const lineData=barData.map(v=>{cum+=v;return r2(cum);});
+  if(canvas._ltChart)canvas._ltChart.destroy();
+  const isDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+  const textClr=isDark?'#A0A0A0':'#6e6e73';
+  const gridClr=isDark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)';
+  const barClr=isDark?'rgba(96,165,250,0.75)':'rgba(0,122,255,0.75)';
+  const lineClr=isDark?'#4ADE80':'#34C759';
+  canvas._ltChart=new Chart(canvas,{
+    type:'bar',
+    data:{labels,datasets:[
+      {type:'bar',label:'Gains',data:barData,backgroundColor:barClr,borderRadius:4,order:2},
+      {type:'line',label:'Cumulatif',data:lineData,borderColor:lineClr,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:lineClr,tension:.3,order:1,yAxisID:'y2'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:true,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+$f(c.parsed.y)}}},
+      scales:{
+        x:{grid:{color:gridClr},ticks:{color:textClr,font:{size:11}}},
+        y:{grid:{color:gridClr},ticks:{color:textClr,font:{size:11},callback:v=>v===0?'0':'$'+v},position:'left'},
+        y2:{display:false}
+      }
+    }
+  });
 }
 
 // ── LIVRAISONS ─────────────────────────────────────────────────────────────────
@@ -1061,6 +1153,15 @@ function rFsub(){
     const setA=f.gross*Math.max(f.rate,.25);
     el.innerHTML=`
       <div class="card"><div class="card-title">Revenus bruts ${yr}</div><div class="card-value">${$f(f.gross)}</div><div class="card-sub">${f.divs.length} livraisons</div></div>
+      <div class="card" style="background:rgba(52,199,89,.05);border:1px solid rgba(52,199,89,.2);margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:8px">Résumé fiscal</div>
+        <table class="dtable">
+          <tr><td>Revenus bruts</td><td style="text-align:right;font-weight:600">${$f(f.gross)}</td></tr>
+          <tr><td>Total déductions</td><td style="text-align:right;font-weight:600;color:var(--ok)">${$f(f.totDed)}</td></tr>
+          <tr><td style="font-weight:700">Revenu net estimé</td><td style="text-align:right;font-weight:700;color:var(--accent)">${$f(f.net)}</td></tr>
+        </table>
+        ${f.totDed>f.gross&&f.gross>0?'<p style="font-size:11px;color:var(--text2);margin-top:6px">Déductions supérieures aux revenus</p>':''}
+      </div>
       ${f.needsTPS?`<div class="alert alert-w"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></em><p>Tu dois percevoir et remettre la TPS/TVQ.</p></div><div class="grid2"><div class="scard"><div class="slabel">TPS (5%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TPS)}</div></div><div class="scard"><div class="slabel">TVQ (9.975%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TVQ)}</div></div></div>`
       :`<div class="alert alert-i"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></em><p>Seuil TPS/TVQ : ${$f(f.gross)} / ${$f(30000)} (${$f(Math.max(0,30000-f.gross))} restant)</p></div><div class="pbar"><div class="pfill" style="width:${Math.min(100,f.gross/300).toFixed(1)}%"></div></div>`}
       ${f.total>0?`<div class="stitle">Estimation impôt</div><div class="card"><table class="dtable"><tr><td>Revenu net imposable <span class="tip" title="Votre revenu brut moins toutes vos déductions admissibles. C'est sur ce montant que l'impôt est calculé.">?</span></td><td>${$f(f.net)}</td></tr><tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr><tr><td>Impôt provincial (QC)</td><td>${$f(f.qcOwed)}</td></tr><tr><td>Cotisation RRQ</td><td>${$f(f.rrq)}</td></tr><tr><td style="font-weight:700">Total estimé</td><td style="color:var(--err);font-weight:700">${$f(f.total)}</td></tr></table></div><div class="card" style="background:rgba(0,122,255,.06);border:1px solid rgba(0,122,255,.15)"><div class="card-title">Mise de côté recommandée</div><div class="card-value" style="color:var(--accent)">${$f(setA)}</div><div class="card-sub">${Math.ceil(Math.max(f.rate,.25)*100)}% des revenus bruts</div></div>`:''}
@@ -1377,6 +1478,12 @@ function initEvents(){
 
   // Tooltip popup
   const _tipPop=document.getElementById('tip-popup');
+  // Dashboard chart mode buttons
+  document.addEventListener('click',e=>{
+    const chartBtn=e.target.closest('[data-dashmode]');
+    if(chartBtn){_dashMode=chartBtn.dataset.dashmode;rDash();return;}
+  });
+
   document.addEventListener('click',e=>{
     const tipTgt=e.target.closest('.tip');
     if(tipTgt&&_tipPop){
@@ -1485,6 +1592,38 @@ function initEvents(){
 
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){document.querySelectorAll('.moverlay.open').forEach(m=>closeM(m.id));closeDrawer();}
+  });
+
+  // Swipe-to-close modals
+  document.querySelectorAll('.moverlay').forEach(function(overlay){
+    var modal=overlay.querySelector('.modal');
+    if(!modal)return;
+    var startY=0,swipeActive=false;
+    modal.addEventListener('touchstart',function(e){
+      if(e.touches.length!==1){swipeActive=false;return;}
+      swipeActive=modal.scrollTop===0;
+      startY=e.touches[0].clientY;
+    },{passive:true});
+    modal.addEventListener('touchmove',function(e){
+      if(!swipeActive)return;
+      var dy=e.touches[0].clientY-startY;
+      if(dy>0){modal.style.transform='translateY('+dy+'px)';e.preventDefault();}
+      else{swipeActive=false;modal.style.transform='';}
+    },{passive:false});
+    modal.addEventListener('touchend',function(e){
+      if(!swipeActive)return;
+      swipeActive=false;
+      var dy=e.changedTouches[0].clientY-startY;
+      if(dy>80){
+        modal.style.transition='transform .3s ease-out';
+        modal.style.transform='translateY(110%)';
+        setTimeout(function(){modal.style.transition='';modal.style.transform='';closeM(overlay.id);},300);
+      }else{
+        modal.style.transition='transform .2s ease-out';
+        modal.style.transform='';
+        setTimeout(function(){modal.style.transition='';},200);
+      }
+    },{passive:true});
   });
 }
 
