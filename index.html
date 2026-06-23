@@ -563,7 +563,7 @@ const PLAT_LOGO={'Instacart':'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgA
 const platIco=p=>{
   const c=PLAT_CLR[p]||'#007AFF';
   const logo=PLAT_LOGO[p];
-  if(logo)return`<span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:${c};flex-shrink:0;overflow:hidden"><img src="${logo}" style="width:28px;height:28px;object-fit:contain" alt="${p}"></span>`;
+  if(logo)return`<span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;flex-shrink:0;overflow:hidden"><img src="${logo}" style="width:36px;height:36px;object-fit:cover" alt="${p}"></span>`;
   const l=(p||'?')[0].toUpperCase();
   return`<span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:${c};color:#fff;font-size:15px;font-weight:700;flex-shrink:0">${l}</span>`;
 };
@@ -573,7 +573,7 @@ function fdate(s){try{const d=parseDate(s);return d.toLocaleDateString('fr-CA',{
 function fdateShort(s){try{const d=parseDate(s);return d.toLocaleDateString('fr-CA',{day:'2-digit',month:'2-digit',year:'2-digit'});}catch(e){return s||'';}}
 function normSec(val){
   if(!val||val<=0)return 0;
-  return val<=3600?val*60:val;
+  return val; // données toujours en secondes dans Supabase
 }
 function fmtDur(sec){
   if(!sec||sec<=0)return'';
@@ -583,7 +583,7 @@ function fmtDur(sec){
   return m+'min';
 }
 function secToHMS(sec){
-  var s=normSec(sec);
+  var s=sec||0;
   return{h:Math.floor(s/3600),m:Math.floor((s%3600)/60),s:s%60};
 }
 function hmsToSec(h,m,s){return(h*3600)+(m*60)+s;}
