@@ -304,7 +304,11 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
   </div>
   <div class="fg"><label class="fl">Distance (km)</label><input type="number" inputmode="decimal" class="fi" id="liv-km" step="0.1" min="0" placeholder="0.0"></div>
   <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="liv-date"></div>
-  <div class="fg"><label class="fl">Durée (min)</label><input type="number" inputmode="numeric" class="fi" id="liv-duree" step="1" min="0" placeholder="45"></div>
+  <div class="fg"><label class="fl">Durée</label><div class="frow" style="gap:8px">
+    <div style="flex:1;text-align:center"><input type="number" inputmode="numeric" class="fi" id="liv-duree-h" min="0" placeholder="0" style="font-size:16px;text-align:center"><div style="font-size:11px;color:var(--c-sub);margin-top:2px">H</div></div>
+    <div style="flex:1;text-align:center"><input type="number" inputmode="numeric" class="fi" id="liv-duree-m" min="0" max="59" placeholder="0" style="font-size:16px;text-align:center"><div style="font-size:11px;color:var(--c-sub);margin-top:2px">Min</div></div>
+    <div style="flex:1;text-align:center"><input type="number" inputmode="numeric" class="fi" id="liv-duree-s" min="0" max="59" placeholder="0" style="font-size:16px;text-align:center"><div style="font-size:11px;color:var(--c-sub);margin-top:2px">Sec</div></div>
+  </div></div>
   <div class="fg"><label class="fl">Notes</label><input type="text" class="fi" id="liv-notes" placeholder="Optionnel…"></div>
   <div style="display:flex;gap:10px">
     <button class="btn btn-p" style="flex:1" id="liv-save">Enregistrer</button>
@@ -560,7 +564,19 @@ const platIco=p=>{const c=PLAT_CLR[p]||'#007AFF';const l=(p||'?')[0].toUpperCase
 function parseDate(s){if(!s)return new Date(NaN);return s.includes('T')?new Date(s):new Date(s+'T00:00:00');}
 function fdate(s){try{const d=parseDate(s);return d.toLocaleDateString('fr-CA',{day:'numeric',month:'short'});}catch(e){return s||'';}}
 function fdateShort(s){try{const d=parseDate(s);return d.toLocaleDateString('fr-CA',{day:'2-digit',month:'2-digit',year:'2-digit'});}catch(e){return s||'';}}
-function fmtDur(min){if(!min||min<=0)return'';return min>=60?`${Math.floor(min/60)}h${String(min%60).padStart(2,'0')}`:`${min}min`;}
+function fmtDur(sec){
+  if(!sec||sec<=0)return'';
+  // Détection ancien format (minutes) vs nouveau (secondes)
+  var s=sec<=300?sec*60:sec;
+  var h=Math.floor(s/3600),m=Math.floor((s%3600)/60);
+  if(h>0)return h+'h'+String(m).padStart(2,'0')+'min';
+  return m+'min';
+}
+function secToHMS(sec){
+  var s=sec<=300&&sec>0?sec*60:sec;
+  return{h:Math.floor(s/3600),m:Math.floor((s%3600)/60),s:s%60};
+}
+function hmsToSec(h,m,s){return(h*3600)+(m*60)+s;}
 function calcBracket(inc,brackets){let tax=0,prev=0;for(const b of brackets){if(inc<=prev)break;tax+=(Math.min(inc,b.max)-prev)*b.r;prev=b.max;}return tax;}
 
 function expAnnual(e){
@@ -920,13 +936,16 @@ function openLivModal(id=null){
     document.getElementById('liv-tip').value=d.tip||'';
     document.getElementById('liv-km').value=d.km||'';
     document.getElementById('liv-date').value=d.date||today;
-    document.getElementById('liv-duree').value=d.dureeMin||'';
+    var hms=secToHMS(d.dureeMin||0);
+    document.getElementById('liv-duree-h').value=hms.h||'';
+    document.getElementById('liv-duree-m').value=hms.m||'';
+    document.getElementById('liv-duree-s').value=hms.s||'';
     document.getElementById('liv-notes').value=d.notes||'';
   }else{
     document.getElementById('liv-title').textContent='Nouvelle livraison';
     document.getElementById('liv-id').value='';
     sel.value=S.cfg.defaultPlat;
-    ['liv-rev','liv-tip','liv-km','liv-duree','liv-notes'].forEach(id=>document.getElementById(id).value='');
+    ['liv-rev','liv-tip','liv-km','liv-duree-h','liv-duree-m','liv-duree-s','liv-notes'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('liv-date').value=today;
   }
   openM('m-liv');
@@ -936,7 +955,7 @@ function saveLiv(){
   const id=document.getElementById('liv-id').value||uid();
   const dateVal=document.getElementById('liv-date').value;
   if(!dateVal){toast('Date requise');return;}
-  const d={id,plat:document.getElementById('liv-plat').value,rev:parseFloat(document.getElementById('liv-rev').value)||0,tip:parseFloat(document.getElementById('liv-tip').value)||0,km:parseFloat(document.getElementById('liv-km').value)||0,date:dateVal,dureeMin:parseInt(document.getElementById('liv-duree').value)||0,notes:document.getElementById('liv-notes').value};
+  const d={id,plat:document.getElementById('liv-plat').value,rev:parseFloat(document.getElementById('liv-rev').value)||0,tip:parseFloat(document.getElementById('liv-tip').value)||0,km:parseFloat(document.getElementById('liv-km').value)||0,date:dateVal,dureeMin:hmsToSec(parseInt(document.getElementById('liv-duree-h')?.value)||0,parseInt(document.getElementById('liv-duree-m')?.value)||0,parseInt(document.getElementById('liv-duree-s')?.value)||0),notes:document.getElementById('liv-notes').value};
   const i=S.deliveries.findIndex(x=>x.id===id);
   if(i>=0)S.deliveries[i]=d;else S.deliveries.unshift(d);
   refreshProRatio(); saveLS(); sbUpsert('livraisons',dToDB(d)); closeM('m-liv'); render(); toast('Livraison enregistrée');
@@ -1614,6 +1633,10 @@ function initEvents(){
   document.querySelectorAll('.moverlay').forEach(function(overlay){
     var modal=overlay.querySelector('.modal');
     if(!modal)return;
+    // Force GPU rendering to prevent flash on Safari iOS
+    modal.style.willChange='transform';
+    modal.style.webkitBackfaceVisibility='hidden';
+    modal.style.backfaceVisibility='hidden';
     var startY=0,swipeActive=false;
     modal.addEventListener('touchstart',function(e){
       if(e.touches.length!==1){swipeActive=false;return;}
@@ -1631,9 +1654,19 @@ function initEvents(){
       swipeActive=false;
       var dy=e.changedTouches[0].clientY-startY;
       if(dy>80){
+        // Fade overlay and slide modal simultaneously
+        overlay.style.transition='opacity .3s ease-out';
+        overlay.style.opacity='0';
         modal.style.transition='transform .3s ease-out';
         modal.style.transform='translateY(110%)';
-        setTimeout(function(){modal.style.transition='';modal.style.transform='';closeM(overlay.id);},300);
+        modal.addEventListener('transitionend',function handler(){
+          modal.removeEventListener('transitionend',handler);
+          modal.style.transition='';
+          modal.style.transform='';
+          overlay.style.transition='';
+          overlay.style.opacity='';
+          closeM(overlay.id);
+        });
       }else{
         modal.style.transition='transform .2s ease-out';
         modal.style.transform='';
