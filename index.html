@@ -392,6 +392,13 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
     <div class="fg"><label class="fl">Année fiscale</label><input type="number" class="fi" id="s-year" min="2020" max="2035"></div>
     <div class="fg"><label class="fl">Coût/kWh ($)</label><input type="number" class="fi" id="s-kwh" step="0.001" min="0"></div>
   </div>
+  <div class="div"></div>
+  <div class="stitle">Rentabilité des livraisons</div>
+  <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Seuils de taux horaire net (revenu − coût km CRA ÷ durée)</div>
+  <div class="frow">
+    <div class="fg"><label class="fl">🟢 Seuil rentable ($/h)</label><input type="number" class="fi" id="s-seuil-vert" step="0.5" min="0" placeholder="15"></div>
+    <div class="fg"><label class="fl">🟠 Seuil limite ($/h)</label><input type="number" class="fi" id="s-seuil-orange" step="0.5" min="0" placeholder="10"></div>
+  </div>
   <div id="auto-km-cost-wrap" style="background:var(--card2);border-radius:12px;padding:12px 14px;margin-bottom:12px;display:none">
     <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500;text-transform:uppercase">Coût moyen / km (calculé)</div>
     <div id="auto-km-cost" style="font-size:20px;font-weight:700;color:var(--accent)">—</div>
@@ -450,7 +457,7 @@ const r2=x=>Math.round((x||0)*100)/100;
 const S={
   tab:'dashboard', fsub:'revenus',
   deliveries:[], expenses:[],
-  cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra'},
+  cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra',seuilVert:15,seuilOrange:10},
   dFilt:{plat:'',dateFrom:'',dateTo:''}, eFilt:'', eShowFilt:false,
   dedDetailOpen:false,
   exportDateFrom:'', exportDateTo:'',
@@ -587,6 +594,18 @@ function secToHMS(sec){
   return{h:Math.floor(s/3600),m:Math.floor((s%3600)/60),s:s%60};
 }
 function hmsToSec(h,m,s){return(h*3600)+(m*60)+s;}
+
+function calcRentabilite(d){
+  const tot=r2((d.rev||0)+(d.tip||0));
+  const coutKm=r2((d.km||0)*0.70);
+  const net=r2(tot-coutKm);
+  const heures=d.dureeMin>0?d.dureeMin/3600:0;
+  const tauxNet=heures>0?r2(net/heures):null;
+  const sv=S.cfg.seuilVert||15, so=S.cfg.seuilOrange||10;
+  const couleur=tauxNet===null?'#8E8E93':tauxNet>=sv?'#34C759':tauxNet>=so?'#FF9500':'#FF3B30';
+  const label=tauxNet===null?'—':tauxNet>=sv?'Rentable ✓':tauxNet>=so?'Limite ⚠':'Non rentable ✗';
+  return{tot,coutKm,net,heures,tauxNet,couleur,label};
+}
 function calcBracket(inc,brackets){let tax=0,prev=0;for(const b of brackets){if(inc<=prev)break;tax+=(Math.min(inc,b.max)-prev)*b.r;prev=b.max;}return tax;}
 
 function expAnnual(e){
@@ -927,10 +946,12 @@ function rLiv(){
 
 function livCard(d,acts=false){
   const tot=(d.rev||0)+(d.tip||0), dur=fmtDur(d.dureeMin), hr=d.dureeMin>0?tot/(d.dureeMin/60):0;
-  return`<div class="li">
+  const rb=calcRentabilite(d);
+  const tauxBadge=rb.tauxNet!==null?`<span style="font-size:10px;font-weight:600;color:${rb.couleur};margin-left:4px">${$f(rb.tauxNet)}/h</span>`:'';
+  return`<div class="li" data-action="detail-liv" data-id="${d.id}" style="cursor:pointer;border-left:3px solid ${rb.couleur}">
     <div class="li-ico" style="background:none;border-radius:0">${platIco(d.plat)}</div>
     <div class="li-body">
-      <div class="li-title">${esc(d.plat)}</div>
+      <div class="li-title">${esc(d.plat)}${tauxBadge}</div>
       <div class="li-sub">${fdate(d.date)}${dur?' · '+dur:''}${d.km?' · '+d.km+' km':''}${hr>0?' · '+$f(hr)+'/h':''}</div>
       ${d.notes?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(d.notes)}</div>`:''}
     </div>
@@ -940,6 +961,32 @@ function livCard(d,acts=false){
       ${acts?`<div class="li-acts"><button class="btn btn-xs btn-s" data-action="edit-liv" data-id="${d.id}">${_SVG_EDIT}</button><button class="btn btn-xs btn-d" data-action="del-liv" data-id="${d.id}">${_SVG_TRASH}</button></div>`:''}
     </div>
   </div>`;
+}
+
+function openLivDetail(id){
+  const d=S.deliveries.find(x=>x.id===id);if(!d)return;
+  const rb=calcRentabilite(d);
+  const dur=fmtDur(d.dureeMin);
+  const hr=d.dureeMin>0?(((d.rev||0)+(d.tip||0))/(d.dureeMin/3600)):0;
+  document.getElementById('liv-detail-title').textContent=esc(d.plat)+' — '+fdate(d.date);
+  document.getElementById('liv-detail-body').innerHTML=`
+    <div style="border-left:4px solid ${rb.couleur};padding:10px 14px;border-radius:8px;background:var(--card2);margin-bottom:16px">
+      <div style="font-size:18px;font-weight:700;color:${rb.couleur}">${rb.label}</div>
+      ${rb.tauxNet!==null?`<div style="font-size:13px;color:var(--text2);margin-top:2px">${$f(rb.tauxNet)}/h net</div>`:'<div style="font-size:12px;color:var(--text2)">Durée non saisie — taux horaire indisponible</div>'}
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:14px">
+      <tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;color:var(--text2)">Revenu brut</td><td style="padding:8px 4px;text-align:right;font-weight:600">${$f(d.rev||0)}</td></tr>
+      ${d.tip?`<tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;color:var(--text2)">Pourboire</td><td style="padding:8px 4px;text-align:right;font-weight:600">${$f(d.tip||0)}</td></tr>`:''}
+      <tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;color:var(--text2)">Total encaissé</td><td style="padding:8px 4px;text-align:right;font-weight:700">${$f(rb.tot)}</td></tr>
+      <tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;color:var(--text2)">Coût km (${d.km||0} km × 0,70$)</td><td style="padding:8px 4px;text-align:right;color:var(--err)">−${$f(rb.coutKm)}</td></tr>
+      <tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;font-weight:700">Revenu net</td><td style="padding:8px 4px;text-align:right;font-weight:700;color:${rb.net>=0?'var(--ok)':'var(--err)'}">${$f(rb.net)}</td></tr>
+      ${dur?`<tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;color:var(--text2)">Durée</td><td style="padding:8px 4px;text-align:right">${dur}</td></tr>`:''}
+      ${hr>0?`<tr><td style="padding:8px 4px;color:var(--text2)">Taux horaire brut</td><td style="padding:8px 4px;text-align:right">${$f(hr)}/h</td></tr>`:''}
+    </table>
+    ${d.notes?`<div style="margin-top:12px;padding:10px;background:var(--card2);border-radius:8px;font-size:13px;color:var(--text2)">${esc(d.notes)}</div>`:''}
+  `;
+  document.getElementById('liv-detail-edit').onclick=()=>{closeM('m-liv-detail');openLivModal(id);};
+  openM('m-liv-detail');
 }
 
 function openLivModal(id=null){
@@ -1418,6 +1465,8 @@ function openSettings(){
   document.getElementById('s-sb-key').value=S.cfg.supabaseKey||'';
   document.getElementById('s-year').value=S.cfg.year;
   document.getElementById('s-kwh').value=S.cfg.kwhCost;
+  document.getElementById('s-seuil-vert').value=S.cfg.seuilVert||15;
+  document.getElementById('s-seuil-orange').value=S.cfg.seuilOrange||10;
   connDot(!!_sb||null);
   renderPlatList();
   // Auto km cost
@@ -1554,6 +1603,7 @@ function initEvents(){
     const lBtn=e.target.closest('#panel-livraisons [data-action]');
     if(lBtn){const a=lBtn.dataset.action;
       if(a==='new-liv')openLivModal();
+      else if(a==='detail-liv')openLivDetail(lBtn.dataset.id);
       else if(a==='edit-liv')openLivModal(lBtn.dataset.id);
       else if(a==='del-liv')delLiv(lBtn.dataset.id);
       else if(a==='filt-plat'){S.dFilt.plat=lBtn.dataset.val;rLiv();}
@@ -1786,5 +1836,18 @@ create policy "Public" on parametres for all using (true);`);
 }
 document.addEventListener('DOMContentLoaded',init);
 </script>
+
+<!-- Modal détail livraison -->
+<div class="moverlay" id="m-liv-detail" style="display:none">
+  <div class="modal">
+    <div class="drag-bar"></div>
+    <div class="mtitle"><span id="liv-detail-title">Détail livraison</span><button class="mclose" data-close="m-liv-detail">✕</button></div>
+    <div id="liv-detail-body"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-s btn-w" style="flex:1" id="liv-detail-edit">Modifier</button>
+      <button class="btn btn-s" data-close="m-liv-detail" style="flex:1">Fermer</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
