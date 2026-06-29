@@ -830,6 +830,13 @@ function rDash(){
   const durTodMin=tod.reduce((s,d)=>s+normSec(d.dureeMin||0),0);
   const durAllMin=S.deliveries.reduce((s,d)=>s+normSec(d.dureeMin||0),0);
   const fmtD=s=>{ if(!s||s<=0)return'—'; var h=Math.floor(s/3600),m=Math.floor((s%3600)/60); return h>0?h+'h '+String(m).padStart(2,'0')+'min':m+'min'; };
+  // Taux de rentabilité et salaire horaire moyen
+  const livAvecDuree=S.deliveries.filter(d=>d.dureeMin>0);
+  const livRentables=S.deliveries.filter(d=>{const rb=calcRentabilite(d);return rb.tauxNet!==null&&rb.tauxNet>=(S.cfg.seuilVert||15);});
+  const tauxRentabilite=S.deliveries.length>0?Math.round(livRentables.length/S.deliveries.length*100):null;
+  const totalRevCumul=S.deliveries.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
+  const totalSecCumul=livAvecDuree.reduce((s,d)=>s+normSec(d.dureeMin||0),0);
+  const salaireHoraire=totalSecCumul>0?r2(totalRevCumul/(totalSecCumul/3600)):null;
   const alerts=[];
   const _iWarn='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
   const _iInfo='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
@@ -861,6 +868,18 @@ function rDash(){
     <div class="grid2">
       <div class="scard"><div class="slabel">Ce mois</div><div class="sval">${mo.length}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">livraison${mo.length!==1?'s':''}</div></div>
       <div class="scard"><div class="slabel">Cumulé ${S.cfg.year}</div><div class="sval">${S.deliveries.length}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">livraison${S.deliveries.length!==1?'s':''}</div></div>
+    </div>
+    <div class="grid2">
+      <div class="scard">
+        <div class="slabel">Livraisons rentables</div>
+        <div class="sval" style="color:${tauxRentabilite===null?'var(--text2)':tauxRentabilite>=70?'#34C759':tauxRentabilite>=50?'#FF9500':'#FF3B30'}">${tauxRentabilite!==null?tauxRentabilite+'%':'—'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${tauxRentabilite!==null?livRentables.length+' / '+S.deliveries.length+' livraisons':'Aucune donnée'}</div>
+      </div>
+      <div class="scard">
+        <div class="slabel">Salaire horaire moyen</div>
+        <div class="sval" style="color:${salaireHoraire===null?'var(--text2)':salaireHoraire>=(S.cfg.seuilVert||15)?'#34C759':salaireHoraire>=(S.cfg.seuilOrange||10)?'#FF9500':'#FF3B30'}">${salaireHoraire!==null?$f(salaireHoraire)+'/h':'—'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${livAvecDuree.length} liv. avec durée</div>
+      </div>
     </div>
     ${alerts.map(a=>`<div class="alert alert-${a.t}"><em>${a.i}</em><p>${a.m}</p></div>`).join('')}
     <div class="stitle">Gains par période</div>
