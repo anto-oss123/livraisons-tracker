@@ -37,14 +37,15 @@ body{background-image:var(--grad);background-attachment:fixed}
 .sb-btn .ico{font-size:18px;width:24px;text-align:center}
 .sb-footer{padding:10px calc(10px + var(--sl)) calc(16px + var(--sb));border-top:1px solid var(--border)}
 #app-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:calc(10px + var(--st));background:rgba(242,242,247,0.8);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:calc(10px + var(--st));background:rgba(242,242,247,0.8);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:relative;}
 @media(prefers-color-scheme:dark){header{background:rgba(0,0,0,0.75);}}
-.hdr-title{font-size:17px;font-weight:600}
+.hdr-title{font-size:17px;font-weight:600;position:absolute;left:50%;transform:translateX(-50%);pointer-events:none}
 .hdr-actions{display:flex;gap:8px}
 .icon-btn{width:36px;height:36px;border:none;border-radius:50%;background:var(--card2);color:var(--accent);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--sb))}
-.panel{display:none;padding:16px;min-height:100%}
+.panel{display:none;padding:16px;min-height:100%;animation:fadeSlide .2s ease-out}
 .panel.active{display:block}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 #bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(242,242,247,0.95);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid rgba(0,0,0,0.1);display:flex;padding-bottom:var(--sb);z-index:100;height:calc(72px + var(--sb))}
 @media(prefers-color-scheme:dark){#bnav{background:rgba(28,28,30,0.95);border-top-color:rgba(255,255,255,0.12);}}
 .nb{flex:1;border:none;background:none;color:#8E8E93;padding:10px 2px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:inherit;touch-action:manipulation}
@@ -57,11 +58,11 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
 .card-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600}
 .card-value{font-size:28px;font-weight:700;letter-spacing:-.5px}
 .card-sub{font-size:12px;color:var(--text2);margin-top:4px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.scard{background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:var(--r);padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.scard{background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:var(--r);padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 @media(prefers-color-scheme:dark){.scard{background:rgba(28,28,30,0.9);border-color:rgba(255,255,255,0.1);}}
-.slabel{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500}
-.sval{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.slabel{font-size:10px;color:var(--text2);margin-bottom:2px;font-weight:500;text-transform:uppercase;letter-spacing:.2px}
+.sval{font-size:17px;font-weight:700;letter-spacing:-.3px}
 .sval.g{color:var(--ok)}.sval.b{color:var(--accent)}.sval.y{color:var(--warn)}.sval.r{color:var(--err)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px;font-family:inherit;touch-action:manipulation;transition:opacity .1s}
 .btn:active{opacity:.7}
@@ -88,7 +89,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--s
 .li-right{flex-shrink:0;text-align:right}
 .li-amt{font-size:16px;font-weight:700;color:var(--ok)}
 .li-acts{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
-.stitle{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin:20px 0 10px}
+.stitle{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin:16px 0 8px}.stitle-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}.stitle-toggle .arr{transition:transform .2s;display:inline-block}.stitle-toggle.collapsed .arr{transform:rotate(-90deg)}
 .stitle:first-child{margin-top:0}
 .div{height:1px;background:var(--border);margin:14px 0}
 .alert{border-radius:var(--r);padding:12px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px}
@@ -229,7 +230,6 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
     <span style="color:var(--accent);display:flex;align-items:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
     <span class="hdr-title" id="hdr-title">Tableau de bord</span>
     <div class="hdr-actions">
-      <button class="icon-btn" id="mob-sync"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
       <button class="icon-btn" id="mob-menu" aria-label="Menu">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
@@ -470,7 +470,7 @@ const r2=x=>Math.round((x||0)*100)/100;
 const S={
   tab:'dashboard', fsub:'revenus',
   deliveries:[], expenses:[],
-  cfg:{platforms:['Instacart','DoorDash','Uber Eats'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra',seuilVert:15,seuilOrange:10,veConsommation:19,seuilNetMin:5},
+  cfg:{platforms:['Instacart'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra',seuilVert:15,seuilOrange:10,veConsommation:19,seuilNetMin:5},
   dFilt:{plat:'',dateFrom:'',dateTo:''}, eFilt:'', eShowFilt:false,
   dedDetailOpen:false,
   exportDateFrom:'', exportDateTo:'',
@@ -806,7 +806,6 @@ function render(){
 const _SYNC_SVG='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>';
 function setSyncSpin(on){
   const spin=on?`<span class="spin">${_SYNC_SVG}</span>`:_SYNC_SVG;
-  const mob=document.getElementById('mob-sync');if(mob)mob.innerHTML=spin;
   const ico=document.getElementById('sb-sync-ico');if(ico)ico.innerHTML=spin;
 }
 async function doSync(){
@@ -860,7 +859,8 @@ function rDash(){
       <div class="scard"><div class="slabel">Temps aujourd'hui</div><div class="sval" style="font-size:18px">${fmtD(durTodMin)}</div></div>
       <div class="scard"><div class="slabel">Temps cumulé</div><div class="sval" style="font-size:18px">${fmtD(durAllMin)}</div></div>
     </div>
-    <div class="stitle">Livraisons</div>
+    <div class="stitle stitle-toggle" id="dash-tog-liv" onclick="dashToggle('liv')"><span>Livraisons</span><span class="arr">▾</span></div>
+    <div id="dash-sec-liv">
     <div class="grid2">
       <div class="scard"><div class="slabel">Aujourd'hui</div><div class="sval g">${tod.length}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">livraison${tod.length!==1?'s':''}</div></div>
       <div class="scard"><div class="slabel">Cette semaine</div><div class="sval b">${wk.length}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">livraison${wk.length!==1?'s':''}</div></div>
@@ -880,6 +880,7 @@ function rDash(){
         <div class="sval" style="color:${salaireHoraire===null?'var(--text2)':salaireHoraire>=(S.cfg.seuilVert||15)?'#34C759':salaireHoraire>=(S.cfg.seuilOrange||10)?'#FF9500':'#FF3B30'}">${salaireHoraire!==null?$f(salaireHoraire)+'/h':'—'}</div>
         <div style="font-size:11px;color:var(--text2);margin-top:2px">${livAvecDuree.length} liv. avec durée</div>
       </div>
+    </div>
     </div>
     ${alerts.map(a=>`<div class="alert alert-${a.t}"><em>${a.i}</em><p>${a.m}</p></div>`).join('')}
     <div class="stitle">Gains par période</div>
@@ -963,15 +964,26 @@ function renderDashChart(){
 
 // ── LIVRAISONS ─────────────────────────────────────────────────────────────────
 function rLiv(){
-  const plats=['Toutes',...S.cfg.platforms];
   let filt=[...S.deliveries].sort((a,b)=>parseDate(b.date)-parseDate(a.date));
   if(S.dFilt.plat&&S.dFilt.plat!=='Toutes') filt=filt.filter(d=>d.plat===S.dFilt.plat);
   if(S.dFilt.dateFrom) filt=filt.filter(d=>d.date>=S.dFilt.dateFrom);
   if(S.dFilt.dateTo) filt=filt.filter(d=>d.date<=S.dFilt.dateTo);
   document.getElementById('panel-livraisons').innerHTML=`
-    <div class="chips">${plats.map(p=>`<button class="chip${(S.dFilt.plat||'Toutes')===p?' active':''}" data-action="filt-plat" data-val="${esc(p)}">${esc(p)}</button>`).join('')}</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:flex-end"><div style="flex:1;min-width:130px"><label class="fl">Du</label><input type="date" id="filt-date-from" value="${S.dFilt.dateFrom}" class="fi" style="font-size:16px;min-width:130px;padding:10px 8px;-webkit-appearance:none;appearance:none"></div><div style="flex:1;min-width:130px"><label class="fl">Au</label><input type="date" id="filt-date-to" value="${S.dFilt.dateTo}" class="fi" style="font-size:16px;min-width:130px;padding:10px 8px;-webkit-appearance:none;appearance:none"></div><button class="btn btn-s btn-sm" data-action="filt-date-reset" style="flex-shrink:0;align-self:flex-end;white-space:nowrap">Réinitialiser</button></div>
-    ${filt.length===0?`<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><p>Aucune livraison.<br>Appuie sur + pour en ajouter une.</p></div>`:filt.map(d=>livCard(d,true)).join('')}
+    ${(()=>{
+      if(filt.length===0) return '<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><p>Aucune livraison.<br>Appuie sur + pour en ajouter une.</p></div>';
+      const MOIS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+      let html='', lastYM='';
+      filt.forEach(d=>{
+        const dt=parseDate(d.date), ym=dt.getFullYear()+'-'+dt.getMonth();
+        if(ym!==lastYM){
+          lastYM=ym;
+          html+=`<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px;padding:0 2px">${MOIS[dt.getMonth()]} ${dt.getFullYear()}</div>`;
+        }
+        html+=livCard(d,true);
+      });
+      return html;
+    })()}
     <button class="fab" data-action="new-liv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
   `;
 }
@@ -980,17 +992,21 @@ function livCard(d,acts=false){
   const tot=(d.rev||0)+(d.tip||0), dur=fmtDur(d.dureeMin), hr=d.dureeMin>0?tot/(d.dureeMin/60):0;
   const rb=calcRentabilite(d);
   const tauxBadge=rb.tauxNet!==null?`<span style="font-size:10px;font-weight:600;color:${rb.couleur};margin-left:4px">${$f(rb.tauxNet)}/h</span>`:'';
+  const avgSec=S.deliveries.filter(x=>x.dureeMin>0).reduce((s,x)=>s+normSec(x.dureeMin),0)/(S.deliveries.filter(x=>x.dureeMin>0).length||1);
+  const thisSec=normSec(d.dureeMin||0);
+  const durPct=avgSec>0?Math.min(100,Math.round(thisSec/avgSec*100)):0;
+  const durBar=d.dureeMin>0?`<div style="margin-top:5px;display:flex;align-items:center;gap:6px"><div style="flex:1;height:3px;background:var(--card2);border-radius:2px;overflow:hidden"><div style="width:${durPct}%;height:100%;background:var(--accent);border-radius:2px;transition:width .3s"></div></div><span style="font-size:9px;color:var(--text2);min-width:28px">${durPct}%</span></div>`:'';
   return`<div class="li" data-action="detail-liv" data-id="${d.id}" style="cursor:pointer;border-left:3px solid ${rb.couleur}">
     <div class="li-ico" style="background:none;border-radius:0">${platIco(d.plat)}</div>
     <div class="li-body">
       <div class="li-title">${esc(d.plat)}${tauxBadge}</div>
       <div class="li-sub">${fdate(d.date)}${dur?' · '+dur:''}${d.km?' · '+d.km+' km':''}${hr>0?' · '+$f(hr)+'/h':''}</div>
       ${d.notes?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(d.notes)}</div>`:''}
+      ${durBar}
     </div>
     <div class="li-right">
       <div class="li-amt">${$f(tot)}</div>
       ${d.tip?`<div style="font-size:11px;color:var(--text2)">+${$f(d.tip)} tip</div>`:''}
-      ${acts?`<div class="li-acts"><button class="btn btn-xs btn-s" data-action="edit-liv" data-id="${d.id}">${_SVG_EDIT}</button><button class="btn btn-xs btn-d" data-action="del-liv" data-id="${d.id}">${_SVG_TRASH}</button></div>`:''}
     </div>
   </div>`;
 }
@@ -1018,6 +1034,7 @@ function openLivDetail(id){
     ${d.notes?`<div style="margin-top:12px;padding:10px;background:var(--card2);border-radius:8px;font-size:13px;color:var(--text2)">${esc(d.notes)}</div>`:''}
   `;
   document.getElementById('liv-detail-edit').onclick=()=>{closeM('m-liv-detail');openLivModal(id);};
+  document.getElementById('liv-detail-del').onclick=()=>{closeM('m-liv-detail');delLiv(id);};
   openM('m-liv-detail');
 }
 
@@ -1343,6 +1360,15 @@ function rFsub(){
 }
 
 // ── OUTILS ─────────────────────────────────────────────────────────────────────
+var _dashCollapsed={};
+function dashToggle(sec){
+  _dashCollapsed[sec]=!_dashCollapsed[sec];
+  const el=document.getElementById('dash-sec-'+sec);
+  const tog=document.getElementById('dash-tog-'+sec);
+  if(el){el.style.display=_dashCollapsed[sec]?'none':'block';}
+  if(tog){tog.classList.toggle('collapsed',!!_dashCollapsed[sec]);}
+}
+
 function rCalculette(){
   const seuil=S.cfg.seuilNetMin||5;
   const conso=S.cfg.veConsommation||19;
@@ -1698,7 +1724,6 @@ function closeM(id){
 function initEvents(){
   document.getElementById('bnav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);});
   document.getElementById('sb-nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);});
-  document.getElementById('mob-sync').addEventListener('click',doSync);
   document.getElementById('sb-sync').addEventListener('click',doSync);
   document.getElementById('sb-settings').addEventListener('click',openSettings);
   document.getElementById('mob-menu').addEventListener('click',openDrawer);
@@ -1983,8 +2008,9 @@ document.addEventListener('DOMContentLoaded',init);
     <div class="drag-bar"></div>
     <div class="mtitle"><span id="liv-detail-title">Détail livraison</span><button class="mclose" data-close="m-liv-detail">✕</button></div>
     <div id="liv-detail-body"></div>
-    <div style="display:flex;gap:10px;margin-top:16px">
-      <button class="btn btn-s btn-w" style="flex:1" id="liv-detail-edit">Modifier</button>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-s btn-w" style="flex:1" id="liv-detail-edit">✏️ Modifier</button>
+      <button class="btn btn-d" style="flex:1" id="liv-detail-del">🗑 Supprimer</button>
       <button class="btn btn-s" data-close="m-liv-detail" style="flex:1">Fermer</button>
     </div>
   </div>
