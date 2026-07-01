@@ -400,7 +400,7 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
   </div>
   <div class="div"></div>
   <div class="stitle">Rentabilité des livraisons</div>
-  <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Seuils de taux horaire net (revenu − coût km CRA ÷ durée)</div>
+  <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Seuils d'affichage sur les cartes de livraison</div>
   <div class="frow">
     <div class="fg"><label class="fl">🟢 Seuil rentable ($/h)</label><input type="number" class="fi" id="s-seuil-vert" step="0.5" min="0" placeholder="15"></div>
     <div class="fg"><label class="fl">🟠 Seuil limite ($/h)</label><input type="number" class="fi" id="s-seuil-orange" step="0.5" min="0" placeholder="10"></div>
@@ -608,16 +608,28 @@ function secToHMS(sec){
 }
 function hmsToSec(h,m,s){return(h*3600)+(m*60)+s;}
 
+function calcCoutKmVE(){
+  // Calcule le coût/km réel depuis les recharges enregistrées
+  const recharges=S.expenses.filter(e=>e.cat==='Recharge VE'&&e.kwh>0&&e.amt>0);
+  if(recharges.length===0){
+    // Fallback : consommation cfg × kwhCost cfg
+    return r2((S.cfg.veConsommation||20)*(S.cfg.kwhCost||0.085)/100);
+  }
+  const totalKwh=recharges.reduce((s,e)=>s+(e.kwh||0),0);
+  const totalAmt=recharges.reduce((s,e)=>s+(e.amt||0),0);
+  const kwhMoyen=totalAmt/totalKwh; // coût/kWh moyen réel
+  return r2((S.cfg.veConsommation||20)*kwhMoyen/100);
+}
+
 function calcRentabilite(d){
   const tot=r2((d.rev||0)+(d.tip||0));
-  const coutKm=r2((d.km||0)*0.70);
+  const coutKmVE=calcCoutKmVE();
+  const coutKm=r2((d.km||0)*coutKmVE);
   const net=r2(tot-coutKm);
-  const heures=d.dureeMin>0?d.dureeMin/3600:0;
-  const tauxNet=heures>0?r2(net/heures):null;
-  const sv=S.cfg.seuilVert||15, so=S.cfg.seuilOrange||10;
-  const couleur=tauxNet===null?'#8E8E93':tauxNet>=sv?'#34C759':tauxNet>=so?'#FF9500':'#FF3B30';
-  const label=tauxNet===null?'—':tauxNet>=sv?'Rentable ✓':tauxNet>=so?'Limite ⚠':'Non rentable ✗';
-  return{tot,coutKm,net,heures,tauxNet,couleur,label};
+  const sv=S.cfg.seuilNetMin||5, so=r2((S.cfg.seuilNetMin||5)*0.5);
+  const couleur=net>=sv?'#34C759':net>=so?'#FF9500':'#FF3B30';
+  const label=net>=sv?'Rentable ✓':net>=so?'Limite ⚠':'Non rentable ✗';
+  return{tot,coutKm,net,coutKmVE,couleur,label,tauxNet:net};
 }
 function calcBracket(inc,brackets){let tax=0,prev=0;for(const b of brackets){if(inc<=prev)break;tax+=(Math.min(inc,b.max)-prev)*b.r;prev=b.max;}return tax;}
 
@@ -831,7 +843,7 @@ function rDash(){
   const fmtD=s=>{ if(!s||s<=0)return'—'; var h=Math.floor(s/3600),m=Math.floor((s%3600)/60); return h>0?h+'h '+String(m).padStart(2,'0')+'min':m+'min'; };
   // Taux de rentabilité et salaire horaire moyen
   const livAvecDuree=S.deliveries.filter(d=>d.dureeMin>0);
-  const livRentables=S.deliveries.filter(d=>{const rb=calcRentabilite(d);return rb.tauxNet!==null&&rb.tauxNet>=(S.cfg.seuilVert||15);});
+  const livRentables=S.deliveries.filter(d=>{const rb=calcRentabilite(d);return rb.net>=(S.cfg.seuilNetMin||5);});
   const tauxRentabilite=S.deliveries.length>0?Math.round(livRentables.length/S.deliveries.length*100):null;
   const totalRevCumul=S.deliveries.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
   const totalSecCumul=livAvecDuree.reduce((s,d)=>s+normSec(d.dureeMin||0),0);
@@ -884,6 +896,7 @@ function rDash(){
     </div>
     ${alerts.map(a=>`<div class="alert alert-${a.t}"><em>${a.i}</em><p>${a.m}</p></div>`).join('')}
     <div class="stitle">Gains par période</div>
+    <button class="fab fab-dash" style="bottom:80px" title="Nouvelle livraison"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     <div style="display:flex;gap:6px;margin-bottom:10px">
       <button class="chip${_dashMode==='semaine'?' active':''}" data-dashmode="semaine">Semaine</button>
       <button class="chip${_dashMode==='mois'?' active':''}" data-dashmode="mois">Mois</button>
@@ -894,6 +907,11 @@ function rDash(){
     </div>
   `;
   requestAnimationFrame(()=>renderDashChart());
+  // FAB + livraison sur le dashboard
+  setTimeout(()=>{
+    const fab=document.querySelector('#panel-dashboard .fab-dash');
+    if(fab)fab.onclick=()=>openLivModal();
+  },0);
 }
 
 function renderDashChart(){
@@ -991,7 +1009,7 @@ function rLiv(){
 function livCard(d,acts=false){
   const tot=(d.rev||0)+(d.tip||0), dur=fmtDur(d.dureeMin), hr=d.dureeMin>0?tot/(d.dureeMin/60):0;
   const rb=calcRentabilite(d);
-  const tauxBadge=rb.tauxNet!==null?`<span style="font-size:10px;font-weight:600;color:${rb.couleur};margin-left:4px">${$f(rb.tauxNet)}/h</span>`:'';
+  const tauxBadge=`<span style="font-size:10px;font-weight:600;color:${rb.couleur};margin-left:4px">${$f(rb.net)} net</span>`;
   const avgSec=S.deliveries.filter(x=>x.dureeMin>0).reduce((s,x)=>s+normSec(x.dureeMin),0)/(S.deliveries.filter(x=>x.dureeMin>0).length||1);
   const thisSec=normSec(d.dureeMin||0);
   const durPct=avgSec>0?Math.min(100,Math.round(thisSec/avgSec*100)):0;
@@ -1020,13 +1038,13 @@ function openLivDetail(id){
   document.getElementById('liv-detail-body').innerHTML=`
     <div style="border-left:4px solid ${rb.couleur};padding:10px 14px;border-radius:8px;background:var(--card2);margin-bottom:16px">
       <div style="font-size:18px;font-weight:700;color:${rb.couleur}">${rb.label}</div>
-      ${rb.tauxNet!==null?`<div style="font-size:13px;color:var(--text2);margin-top:2px">${$f(rb.tauxNet)}/h net</div>`:'<div style="font-size:12px;color:var(--text2)">Durée non saisie — taux horaire indisponible</div>'}
+      <div style="font-size:13px;color:var(--text2);margin-top:2px">${$f(rb.net)} net (seuil : ${$f(S.cfg.seuilNetMin||5)})</div>
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:14px">
       <tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;color:var(--text2)">Revenu brut</td><td style="padding:8px 4px;text-align:right;font-weight:600">${$f(d.rev||0)}</td></tr>
       ${d.tip?`<tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;color:var(--text2)">Pourboire</td><td style="padding:8px 4px;text-align:right;font-weight:600">${$f(d.tip||0)}</td></tr>`:''}
       <tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;color:var(--text2)">Total encaissé</td><td style="padding:8px 4px;text-align:right;font-weight:700">${$f(rb.tot)}</td></tr>
-      <tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;color:var(--text2)">Coût km (${d.km||0} km × 0,70$)</td><td style="padding:8px 4px;text-align:right;color:var(--err)">−${$f(rb.coutKm)}</td></tr>
+      <tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;color:var(--text2)">Coût km (${d.km||0} km × ${rb.coutKmVE?rb.coutKmVE.toFixed(4):'?'}$/km VE)</td><td style="padding:8px 4px;text-align:right;color:var(--err)">−${$f(rb.coutKm)}</td></tr>
       <tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;font-weight:700">Revenu net</td><td style="padding:8px 4px;text-align:right;font-weight:700;color:${rb.net>=0?'var(--ok)':'var(--err)'}">${$f(rb.net)}</td></tr>
       ${dur?`<tr style="border-bottom:1px solid var(--div)"><td style="padding:8px 4px;color:var(--text2)">Durée</td><td style="padding:8px 4px;text-align:right">${dur}</td></tr>`:''}
       ${hr>0?`<tr><td style="padding:8px 4px;color:var(--text2)">Taux horaire brut</td><td style="padding:8px 4px;text-align:right">${$f(hr)}/h</td></tr>`:''}
@@ -1371,9 +1389,10 @@ function dashToggle(sec){
 
 function rCalculette(){
   const seuil=S.cfg.seuilNetMin||5;
-  const conso=S.cfg.veConsommation||19;
-  const kwhCost=S.cfg.kwhCost||0.085;
-  const coutKmElec=r2((conso*kwhCost)/100);
+  const conso=S.cfg.veConsommation||20;
+  const recharges=S.expenses.filter(e=>e.cat==='Recharge VE'&&e.kwh>0&&e.amt>0);
+  const kwhMoyen=recharges.length>0?r2(recharges.reduce((s,e)=>s+e.amt,0)/recharges.reduce((s,e)=>s+e.kwh,0)):(S.cfg.kwhCost||0.085);
+  const coutKmElec=calcCoutKmVE();
 
   document.getElementById('panel-calculette').innerHTML=`
     <div class="stitle">Évaluation de commande</div>
@@ -1401,7 +1420,7 @@ function rCalculette(){
       <div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;margin-bottom:8px">Paramètres de calcul</div>
       <table style="width:100%;font-size:13px">
         <tr><td style="color:var(--text2);padding:4px 0">Consommation VE</td><td style="text-align:right;font-weight:600">${conso} kWh/100km</td></tr>
-        <tr><td style="color:var(--text2);padding:4px 0">Coût/kWh</td><td style="text-align:right;font-weight:600">${kwhCost.toFixed(3)} $</td></tr>
+        <tr><td style="color:var(--text2);padding:4px 0">Coût/kWh moyen réel</td><td style="text-align:right;font-weight:600">${kwhMoyen.toFixed(3)} $ <span style="font-size:10px;color:var(--text2)">(${recharges.length} recharges)</span></td></tr>
         <tr><td style="color:var(--text2);padding:4px 0">Coût/km calculé</td><td style="text-align:right;font-weight:600">${coutKmElec.toFixed(4)} $/km</td></tr>
         <tr><td style="color:var(--text2);padding:4px 0">Seuil rentable</td><td style="text-align:right;font-weight:600">${$f(seuil)} net min.</td></tr>
       </table>
@@ -1419,9 +1438,7 @@ function evalCommande(){
   const kmLiv=parseFloat(document.getElementById('calc-km-livraison')?.value)||0;
   const kmAller=parseFloat(document.getElementById('calc-km-aller')?.value)||0;
   const kmTotal=r2(kmLiv+kmAller);
-  const conso=S.cfg.veConsommation||19;
-  const kwhCost=S.cfg.kwhCost||0.085;
-  const coutKmElec=r2((conso*kwhCost)/100);
+  const coutKmElec=calcCoutKmVE(); // coût réel depuis recharges enregistrées
   const coutTotal=r2(kmTotal*coutKmElec);
   const net=r2(rev-coutTotal);
   const seuil=S.cfg.seuilNetMin||5;
