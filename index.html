@@ -896,7 +896,7 @@ function rDash(){
     </div>
     ${alerts.map(a=>`<div class="alert alert-${a.t}"><em>${a.i}</em><p>${a.m}</p></div>`).join('')}
     <div class="stitle">Gains par période</div>
-    <button class="fab fab-dash" style="bottom:80px" title="Nouvelle livraison"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <button class="fab fab-dash" style="bottom:calc(72px + var(--sb) + 70px)" title="Nouvelle livraison"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     <div style="display:flex;gap:6px;margin-bottom:10px">
       <button class="chip${_dashMode==='semaine'?' active':''}" data-dashmode="semaine">Semaine</button>
       <button class="chip${_dashMode==='mois'?' active':''}" data-dashmode="mois">Mois</button>
@@ -1007,7 +1007,7 @@ function rLiv(){
 }
 
 function livCard(d,acts=false){
-  const tot=(d.rev||0)+(d.tip||0), dur=fmtDur(d.dureeMin), hr=d.dureeMin>0?tot/(d.dureeMin/60):0;
+  const tot=(d.rev||0)+(d.tip||0), dur=fmtDur(d.dureeMin), hr=d.dureeMin>0?r2(tot/(normSec(d.dureeMin)/3600)):0;
   const rb=calcRentabilite(d);
   const tauxBadge=`<span style="font-size:10px;font-weight:600;color:${rb.couleur};margin-left:4px">${$f(rb.net)} net</span>`;
   const avgSec=S.deliveries.filter(x=>x.dureeMin>0).reduce((s,x)=>s+normSec(x.dureeMin),0)/(S.deliveries.filter(x=>x.dureeMin>0).length||1);
