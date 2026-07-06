@@ -3,156 +3,210 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#007AFF">
+<meta name="theme-color" content="#F4B400">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Livraisons">
-<link rel="apple-touch-icon" id="pwa-icon-link">
-<link rel="manifest" id="pwa-manifest-link">
+<link rel="apple-touch-icon" id="pwa-icon-link" href="icon-192.png">
+<link rel="manifest" id="pwa-manifest-link" href="manifest.json">
 <title>Livraisons Tracker</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#f2f2f7;--card:#ffffff;--card2:#f2f2f7;
-  --border:rgba(0,0,0,0.1);
-  --text:#000;--text2:#6e6e73;--text3:#aeaeb2;
-  --accent:#007AFF;--ok:#34C759;--warn:#FF9500;--err:#FF3B30;--purple:#5856D6;
-  --r:16px;
-  --grad:linear-gradient(135deg,rgba(102,126,234,.13),rgba(118,75,162,.13));
+  --bg-a:#EFEAE0;--bg-b:#E4E7EC;
+  --bg:#EFEAE0;--card2:#E9E5DC;
+  --text:#1C1E22;--text2:#686560;--text3:#9C988F;
+  --accent:#F4B400;--accent-ink:#4A3600;
+  --ok:#2D6A4F;--warn:#B5762B;--err:#B5452B;--purple:#5856D6;
+  --ok-bg:rgba(45,106,79,0.12);--err-bg:rgba(181,69,43,0.12);
+  --border:rgba(28,30,34,0.10);
+  --r:20px;
+  --glass-fill: rgba(255,255,255,0.55);
+  --glass-fill-strong: rgba(255,255,255,0.74);
+  --glass-edge: rgba(255,255,255,0.9);
+  --glass-edge-soft: rgba(255,255,255,0.5);
+  --glass-shadow: 0 8px 28px rgba(28,30,34,0.08), 0 1px 0 rgba(255,255,255,0.6) inset;
+  --mono:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --grad: radial-gradient(circle at 20% -10%, rgba(244,180,0,0.16), transparent 45%), radial-gradient(circle at 100% 20%, rgba(45,106,79,0.08), transparent 40%);
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
   --sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);
 }
 @media(prefers-color-scheme:dark){
-  :root{--bg:#000;--card:#1E1E1E;--card2:#2A2A2A;--border:rgba(255,255,255,0.12);--text:#E5E5E5;--text2:#A0A0A0;--text3:#6B6B6B;--ok:#4ADE80;--accent:#60A5FA;--grad:linear-gradient(135deg,rgba(50,0,80,.25),rgba(0,20,80,.25));}
+  :root{
+    --bg-a:#0D0E11;--bg-b:#161A1F;
+    --bg:#0D0E11;--card2:#1D2025;
+    --text:#F1EFE9;--text2:#9B978E;--text3:#615D56;
+    --accent:#F4B400;--ok:#63B491;--warn:#E0A23B;--err:#E08761;
+    --ok-bg:rgba(99,180,145,0.16);--err-bg:rgba(224,135,97,0.16);
+    --border:rgba(255,255,255,0.10);
+    --glass-fill: rgba(38,40,46,0.55);
+    --glass-fill-strong: rgba(38,40,46,0.76);
+    --glass-edge: rgba(255,255,255,0.12);
+    --glass-edge-soft: rgba(255,255,255,0.06);
+    --glass-shadow: 0 8px 28px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.05) inset;
+  }
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;font-size:16px;-webkit-font-smoothing:antialiased}
-body{background-image:var(--grad);background-attachment:fixed}
+body{background-image:var(--grad),linear-gradient(160deg,var(--bg-a),var(--bg-b));background-attachment:fixed}
 #app{display:flex;height:100vh;height:100dvh;overflow:hidden}
-#sidebar{display:none;width:240px;background:rgba(242,242,247,0.85);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-right:1px solid var(--border);flex-direction:column;flex-shrink:0;padding-top:var(--st)}
-@media(prefers-color-scheme:dark){#sidebar{background:rgba(28,28,30,0.9);}}
-.sb-logo{padding:24px 20px 8px;font-size:20px;font-weight:700;color:var(--accent)}
+
+/* ===== GLASS PRIMITIVE ===== */
+.glass,.card,.scard,.li,.modal,.ticket,#sidebar,#bnav,header,.tip-popup,#toast,#drawer{
+  position:relative;
+}
+
+#sidebar{display:none;width:240px;background:var(--glass-fill-strong);-webkit-backdrop-filter:blur(28px) saturate(160%);backdrop-filter:blur(28px) saturate(160%);border-right:1px solid var(--glass-edge-soft);flex-direction:column;flex-shrink:0;padding-top:var(--st)}
+.sb-logo{padding:24px 20px 8px;font-size:20px;font-weight:800;color:var(--accent);letter-spacing:-.3px}
 .sb-nav{flex:1;padding:6px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
-.sb-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;background:none;border-radius:10px;color:var(--text2);font-size:15px;font-weight:500;cursor:pointer;text-align:left;width:100%;font-family:inherit;min-height:44px;touch-action:manipulation}
-.sb-btn.active{background:rgba(0,122,255,.12);color:var(--accent);font-weight:600}
-.sb-btn .ico{font-size:18px;width:24px;text-align:center}
-.sb-footer{padding:10px calc(10px + var(--sl)) calc(16px + var(--sb));border-top:1px solid var(--border)}
+.sb-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;background:none;border-radius:14px;color:var(--text2);font-size:15px;font-weight:500;cursor:pointer;text-align:left;width:100%;font-family:inherit;min-height:44px;touch-action:manipulation}
+.sb-btn.active{background:var(--glass-fill);color:var(--text);font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.06),0 1px 0 var(--glass-edge) inset;border:1px solid var(--glass-edge-soft)}
+.sb-btn.active .ico svg{stroke:var(--accent)}
+.sb-btn .ico{font-size:18px;width:24px;text-align:center;display:flex;align-items:center;justify-content:center}
+.sb-footer{padding:10px calc(10px + var(--sl)) calc(16px + var(--sb));border-top:1px solid var(--glass-edge-soft)}
 #app-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:calc(10px + var(--st));background:rgba(242,242,247,0.8);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:relative;}
-@media(prefers-color-scheme:dark){header{background:rgba(0,0,0,0.75);}}
-.hdr-title{font-size:17px;font-weight:600;position:absolute;left:50%;transform:translateX(-50%);pointer-events:none}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:calc(10px + var(--st));background:var(--glass-fill-strong);-webkit-backdrop-filter:blur(28px) saturate(160%);backdrop-filter:blur(28px) saturate(160%);border-bottom:1px solid var(--glass-edge-soft);}
+.hdr-title{font-size:17px;font-weight:800;letter-spacing:-.2px;position:absolute;left:50%;transform:translateX(-50%);pointer-events:none}
 .hdr-actions{display:flex;gap:8px}
-.icon-btn{width:36px;height:36px;border:none;border-radius:50%;background:var(--card2);color:var(--accent);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
-main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(72px + var(--sb))}
-.panel{display:none;padding:16px;min-height:100%;animation:fadeSlide .2s ease-out}
+.icon-btn{width:36px;height:36px;border:1px solid var(--glass-edge-soft);border-radius:50%;background:var(--glass-fill);color:var(--accent);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(96px + var(--sb))}
+.panel{display:none;padding:16px;min-height:100%;animation:fadeSlide .25s ease-out}
 .panel.active{display:block}
 @keyframes fadeSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-#bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(242,242,247,0.95);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid rgba(0,0,0,0.1);display:flex;padding-bottom:var(--sb);z-index:100;height:calc(72px + var(--sb))}
-@media(prefers-color-scheme:dark){#bnav{background:rgba(28,28,30,0.95);border-top-color:rgba(255,255,255,0.12);}}
-.nb{flex:1;border:none;background:none;color:#8E8E93;padding:10px 2px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:inherit;touch-action:manipulation}
-.nb.active{color:#007AFF}
-.nb-ico{width:24px;height:24px;display:flex;align-items:center;justify-content:center}
-.nb-ico svg{width:24px;height:24px;stroke:currentColor}
-.nb-lbl{font-size:11px;font-weight:500;line-height:1}
-.card{background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-@media(prefers-color-scheme:dark){.card{background:rgba(28,28,30,0.9);border-color:rgba(255,255,255,0.1);}}
-.card-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600}
-.card-value{font-size:28px;font-weight:700;letter-spacing:-.5px}
+
+/* ===== BOTTOM NAV — floating glass pill ===== */
+#bnav{position:fixed;bottom:calc(16px + var(--sb));left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:var(--glass-fill-strong);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);border:1px solid var(--glass-edge);border-radius:26px;display:flex;padding:8px;z-index:100;box-shadow:0 12px 40px rgba(0,0,0,0.14),0 1px 0 var(--glass-edge) inset;}
+.nb{flex:1;border:none;background:none;color:var(--text3);padding:9px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-family:inherit;touch-action:manipulation;border-radius:18px;position:relative}
+.nb.active{color:var(--text)}
+.nb.active::before{content:'';position:absolute;inset:0;border-radius:18px;background:var(--glass-fill);border:1px solid var(--glass-edge-soft);box-shadow:0 2px 10px rgba(0,0,0,0.06),0 1px 0 var(--glass-edge) inset;z-index:-1}
+.nb.active .nb-ico svg{stroke:var(--accent)}
+.nb-ico{width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.nb-ico svg{width:22px;height:22px;stroke:currentColor}
+.nb-lbl{font-size:9.5px;font-weight:700;line-height:1;letter-spacing:.2px}
+
+/* ===== CARDS — glass ===== */
+.card{background:var(--glass-fill);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border:1px solid var(--glass-edge-soft);border-radius:var(--r);padding:18px;margin-bottom:12px;box-shadow:var(--glass-shadow)}
+.card::after{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--glass-edge),transparent);opacity:0.8;pointer-events:none}
+.card-title{font-size:10.5px;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px;font-weight:700}
+.card-value{font-family:var(--mono);font-size:28px;font-weight:700;letter-spacing:-.5px}
 .card-sub{font-size:12px;color:var(--text2);margin-top:4px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.scard{background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:var(--r);padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-@media(prefers-color-scheme:dark){.scard{background:rgba(28,28,30,0.9);border-color:rgba(255,255,255,0.1);}}
-.slabel{font-size:10px;color:var(--text2);margin-bottom:2px;font-weight:500;text-transform:uppercase;letter-spacing:.2px}
-.sval{font-size:17px;font-weight:700;letter-spacing:-.3px}
-.sval.g{color:var(--ok)}.sval.b{color:var(--accent)}.sval.y{color:var(--warn)}.sval.r{color:var(--err)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px;font-family:inherit;touch-action:manipulation;transition:opacity .1s}
-.btn:active{opacity:.7}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.scard{background:var(--glass-fill);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border:1px solid var(--glass-edge-soft);border-radius:20px;padding:14px 15px 13px;box-shadow:var(--glass-shadow)}
+.scard::after{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--glass-edge),transparent);opacity:0.8;pointer-events:none}
+.slabel{font-size:10px;color:var(--text2);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.sval{font-family:var(--mono);font-size:19px;font-weight:700;letter-spacing:-.4px}
+.sval.g{color:var(--ok)}.sval.b{color:var(--accent-ink)}.sval.y{color:var(--warn)}.sval.r{color:var(--err)}
+@media(prefers-color-scheme:dark){.sval.b{color:var(--accent)}}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border:none;border-radius:16px;font-size:16px;font-weight:700;cursor:pointer;min-height:44px;font-family:inherit;touch-action:manipulation;transition:opacity .1s,transform .1s}
+.btn:active{opacity:.7;transform:scale(.98)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-p{background:var(--accent);color:#fff}
-.btn-s{background:var(--card2);color:var(--text)}
+.btn-p{background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px rgba(244,180,0,.35)}
+.btn-s{background:var(--glass-fill);border:1px solid var(--glass-edge-soft);color:var(--text);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
 .btn-d{background:var(--err);color:#fff}
 .btn-ok{background:var(--ok);color:#fff}
 .btn-w{width:100%}
-.btn-sm{padding:8px 14px;font-size:14px;min-height:36px;border-radius:10px}
-.btn-xs{padding:5px 10px;font-size:12px;min-height:30px;border-radius:8px}
+.btn-sm{padding:8px 14px;font-size:14px;min-height:36px;border-radius:12px}
+.btn-xs{padding:5px 10px;font-size:12px;min-height:30px;border-radius:10px}
+
+/* ===== FORMS ===== */
 .fg{margin-bottom:14px}
-.fl{display:block;font-size:13px;color:var(--text2);margin-bottom:5px;font-weight:500}
-.fi,.fs,.fta{width:100%;background:var(--card2);border:1.5px solid transparent;border-radius:12px;color:var(--text);font-size:16px;padding:12px 14px;outline:none;-webkit-appearance:none;appearance:none;font-family:inherit}
+.fl{display:block;font-size:13px;color:var(--text2);margin-bottom:5px;font-weight:600}
+.fi,.fs,.fta{width:100%;background:var(--card2);border:1.5px solid transparent;border-radius:14px;color:var(--text);font-size:16px;padding:12px 14px;outline:none;-webkit-appearance:none;appearance:none;font-family:inherit}
 .fi:focus,.fs:focus,.fta:focus{border-color:var(--accent)}
 .fs{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238E8E93' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.li{background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:var(--r);padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-@media(prefers-color-scheme:dark){.li{background:rgba(28,28,30,0.9);border-color:rgba(255,255,255,0.1);}}
-.li-ico{width:40px;height:40px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+
+/* ===== TICKETS (formerly .li — delivery/expense rows) ===== */
+.li{background:var(--glass-fill);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border:1px solid var(--glass-edge-soft);border-radius:18px;padding:15px 16px;margin-bottom:9px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--glass-shadow)}
+.li::before{content:'';position:absolute;top:0;left:16px;right:16px;height:1px;background-image:linear-gradient(90deg,var(--text3) 45%,transparent 45%);background-size:7px 1px;opacity:0.4}
+.li-ico{width:40px;height:40px;border-radius:13px;background:var(--card2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
 .li-body{flex:1;min-width:0}
-.li-title{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.li-sub{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4}
-.li-right{flex-shrink:0;text-align:right}
-.li-amt{font-size:16px;font-weight:700;color:var(--ok)}
+.li-title{font-size:14.5px;font-weight:700;letter-spacing:-.1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li-sub{font-family:var(--mono);font-size:11.5px;color:var(--text2);margin-top:4px;line-height:1.4}
+.li-right{flex-shrink:0;text-align:right;min-width:72px}
+.li-amt{font-family:var(--mono);font-size:17px;font-weight:800;color:var(--ok)}
 .li-acts{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
-.stitle{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin:16px 0 8px}.stitle-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}.stitle-toggle .arr{transition:transform .2s;display:inline-block}.stitle-toggle.collapsed .arr{transform:rotate(-90deg)}
+
+.stitle{font-size:12.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin:20px 0 10px}
+.stitle-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.stitle-toggle .arr{transition:transform .2s;display:inline-block}
+.stitle-toggle.collapsed .arr{transform:rotate(-90deg)}
 .stitle:first-child{margin-top:0}
 .div{height:1px;background:var(--border);margin:14px 0}
-.alert{border-radius:var(--r);padding:12px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px}
-.alert-w{background:rgba(255,149,0,.1);border:1px solid rgba(255,149,0,.25)}
-.alert-i{background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.18)}
-.alert-g{background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.18)}
+
+/* ===== ALERTS ===== */
+.alert{border-radius:var(--r);padding:13px 15px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;background:var(--glass-fill);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--glass-edge-soft)}
+.alert-w{box-shadow:inset 0 0 0 1px rgba(181,118,43,.25);background:rgba(181,118,43,.10)}
+.alert-i{box-shadow:inset 0 0 0 1px rgba(244,180,0,.25);background:rgba(244,180,0,.10)}
+.alert-g{box-shadow:inset 0 0 0 1px rgba(45,106,79,.25);background:var(--ok-bg)}
 .alert em{flex-shrink:0;display:flex;align-items:center}
+.alert em svg{stroke:var(--text2)}
+.alert-w em svg{stroke:var(--warn)}
+.alert-i em svg{stroke:var(--accent-ink)}
+@media(prefers-color-scheme:dark){.alert-i em svg{stroke:var(--accent)}}
+.alert-g em svg{stroke:var(--ok)}
 .alert p{font-size:13px;color:var(--text2);line-height:1.5}
+
+/* ===== CHIPS / TABS ===== */
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
-.chip{border:1px solid var(--border);padding:8px 14px;border-radius:20px;background:var(--card);color:var(--text2);font-size:13px;cursor:pointer;white-space:nowrap;min-height:36px;font-family:inherit;touch-action:manipulation}
-.chip.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
-.subtabs{display:flex;background:var(--card2);border-radius:10px;padding:3px;margin-bottom:16px;gap:2px}
-.stab{flex:1;padding:7px 4px;border:none;border-radius:8px;background:none;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;touch-action:manipulation}
-.stab.active{background:var(--card);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.pbar{height:6px;background:var(--card2);border-radius:3px;overflow:hidden;margin:6px 0}
-.pfill{height:100%;background:var(--accent);border-radius:3px}
+.chip{border:1px solid var(--glass-edge-soft);padding:8px 14px;border-radius:20px;background:var(--glass-fill);color:var(--text2);font-size:13px;cursor:pointer;white-space:nowrap;min-height:36px;font-family:inherit;touch-action:manipulation;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.chip.active{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.subtabs{display:flex;background:var(--card2);border-radius:14px;padding:3px;margin-bottom:16px;gap:2px}
+.stab{flex:1;padding:8px 4px;border:none;border-radius:11px;background:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;touch-action:manipulation}
+.stab.active{background:var(--glass-fill-strong);color:var(--text);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+/* ===== PROGRESS / TABLE ===== */
+.pbar{height:7px;background:var(--card2);border-radius:4px;overflow:hidden;margin:6px 0}
+.pfill{height:100%;background:linear-gradient(90deg,var(--accent),#ffd35c);border-radius:4px}
 .dtable{width:100%;border-collapse:collapse}
-.dtable th{text-align:left;font-size:11px;color:var(--text2);text-transform:uppercase;padding:7px 0;border-bottom:1px solid var(--border);font-weight:600}
-.dtable td{padding:10px 0;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+.dtable th{text-align:left;font-size:10.5px;color:var(--text2);text-transform:uppercase;padding:7px 0;border-bottom:1px solid var(--border);font-weight:700;letter-spacing:.4px}
+.dtable td{padding:10px 0;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;font-family:var(--mono)}
 .dtable tr:last-child td{border-bottom:none}
-.dtable td:last-child{text-align:right;font-weight:600}
-.ratio-row{display:flex;gap:3px;height:8px;border-radius:4px;overflow:hidden;margin:6px 0}
+.dtable td:last-child{text-align:right;font-weight:700}
+.ratio-row{display:flex;gap:3px;height:9px;border-radius:5px;overflow:hidden;margin:6px 0}
 .ratio-pro{background:var(--accent)}
 .ratio-perso{background:var(--card2)}
 .empty{text-align:center;padding:48px 20px;color:var(--text2)}
 .empty-ico{font-size:48px;margin-bottom:12px}
 .empty p{font-size:14px;line-height:1.6}
-.fab{position:fixed;bottom:calc(72px + var(--sb) + 16px);right:16px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,122,255,.4);z-index:150;touch-action:manipulation}
-.dep-date-hdr{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;padding:14px 0 6px;margin-bottom:0}
+
+/* ===== FAB ===== */
+.fab{position:fixed;bottom:calc(96px + var(--sb) + 16px);right:16px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:var(--accent-ink);border:none;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(244,180,0,.45);z-index:150;touch-action:manipulation}
+.dep-date-hdr{font-size:11.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;padding:14px 0 6px;margin-bottom:0}
 .dep-date-hdr:first-child{padding-top:0}
 .dep-bar-wrap{display:flex;flex-direction:column;gap:5px;margin-top:10px}
 .dep-bar-row{display:flex;align-items:center;gap:8px;font-size:12px}
 .dep-bar-label{width:110px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
 .dep-bar-track{flex:1;height:5px;background:var(--card2);border-radius:3px;overflow:hidden}
 .dep-bar-fill{height:100%;background:var(--accent);border-radius:3px}
-.dep-bar-val{width:60px;text-align:right;font-weight:600;font-size:12px;flex-shrink:0}
+.dep-bar-val{width:60px;text-align:right;font-weight:700;font-size:12px;flex-shrink:0;font-family:var(--mono)}
+
 /* TOAST */
-#toast{position:fixed;bottom:calc(80px + var(--sb));left:50%;transform:translateX(-50%) translateY(10px);background:rgba(30,30,30,.95);color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;font-weight:500;z-index:400;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;max-width:90vw}
+#toast{position:fixed;bottom:calc(96px + var(--sb));left:50%;transform:translateX(-50%) translateY(10px);background:var(--glass-fill-strong);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);color:var(--text);border:1px solid var(--glass-edge-soft);padding:10px 20px;border-radius:24px;font-size:14px;font-weight:600;z-index:400;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;max-width:90vw;box-shadow:var(--glass-shadow)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
 /* MODAL */
-.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end}
+.moverlay{position:fixed;inset:0;background:rgba(20,20,24,.45);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end}
 .moverlay.open{display:flex}
-.modal{background:#ffffff;border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding:12px 16px calc(24px + var(--sb))}
-@media(prefers-color-scheme:dark){.modal{background:#1c1c1e;}}
-.mhandle{width:36px;height:4px;background:var(--card2);border-radius:2px;margin:0 auto 16px}
-.mtitle{font-size:18px;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+.modal{background:var(--glass-fill-strong);-webkit-backdrop-filter:blur(32px) saturate(180%);backdrop-filter:blur(32px) saturate(180%);border:1px solid var(--glass-edge);border-top-left-radius:28px;border-top-right-radius:28px;width:100%;max-height:93vh;overflow-y:auto;padding:12px 16px calc(24px + var(--sb));box-shadow:0 -8px 40px rgba(0,0,0,0.18)}
+.mhandle{width:36px;height:4px;background:var(--text3);border-radius:2px;margin:0 auto 16px;opacity:.5}
+.mtitle{font-size:18px;font-weight:800;letter-spacing:-.2px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
 .mclose{background:var(--card2);border:none;color:var(--text2);font-size:15px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.badge{display:inline-block;padding:3px 9px;border-radius:8px;font-size:11px;font-weight:600}
-.bdg-b{background:rgba(0,122,255,.12);color:var(--accent)}
-.bdg-g{background:rgba(52,199,89,.12);color:var(--ok)}
-.bdg-y{background:rgba(255,149,0,.12);color:var(--warn)}
+.badge{display:inline-block;padding:3px 9px;border-radius:8px;font-size:11px;font-weight:700}
+.bdg-b{background:rgba(244,180,0,.15);color:var(--accent-ink)}
+@media(prefers-color-scheme:dark){.bdg-b{color:var(--accent)}}
+.bdg-g{background:var(--ok-bg);color:var(--ok)}
+.bdg-y{background:rgba(181,118,43,.15);color:var(--warn)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{display:inline-block;animation:spin .9s linear infinite}
-.conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#8E8E93;flex-shrink:0}
+.conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--text3);flex-shrink:0}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-/* Safari/iOS: preserve native date picker for filter inputs */
 input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cursor:pointer}
-/* Modal date inputs: match other fi inputs exactly */
 #m-liv input[type="date"].fi,#m-dep input[type="date"].fi{-webkit-appearance:none;appearance:none;min-height:unset;line-height:normal;box-sizing:border-box}
-/* Phase 2: ensure date input is never clipped by stacking contexts */
 #panel-livraisons input[type="date"]{position:relative;z-index:2}
-/* Print styles */
 #print-fiscal{display:none}
 @media print{
   #app,#bnav,#drawer,#drawer-overlay,#toast,.moverlay{display:none!important}
@@ -165,26 +219,21 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
 /* DRAWER */
 #drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;display:none;opacity:0;transition:opacity .25s}
 #drawer-overlay.open{display:block;opacity:1}
-#drawer{position:fixed;top:0;right:0;bottom:0;width:260px;background:#ffffff;z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding-top:var(--st)}
-@media(prefers-color-scheme:dark){#drawer{background:#1c1c1e;}}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:260px;background:var(--glass-fill-strong);-webkit-backdrop-filter:blur(30px) saturate(170%);backdrop-filter:blur(30px) saturate(170%);border-left:1px solid var(--glass-edge-soft);z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding-top:var(--st)}
 #drawer.open{transform:translateX(0)}
 .drawer-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1px solid var(--border)}
 .drawer-close{width:32px;height:32px;border:none;border-radius:50%;background:var(--card2);color:var(--text2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
-.drawer-btn{display:flex;align-items:center;gap:14px;width:100%;border:none;background:none;color:var(--text);font-size:16px;font-weight:500;padding:16px 20px;cursor:pointer;text-align:left;font-family:inherit;touch-action:manipulation;border-bottom:1px solid var(--border)}
+.drawer-btn{display:flex;align-items:center;gap:14px;width:100%;border:none;background:none;color:var(--text);font-size:16px;font-weight:600;padding:16px 20px;cursor:pointer;text-align:left;font-family:inherit;touch-action:manipulation;border-bottom:1px solid var(--border)}
 .drawer-btn:last-child{border-bottom:none}
 .drawer-btn:active{background:var(--card2)}
 .drawer-btn svg{flex-shrink:0;stroke:var(--accent)}
 /* Export */
 .export-section{margin-bottom:20px}
-/* 3-col grid for dep categories */
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
-/* ensure dep card buttons never clip */
-.li-right{flex-shrink:0;text-align:right;min-width:72px}
 /* tooltip helper */
 .tip{display:inline-block;width:16px;height:16px;border-radius:50%;background:var(--card2);color:var(--text2);font-size:10px;font-weight:700;text-align:center;line-height:16px;cursor:pointer;border:1px solid var(--border);margin-left:4px;vertical-align:middle;-webkit-user-select:none;user-select:none}
-.tip-popup{position:fixed;background:rgba(30,30,30,.95);color:#fff;font-size:12px;padding:8px 12px;border-radius:10px;max-width:240px;line-height:1.5;z-index:500;pointer-events:none;opacity:0;transition:opacity .15s;word-break:break-word}
+.tip-popup{position:fixed;background:var(--glass-fill-strong);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);color:var(--text);font-size:12px;padding:8px 12px;border-radius:12px;max-width:240px;line-height:1.5;z-index:500;pointer-events:none;opacity:0;transition:opacity .15s;word-break:break-word;border:1px solid var(--glass-edge-soft);box-shadow:var(--glass-shadow)}
 .tip-popup.show{opacity:1}
-.note-sm{font-size:11px;color:var(--text2);line-height:1.5;margin-top:4px;padding:6px 10px;background:var(--card2);border-radius:8px}
+.note-sm{font-size:11px;color:var(--text2);line-height:1.5;margin-top:4px;padding:6px 10px;background:var(--card2);border-radius:10px}
 @media(min-width:768px){
   #sidebar{display:flex}
   #bnav{display:none}
@@ -193,17 +242,40 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
   .panel{max-width:860px;margin:0 auto;padding:20px 24px}
   .fab{bottom:24px}
   #toast{bottom:24px}
-  .modal{max-width:540px;margin:0 auto;border-radius:20px}
+  .modal{max-width:540px;margin:0 auto;border-radius:26px}
   .moverlay{align-items:center;justify-content:center;padding:20px}
   #dash-chart{max-height:300px}
 }
-@media(prefers-color-scheme:dark){
-  .fi,.fs,.fta{background:#2A2A2A;color:#E5E5E5;}
-  .fi::placeholder,.fta::placeholder{color:#6B6B6B;}
-  .btn:disabled{opacity:.6;cursor:not-allowed;}
-  .modal{background:#1E1E1E;}
-  .scard{background:rgba(30,30,30,0.9);border-color:rgba(255,255,255,0.12);}
-}
+
+/* ===== DASHBOARD HERO — carnet header + odometer + stat grid ===== */
+.dash-head{padding:4px 2px 14px}
+.dash-head .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;color:var(--text2);font-weight:700}
+.dash-head h1{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-top:5px;color:var(--text)}
+.dash-head h1 span{color:var(--accent)}
+.odo{padding:22px 20px 20px}
+.odo-top{display:flex;justify-content:space-between;align-items:flex-start}
+.odo-label{font-family:var(--mono);font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);font-weight:700}
+.odo-badge{width:38px;height:38px;border-radius:50%;background:var(--glass-fill-strong);border:1px solid var(--glass-edge);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.odo-badge svg{width:18px;height:18px;stroke:var(--accent)}
+.odo-value{font-family:var(--mono);font-size:42px;font-weight:700;letter-spacing:-1.5px;margin-top:6px;display:flex;align-items:baseline;gap:6px;color:var(--text)}
+.odo-value .unit{font-size:16px;color:var(--text2);font-weight:500}
+.gauge-row{display:flex;align-items:center;gap:10px;margin-top:16px}
+.gauge-track{flex:1;height:10px;border-radius:6px;background:rgba(120,120,130,0.15);overflow:hidden;position:relative}
+.gauge-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),#ffd35c);position:relative}
+.gauge-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.5),transparent 60%)}
+.gauge-pct{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent-ink);min-width:32px;text-align:right}
+@media(prefers-color-scheme:dark){.gauge-pct{color:var(--accent)}}
+.odo-sub{display:flex;gap:8px;margin-top:16px}
+.odo-mini{flex:1;background:var(--glass-fill-strong);border:1px solid var(--glass-edge-soft);border-radius:14px;padding:9px 11px}
+.odo-mini-label{font-size:9.5px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:3px}
+.odo-mini-val{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:-.3px;color:var(--text)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.stat-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:6px}
+.stat-val{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-.4px;color:var(--text)}
+.stat-val.ok{color:var(--ok)}
+.stat-val.bad{color:var(--err)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:4px}
+
 </style>
 </head>
 <body>
@@ -220,7 +292,8 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
     <button class="sb-btn" data-tab="outils"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></span>Outils</button>
   </nav>
   <div class="sb-footer">
-    <button class="sb-btn" id="sb-sync"><span class="ico" id="sb-sync-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>Synchroniser</button>
+    <div id="last-sync-label" style="font-size:11px;color:var(--text2);padding:0 12px 6px">Jamais synchronisé</div>
+    <button class="sb-btn" id="sb-sync" style="position:relative"><span class="ico" id="sb-sync-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>Synchroniser<span id="sync-queue-badge" style="display:none;position:absolute;top:4px;right:8px;background:#B5762B;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 4px"></span></button>
     <button class="sb-btn" id="sb-settings"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Paramètres</button>
   </div>
 </aside>
@@ -356,6 +429,14 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
       </div>
     </div>
   </div>
+  <div id="freq-fields" style="display:none">
+    <div class="fg"><label class="fl">Fréquence de paiement</label>
+      <select class="fs" id="dep-freq">
+        <option value="biweekly">Aux 2 semaines (×26/an)</option>
+        <option value="monthly">Mensuel (×12/an)</option>
+      </select>
+    </div>
+  </div>
   <div class="frow">
     <div class="fg"><label class="fl" id="dep-amt-label">Montant ($)</label><input type="number" inputmode="decimal" class="fi" id="dep-amt" step="0.01" min="0" placeholder="0.00"></div>
     <div class="fg"><label class="fl" id="dep-date-label">Date</label><input type="date" class="fi" id="dep-date"></div>
@@ -384,10 +465,11 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
 
   <div class="div"></div>
   <div class="stitle">Supabase</div>
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
     <span class="conn-dot" id="conn-dot"></span>
     <span style="font-size:12px;color:var(--text2)" id="conn-status">Non configuré</span>
   </div>
+  <div style="font-size:11px;color:var(--text2);margin-bottom:10px" id="last-sync-label-settings">Jamais synchronisé</div>
   <div class="fg"><label class="fl">URL du projet</label><input type="url" class="fi" id="s-sb-url" placeholder="https://xxx.supabase.co" autocomplete="off"></div>
   <div class="fg"><label class="fl">Anon Key</label><input type="password" class="fi" id="s-sb-key" placeholder="eyJ…" autocomplete="off"></div>
   <button class="btn btn-s btn-w btn-sm" id="test-conn-btn" style="margin-bottom:12px">Tester la connexion</button>
@@ -415,7 +497,7 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
   <div id="auto-km-cost-wrap" style="background:var(--card2);border-radius:12px;padding:12px 14px;margin-bottom:12px;display:none">
     <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500;text-transform:uppercase">Coût moyen / km (calculé)</div>
     <div id="auto-km-cost" style="font-size:20px;font-weight:700;color:var(--accent)">—</div>
-    <div style="font-size:11px;color:var(--text2);margin-top:2px">Total dépenses véhicule ÷ km pro</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:2px">Dépenses réellement déboursées ÷ km pro</div>
   </div>
 
   <div class="div"></div>
@@ -437,9 +519,35 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
 window.addEventListener('unhandledrejection',e=>e.preventDefault());
 
 // ── CONSTANTS ──────────────────────────────────────────────────────────────────
-const FED_BR=[{max:57375,r:.15},{max:114750,r:.205},{max:158519,r:.26},{max:220000,r:.29},{max:Infinity,r:.33}];
-const QC_BR=[{max:51780,r:.14},{max:103545,r:.19},{max:126000,r:.24},{max:Infinity,r:.2575}];
-const FED_BASIC=15705,QC_BASIC=17183,KM_R1=.70,KM_R2=.64,KM_THRESH=5000,TPS=.05,TVQ=.09975,TPS_SEUIL=30000;
+// Tables fiscales par année. Sources : ARC (canada.ca), Revenu Québec, Retraite Québec.
+// À mettre à jour chaque année (indexation annoncée généralement en nov./déc. pour l'année suivante).
+const TAX_TABLES={
+  2025:{
+    fedBrackets:[{max:57375,r:.145},{max:114750,r:.205},{max:177882,r:.26},{max:253414,r:.29},{max:Infinity,r:.33}],
+    fedBasic:16129,
+    qcBrackets:[{max:53255,r:.14},{max:106495,r:.19},{max:129590,r:.24},{max:Infinity,r:.2575}],
+    qcBasic:18571,
+    kmR1:.72,kmR2:.66,kmThresh:5000,
+    rrq:{mga:71300,exemption:3500,tauxAutonome:.128}, // base 10,8% + 1re suppl. 2%, part employé+employeur
+  },
+  2026:{
+    fedBrackets:[{max:58523,r:.14},{max:117045,r:.205},{max:181440,r:.26},{max:258482,r:.29},{max:Infinity,r:.33}],
+    fedBasic:16452,
+    qcBrackets:[{max:54345,r:.14},{max:108680,r:.19},{max:132245,r:.24},{max:Infinity,r:.2575}],
+    qcBasic:18952,
+    kmR1:.73,kmR2:.67,kmThresh:5000,
+    rrq:{mga:74600,exemption:3500,tauxAutonome:.126}, // base 10,6% + 1re suppl. 2%, part employé+employeur
+  },
+};
+const TAX_TABLES_YEARS=Object.keys(TAX_TABLES).map(Number).sort((a,b)=>a-b);
+function getTaxTable(year){
+  if(TAX_TABLES[year]) return{table:TAX_TABLES[year],isFallback:false,fallbackYear:null};
+  // Année non couverte : on retombe sur l'année connue la plus proche (la plus récente si année future, la plus ancienne sinon)
+  const fallbackYear=year>TAX_TABLES_YEARS[TAX_TABLES_YEARS.length-1]?TAX_TABLES_YEARS[TAX_TABLES_YEARS.length-1]:TAX_TABLES_YEARS[0];
+  console.warn(`[LT] Aucune table fiscale pour ${year} — utilisation des valeurs ${fallbackYear} (à mettre à jour)`);
+  return{table:TAX_TABLES[fallbackYear],isFallback:true,fallbackYear};
+}
+const TPS=.05,TVQ=.09975,TPS_SEUIL=30000;
 const _SVG_BOLT='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
 const _SVG_PHONE='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>';
 const _SVG_SHIELD='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
@@ -462,6 +570,7 @@ const TABS=['dashboard','livraisons','depenses','fiscal','calculette','outils'];
 const TAB_TITLES={dashboard:'Tableau de bord',livraisons:'Livraisons',depenses:'Dépenses',fiscal:'Fiscal',calculette:'Calculette',outils:'Outils'};
 const LS_KEY='lt_v4';
 let _dashMode='semaine';
+let _livPeriode='semaine';
 
 // ── HELPERS (rounding) ─────────────────────────────────────────────────────────
 const r2=x=>Math.round((x||0)*100)/100;
@@ -470,8 +579,8 @@ const r2=x=>Math.round((x||0)*100)/100;
 const S={
   tab:'dashboard', fsub:'revenus',
   deliveries:[], expenses:[],
-  cfg:{platforms:['Instacart'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,deductionMethod:'cra',seuilVert:15,seuilOrange:10,veConsommation:19,seuilNetMin:5},
-  dFilt:{plat:'',dateFrom:'',dateTo:''}, eFilt:'', eShowFilt:false,
+  cfg:{platforms:['Instacart'],defaultPlat:'Instacart',supabaseUrl:'',supabaseKey:'',year:new Date().getFullYear(),kwhCost:.085,vehicleKmJan:0,vehicleKmNow:0,vehicleKmDate:'',deductionMethod:'cra',seuilVert:15,seuilOrange:10,veConsommation:19,seuilNetMin:5},
+  dFilt:{plat:'',dateFrom:'',dateTo:'',showLimit:60}, eFilt:'', eShowFilt:false, eShowLimit:60,
   dedDetailOpen:false,
   exportDateFrom:'', exportDateTo:'',
   proRatio:null,
@@ -485,7 +594,7 @@ function loadLS(){
     if(d.deliveries) S.deliveries=d.deliveries;
     if(d.expenses)   S.expenses=d.expenses;
     if(d.cfg){
-      const{vehicleKmJan:_a,vehicleKmNow:_b,...cfgWithout}=d.cfg;
+      const{vehicleKmJan:_a,vehicleKmNow:_b,vehicleKmDate:_c,...cfgWithout}=d.cfg;
       S.cfg={...S.cfg,...cfgWithout};
     }
   }catch(e){}
@@ -493,7 +602,7 @@ function loadLS(){
 }
 function saveLS(){
   try{
-    const{vehicleKmJan:_a,vehicleKmNow:_b,...cfgWithout}=S.cfg;
+    const{vehicleKmJan:_a,vehicleKmNow:_b,vehicleKmDate:_c,...cfgWithout}=S.cfg;
     localStorage.setItem(LS_KEY,JSON.stringify({deliveries:S.deliveries,expenses:S.expenses,cfg:cfgWithout}));
   }catch(e){}
 }
@@ -513,14 +622,14 @@ function sbReset(){
 }
 function connDot(ok){
   const d=document.getElementById('conn-dot'), st=document.getElementById('conn-status');
-  if(d) d.style.background=ok===true?'#34C759':ok===false?'#FF3B30':'#8E8E93';
+  if(d) d.style.background=ok===true?'#2D6A4F':ok===false?'#B5452B':'#9C988F';
   if(st) st.textContent=ok===true?'Connecté':ok===false?'Erreur':'Non configuré';
 }
 
 function dFromDB(r){return{id:r.id,plat:r.plateforme,rev:r.revenu||0,tip:r.pourboire||0,km:r.distance||0,dureeMin:r.duree||0,date:r.date,notes:r.notes||''};}
 function dToDB(d){return{id:d.id,plateforme:d.plat,revenu:d.rev||0,pourboire:d.tip||0,distance:d.km||0,duree:d.dureeMin||0,date:d.date,notes:d.notes||null};}
-function eFromDB(r){return{id:r.id,cat:r.categorie,amt:r.montant||0,desc:r.description||'',recu:r.note_recu||'',date:r.date,proRatioOverride:r.ratio_pro!=null?r.ratio_pro:null,kwh:r.kwh||0};}
-function eToDB(e){return{id:e.id,categorie:e.cat,montant:e.amt||0,montant_annuel:expAnnual(e),description:e.desc||null,note_recu:e.recu||null,date:e.date,ratio_pro:e.proRatioOverride,kwh:e.kwh||null};}
+function eFromDB(r){return{id:r.id,cat:r.categorie,amt:r.montant||0,desc:r.description||'',recu:r.note_recu||'',date:r.date,proRatioOverride:r.ratio_pro!=null?r.ratio_pro:null,kwh:r.kwh||0,freq:r.frequence||'biweekly'};}
+function eToDB(e){return{id:e.id,categorie:e.cat,montant:e.amt||0,montant_annuel:expAnnual(e),description:e.desc||null,note_recu:e.recu||null,date:e.date,ratio_pro:e.proRatioOverride,kwh:e.kwh||null,frequence:e.cat==='Leasing'?(e.freq||'biweekly'):null};}
 async function sbLoad(){
   const sb=sbClient();if(!sb){connDot(false);return false;}
   try{
@@ -537,6 +646,7 @@ async function sbLoad(){
       p.data.forEach(row=>{
         if(row.cle==='odometer_start') S.cfg.vehicleKmJan=parseFloat(row.valeur)||0;
         if(row.cle==='odometer_current') S.cfg.vehicleKmNow=parseFloat(row.valeur)||0;
+        if(row.cle==='odometer_date') S.cfg.vehicleKmDate=row.valeur||'';
       });
     }
     refreshProRatio();
@@ -566,13 +676,64 @@ function onRT(table,{eventType,new:nr,old:or}){
   refreshProRatio(); saveLS(); render();
 }
 
-async function sbUpsert(table,row){
+// ── FILE D'ATTENTE DE RESYNCHRONISATION ─────────────────────────────────────────
+// Si un envoi Supabase échoue (coupure réseau, etc.), l'opération est mise en file
+// et retentée automatiquement à la reconnexion ou lors d'une synchro manuelle.
+// Les données restent toujours sûres en localStorage entre-temps (saveLS()).
+const SYNC_QUEUE_KEY='lt_syncQueue';
+function loadSyncQueue(){
+  try{return JSON.parse(localStorage.getItem(SYNC_QUEUE_KEY)||'[]');}catch(e){return[];}
+}
+function saveSyncQueue(q){
+  try{localStorage.setItem(SYNC_QUEUE_KEY,JSON.stringify(q));}catch(e){}
+  updateSyncQueueBadge();
+}
+function queueSyncOp(op){
+  // op = {type:'upsert'|'delete', table, row|id}
+  const q=loadSyncQueue();
+  q.push({...op,ts:Date.now()});
+  saveSyncQueue(q);
+}
+function updateSyncQueueBadge(){
+  const n=loadSyncQueue().length;
+  const el=document.getElementById('sync-queue-badge');
+  if(el){
+    if(n>0){el.style.display='inline-flex';el.textContent=n>99?'99+':String(n);}
+    else{el.style.display='none';}
+  }
+}
+async function processSyncQueue(){
   const sb=sbClient();if(!sb)return;
-  try{const{error}=await sb.from(table).upsert(row);if(error)throw error;}catch(e){console.error('[SB upsert]',table,e.message);}
+  let q=loadSyncQueue();
+  if(q.length===0)return;
+  const remaining=[];
+  for(const op of q){
+    try{
+      if(op.type==='upsert'){
+        const{error}=await sb.from(op.table).upsert(op.row);
+        if(error)throw error;
+      }else if(op.type==='delete'){
+        const{error}=await sb.from(op.table).delete().eq('id',op.id);
+        if(error)throw error;
+      }
+    }catch(e){
+      remaining.push(op); // échec à nouveau : on la garde pour le prochain essai
+    }
+  }
+  saveSyncQueue(remaining);
+  if(remaining.length<q.length&&remaining.length===0) toast('File de synchro vidée');
+}
+window.addEventListener('online',()=>{processSyncQueue();});
+
+async function sbUpsert(table,row){
+  const sb=sbClient();if(!sb){queueSyncOp({type:'upsert',table,row});return;}
+  try{const{error}=await sb.from(table).upsert(row);if(error)throw error;}
+  catch(e){console.error('[SB upsert]',table,e.message);queueSyncOp({type:'upsert',table,row});toast('Hors ligne — sera synchronisé plus tard');}
 }
 async function sbDelete(table,id){
-  const sb=sbClient();if(!sb)return;
-  try{const{error}=await sb.from(table).delete().eq('id',id);if(error)throw error;}catch(e){console.error('[SB delete]',table,e.message);}
+  const sb=sbClient();if(!sb){queueSyncOp({type:'delete',table,id});return;}
+  try{const{error}=await sb.from(table).delete().eq('id',id);if(error)throw error;}
+  catch(e){console.error('[SB delete]',table,e.message);queueSyncOp({type:'delete',table,id});toast('Hors ligne — sera synchronisé plus tard');}
 }
 
 // ── HELPERS ────────────────────────────────────────────────────────────────────
@@ -581,7 +742,7 @@ const $f=n=>new Intl.NumberFormat('fr-CA',{style:'currency',currency:'CAD'}).for
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const PLAT_LOGO={'Instacart':'data:image/png;base64,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'};
 const platIco=p=>{
-  const c=PLAT_CLR[p]||'#007AFF';
+  const c=PLAT_CLR[p]||'#F4B400';
   const logo=PLAT_LOGO[p];
   if(logo)return`<span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;flex-shrink:0;overflow:hidden"><img src="${logo}" style="width:36px;height:36px;object-fit:cover" alt="${p}"></span>`;
   const l=(p||'?')[0].toUpperCase();
@@ -591,8 +752,16 @@ const platIco=p=>{
 function parseDate(s){if(!s)return new Date(NaN);return s.includes('T')?new Date(s):new Date(s+'T00:00:00');}
 function fdate(s){try{const d=parseDate(s);return d.toLocaleDateString('fr-CA',{day:'numeric',month:'short'});}catch(e){return s||'';}}
 function fdateShort(s){try{const d=parseDate(s);return d.toLocaleDateString('fr-CA',{day:'2-digit',month:'2-digit',year:'2-digit'});}catch(e){return s||'';}}
+const _normSecWarned=new Set();
 function normSec(val){
   if(!val||val<=0)return 0;
+  // Garde-fou : signale (sans corriger silencieusement) les durées suspectes qui pourraient
+  // indiquer une valeur stockée en minutes au lieu de secondes (ancien format) ou une saisie erronée.
+  // Une livraison de moins de 30s ou de plus de 5h est peu plausible en usage normal.
+  if((val<30||val>18000)&&!_normSecWarned.has(val)){
+    _normSecWarned.add(val);
+    console.warn(`[LT] Durée suspecte détectée: ${val}s (${(val/60).toFixed(1)}min) — vérifier si la donnée est bien en secondes`);
+  }
   return val; // données toujours en secondes dans Supabase
 }
 function fmtDur(sec){
@@ -608,17 +777,49 @@ function secToHMS(sec){
 }
 function hmsToSec(h,m,s){return(h*3600)+(m*60)+s;}
 
-function calcCoutKmVE(){
-  // Calcule le coût/km réel depuis les recharges enregistrées
+function calcKwhMoyen(){
+  // Coût moyen réel par kWh depuis les recharges enregistrées, ou coût configuré par défaut.
+  // Source unique de vérité utilisée par calcCoutKmVE() et l'affichage de la Calculette.
   const recharges=S.expenses.filter(e=>e.cat==='Recharge VE'&&e.kwh>0&&e.amt>0);
-  if(recharges.length===0){
-    // Fallback : consommation cfg × kwhCost cfg
-    return r2((S.cfg.veConsommation||20)*(S.cfg.kwhCost||0.085)/100);
-  }
+  if(recharges.length===0) return{kwhMoyen:S.cfg.kwhCost||0.085,recharges:[]};
   const totalKwh=recharges.reduce((s,e)=>s+(e.kwh||0),0);
   const totalAmt=recharges.reduce((s,e)=>s+(e.amt||0),0);
-  const kwhMoyen=totalAmt/totalKwh; // coût/kWh moyen réel
+  return{kwhMoyen:totalAmt/totalKwh,recharges};
+}
+function calcCoutKmVE(){
+  // Calcule le coût/km réel depuis les recharges enregistrées
+  const{kwhMoyen}=calcKwhMoyen();
   return r2((S.cfg.veConsommation||20)*kwhMoyen/100);
+}
+
+function calcCoutKmVehicule(){
+  // Coût/km des frais fixes véhicule (hors électricité) : assurance, entretien, immat., leasing.
+  // IMPORTANT : utilise les montants réellement déboursés à ce jour (e.amt), PAS expAnnual() qui
+  // projette un seul paiement sur toute l'année — ça fausserait complètement le coût/km courant
+  // (ex: un seul paiement de leasing annualisé ÷ quelques centaines de km = coût/km absurde).
+  const yr=S.cfg.year;
+  const divsYr=S.deliveries.filter(d=>parseDate(d.date).getFullYear()===yr);
+  const kmProYr=r2(divsYr.reduce((s,d)=>s+(d.km||0),0));
+  const expsYr=S.expenses.filter(e=>parseDate(e.date).getFullYear()===yr&&VEH.includes(e.cat)&&e.cat!=='Recharge VE');
+  const vehExpTotal=r2(expsYr.reduce((s,e)=>r2(s+(e.amt||0)),0));
+  // Deux critères combinés pour juger la fiabilité du ratio réel :
+  // (1) un minimum de km, pour éviter de diviser par un dénominateur trop petit
+  // (2) un minimum de mois écoulés depuis la première livraison de l'année, pour éviter qu'une
+  //     mensualité normale (ex: assurance payée chaque mois) rapportée à seulement quelques jours
+  //     de km ne fausse le ratio — une mensualité "coûte cher" sur une semaine mais pas sur 3 mois.
+  const KM_MIN_FIABLE=50;
+  const MOIS_MIN_FIABLE=3;
+  const premiereLivraison=divsYr.reduce((min,d)=>{const t=parseDate(d.date).getTime();return min===null||t<min?t:min;},null);
+  const moisEcoules=premiereLivraison!=null?Math.max(1,(Date.now()-premiereLivraison)/(1000*60*60*24*30.44)):0;
+  if(kmProYr>=KM_MIN_FIABLE&&moisEcoules>=MOIS_MIN_FIABLE&&vehExpTotal>0){
+    return{coutKm:r2(vehExpTotal/kmProYr),source:'reel',kmProYr,vehExpTotal,moisEcoules:r2(moisEcoules)};
+  }
+  // Fallback : pas assez de données fiables (trop peu de km et/ou pas assez de mois écoulés).
+  // Le taux CRA (0,73$/km) inclut carburant/dépréciation/entretien pour un véhicule À ESSENCE
+  // moyen — inadapté à un VE (électricité déjà comptée à part, entretien réduit de ~40-50%,
+  // pas de carburant). On utilise plutôt une estimation VE réaliste hors énergie.
+  const VE_FALLBACK_KM=0.18; // $/km, estimation prudente pour un VE en usage commercial léger
+  return{coutKm:VE_FALLBACK_KM,source:'ve_estime',kmProYr,vehExpTotal,moisEcoules:r2(moisEcoules)};
 }
 
 function calcRentabilite(d){
@@ -627,15 +828,26 @@ function calcRentabilite(d){
   const coutKm=r2((d.km||0)*coutKmVE);
   const net=r2(tot-coutKm);
   const sv=S.cfg.seuilNetMin||5, so=r2((S.cfg.seuilNetMin||5)*0.5);
-  const couleur=net>=sv?'#34C759':net>=so?'#FF9500':'#FF3B30';
+  const couleur=net>=sv?'#2D6A4F':net>=so?'#B5762B':'#B5452B';
   const label=net>=sv?'Rentable ✓':net>=so?'Limite ⚠':'Non rentable ✗';
   return{tot,coutKm,net,coutKmVE,couleur,label,tauxNet:net};
 }
 function calcBracket(inc,brackets){let tax=0,prev=0;for(const b of brackets){if(inc<=prev)break;tax+=(Math.min(inc,b.max)-prev)*b.r;prev=b.max;}return tax;}
+function calcRRQ(net,rrqParams){
+  // Cotisation RRQ travailleur autonome (part employé + employeur) :
+  // - tauxAutonome sur le revenu entre l'exemption (3 500$) et le MGA
+  // - 8% (2e cotisation supplémentaire, part employé+employeur) entre le MGA et le MSGA (MGA×1.14)
+  const{mga,exemption,tauxAutonome}=rrqParams;
+  if(net<=exemption) return 0;
+  const msga=r2(mga*1.14);
+  const base=Math.max(0,Math.min(net,mga)-exemption)*tauxAutonome;
+  const suppl2=net>mga?Math.max(0,Math.min(net,msga)-mga)*.08:0;
+  return r2(base+suppl2);
+}
 
 function expAnnual(e){
-  if(e.cat==='Téléphone') return r2((e.amt||0)*12);
-  if(e.cat==='Leasing') return r2((e.amt||0)*26);
+  if(e.cat==='Téléphone') return r2((e.amt||0)*12); // toujours mensuel
+  if(e.cat==='Leasing') return r2((e.amt||0)*(e.freq==='monthly'?12:26)); // par défaut aux 2 semaines
   return r2(e.amt||0);
 }
 function expDed(e,proRatio){
@@ -644,8 +856,49 @@ function expDed(e,proRatio){
   return r2(expAnnual(e)*ratio);
 }
 
+// ── TPS/TVQ : petit fournisseur ─────────────────────────────────────────────────
+// Règle ARC/Revenu Québec : inscription obligatoire si les fournitures taxables dépassent 30 000$
+// (1) au cours d'un seul trimestre civil, OU (2) cumulées sur les 4 trimestres civils consécutifs
+// qui le précèdent (fenêtre mobile, PAS l'année civile). Les deux critères sont indépendants.
+function quarterOf(dateStr){
+  const d=parseDate(dateStr);
+  const y=d.getFullYear(), q=Math.floor(d.getMonth()/3)+1;
+  return{y,q,key:y*10+q,label:`T${q} ${y}`};
+}
+function checkTPSTVQ(){
+  // Regroupe tous les revenus (toutes années confondues) par trimestre civil
+  const parTrimestre={};
+  S.deliveries.forEach(d=>{
+    if(!d.date)return;
+    const{y,q,key,label}=quarterOf(d.date);
+    if(!parTrimestre[key])parTrimestre[key]={total:0,label,key,y,q};
+    parTrimestre[key].total=r2(parTrimestre[key].total+(d.rev||0)+(d.tip||0));
+  });
+  const trimestres=Object.values(parTrimestre).sort((a,b)=>a.key-b.key);
+  const parKey=Object.fromEntries(trimestres.map(t=>[t.key,t]));
+  // Critère 1 : un seul trimestre dépasse le seuil
+  const trimestreDepasse=trimestres.find(t=>t.total>=TPS_SEUIL);
+  // Critère 2 : somme glissante de 4 trimestres consécutifs (0 si trimestre manquant, pas de trou toléré implicitement)
+  let glissantDepasse=null;
+  for(let i=0;i<trimestres.length;i++){
+    const t=trimestres[i];
+    const window=[];
+    let ky=t.y, kq=t.q;
+    for(let n=0;n<4;n++){
+      const found=parKey[ky*10+kq];
+      window.push(found?found.total:0);
+      kq--; if(kq<1){kq=4;ky--;}
+    }
+    const sum=r2(window.reduce((s,v)=>s+v,0));
+    if(sum>=TPS_SEUIL){glissantDepasse={jusqua:t.label,total:sum};break;}
+  }
+  const isSmallSupplier=!trimestreDepasse&&!glissantDepasse;
+  return{isSmallSupplier,trimestreDepasse,glissantDepasse,trimestreActuel:trimestres[trimestres.length-1]||null};
+}
+
 function calcFiscal(){
   const yr=S.cfg.year;
+  const{table:tt,isFallback,fallbackYear}=getTaxTable(yr);
   const divs=S.deliveries.filter(d=>parseDate(d.date).getFullYear()===yr);
   const exps=S.expenses.filter(e=>parseDate(e.date).getFullYear()===yr);
   const gross=r2(divs.reduce((s,d)=>s+r2((d.rev||0)+(d.tip||0)),0));
@@ -653,19 +906,26 @@ function calcFiscal(){
   const kmPro=km;
   const kmTotal=Math.max(0,(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0));
   const proRatio=S.proRatio;
-  const kmDed=r2(km<=KM_THRESH?km*KM_R1:KM_THRESH*KM_R1+(km-KM_THRESH)*KM_R2);
+  const kmDed=r2(km<=tt.kmThresh?km*tt.kmR1:tt.kmThresh*tt.kmR1+(km-tt.kmThresh)*tt.kmR2);
   const vehDed=r2(exps.filter(e=>VEH.includes(e.cat)).reduce((s,e)=>r2(s+expDed(e,proRatio)),0));
   const otherDed=r2(exps.filter(e=>!VEH.includes(e.cat)).reduce((s,e)=>r2(s+expDed(e,proRatio)),0));
   const method=S.cfg.deductionMethod||'cra';
   const totDed=r2(method==='cra'?(kmDed+otherDed):(vehDed+otherDed));
   const net=r2(Math.max(0,gross-totDed));
-  const fedOwed=r2(Math.max(0,calcBracket(net,FED_BR)-FED_BASIC*.15));
-  const qcOwed=r2(Math.max(0,calcBracket(net,QC_BR)-QC_BASIC*.14));
-  const rrq=r2(net>3500?Math.min(Math.max(0,Math.min(net,73200)-3500)*.119,8316.05):0);
+  // Le crédit non remboursable du montant personnel de base s'applique toujours au taux du 1er palier
+  const fedRate1=tt.fedBrackets[0].r, qcRate1=tt.qcBrackets[0].r;
+  const fedOwed=r2(Math.max(0,calcBracket(net,tt.fedBrackets)-tt.fedBasic*fedRate1));
+  const qcOwed=r2(Math.max(0,calcBracket(net,tt.qcBrackets)-tt.qcBasic*qcRate1));
+  const rrq=calcRRQ(net,tt.rrq);
   const total=r2(fedOwed+qcOwed+rrq);
   const vehExpTotal=r2(exps.filter(e=>VEH.includes(e.cat)).reduce((s,e)=>r2(s+expAnnual(e)),0));
-  const autoKmCost=kmPro>0?vehExpTotal/kmPro:null;
-  return{gross,km,kmPro,kmTotal,kmDed,vehDed,otherDed,totDed,net,fedOwed,qcOwed,rrq,total,rate:gross>0?total/gross:0,divs,exps,proRatio,needsTPS:gross>=TPS_SEUIL,autoKmCost,vehExpTotal};
+  // autoKmCost : coût/km réel courant, basé sur les montants réellement déboursés (PAS annualisés,
+  // sinon un seul paiement de leasing/assurance projeté sur l'année ÷ quelques centaines de km
+  // donnerait un coût/km absurde — voir calcCoutKmVehicule() pour la même correction).
+  const vehExpReel=r2(exps.filter(e=>VEH.includes(e.cat)&&e.cat!=='Recharge VE').reduce((s,e)=>r2(s+(e.amt||0)),0));
+  const autoKmCost=kmPro>0?vehExpReel/kmPro:null;
+  const tps=checkTPSTVQ();
+  return{gross,km,kmPro,kmTotal,kmDed,vehDed,otherDed,totDed,net,fedOwed,qcOwed,rrq,total,rate:gross>0?total/gross:0,divs,exps,proRatio,needsTPS:!tps.isSmallSupplier,tps,autoKmCost,vehExpTotal,vehExpReel,taxYear:yr,taxTableFallback:isFallback,taxTableFallbackYear:fallbackYear};
 }
 function calcProRatio(){return S.proRatio;}
 function refreshProRatio(){
@@ -685,7 +945,10 @@ function fiscalFromSnap(snap){
     divs:{length:snap.nombre_livraisons||0},
     exps:snap.depenses_detail||[],
     proRatio:snap.ratio_pro,
+    // Approximation : un snapshot ne connaît que son propre mois, pas les 4 trimestres glissants réels.
+    // Pour un statut TPS/TVQ fiable, se référer à l'onglet Revenus en mode courant (hors historique).
     needsTPS:(snap.revenu_brut||0)>=TPS_SEUIL,
+    tps:null,
     autoKmCost:null,vehExpTotal:0,_isSnap:true
   };
 }
@@ -693,6 +956,7 @@ async function buildFiscalSnapshot(annee,mois,isAuto){
   const sb=sbClient();if(!sb)return false;
   try{
     annee=parseInt(annee,10); mois=parseInt(mois,10);
+    const{table:tt}=getTaxTable(annee);
     const pfx=`${annee}-${String(mois).padStart(2,'0')}`;
     const divs=S.deliveries.filter(d=>d.date&&d.date.startsWith(pfx));
     const exps=S.expenses.filter(e=>e.date&&e.date.startsWith(pfx));
@@ -701,14 +965,14 @@ async function buildFiscalSnapshot(annee,mois,isAuto){
     const kmTotal=Math.max(0,(S.cfg.vehicleKmNow||0)-(S.cfg.vehicleKmJan||0));
     const gross=r2(divs.reduce((s,d)=>s+r2((d.rev||0)+(d.tip||0)),0));
     const tips=r2(divs.reduce((s,d)=>s+(d.tip||0),0));
-    const kmDed=r2(kmPro<=KM_THRESH?kmPro*KM_R1:KM_THRESH*KM_R1+(kmPro-KM_THRESH)*KM_R2);
+    const kmDed=r2(kmPro<=tt.kmThresh?kmPro*tt.kmR1:tt.kmThresh*tt.kmR1+(kmPro-tt.kmThresh)*tt.kmR2);
     const method=S.cfg.deductionMethod||'cra';
     const vehDed=r2(exps.filter(e=>VEH.includes(e.cat)).reduce((s,e)=>r2(s+expDed(e,proRatio)),0));
     const otherDed=r2(exps.filter(e=>!VEH.includes(e.cat)).reduce((s,e)=>r2(s+expDed(e,proRatio)),0));
     const totDed=r2(method==='cra'?(kmDed+otherDed):(vehDed+otherDed));
     const net=r2(Math.max(0,gross-totDed));
     const depensesDetail=exps.map(e=>({cat:e.cat,desc:e.desc||'',amt:e.amt,annual:expAnnual(e),ded:expDed(e,proRatio)}));
-    const row={annee,mois,type_snapshot:'mensuel',revenu_brut:gross,total_pourboires:tips,nombre_livraisons:divs.length,km_pro:kmPro,km_total:kmTotal,ratio_pro:proRatio,odometer_start:S.cfg.vehicleKmJan||0,odometer_current:S.cfg.vehicleKmNow||0,deduction_km_cra:kmDed,autres_deductions:otherDed,total_deductions:totDed,revenu_net_imposable:net,depenses_detail:depensesDetail,methode_deduction:method,taux_km_cra:KM_R1,sauvegarde_auto:isAuto};
+    const row={annee,mois,type_snapshot:'mensuel',revenu_brut:gross,total_pourboires:tips,nombre_livraisons:divs.length,km_pro:kmPro,km_total:kmTotal,ratio_pro:proRatio,odometer_start:S.cfg.vehicleKmJan||0,odometer_current:S.cfg.vehicleKmNow||0,deduction_km_cra:kmDed,autres_deductions:otherDed,total_deductions:totDed,revenu_net_imposable:net,depenses_detail:depensesDetail,methode_deduction:method,taux_km_cra:tt.kmR1,sauvegarde_auto:isAuto};
     console.log('[LT] payload snapshot:',JSON.stringify(row));
     const result=await sb.from('fiscal_snapshots').upsert(row,{onConflict:'annee,mois,type_snapshot'});
     console.log('[LT] buildFiscalSnapshot result',result);
@@ -719,6 +983,7 @@ async function buildFiscalSnapshot(annee,mois,isAuto){
 async function buildAnnualSnapshot(annee){
   const sb=sbClient();if(!sb)return false;
   try{
+    const{table:tt}=getTaxTable(annee);
     const{data,error}=await sb.from('fiscal_snapshots').select('*').eq('annee',annee).eq('type_snapshot','mensuel');
     if(error)throw error;
     if(!data||data.length===0)return false;
@@ -731,7 +996,7 @@ async function buildAnnualSnapshot(annee){
     const totDed=r2(data.reduce((s,r)=>s+(r.total_deductions||0),0));
     const net=r2(Math.max(0,gross-totDed));
     const last=data[data.length-1];
-    const row={annee,mois:0,type_snapshot:'annuel',revenu_brut:gross,total_pourboires:tips,nombre_livraisons:livs,km_pro:kmPro,km_total:last?.km_total||0,ratio_pro:last?.ratio_pro,odometer_start:data[0]?.odometer_start||0,odometer_current:last?.odometer_current||0,deduction_km_cra:kmDed,autres_deductions:otherDed,total_deductions:totDed,revenu_net_imposable:net,depenses_detail:[],methode_deduction:last?.methode_deduction||'cra',taux_km_cra:KM_R1,sauvegarde_auto:true};
+    const row={annee,mois:0,type_snapshot:'annuel',revenu_brut:gross,total_pourboires:tips,nombre_livraisons:livs,km_pro:kmPro,km_total:last?.km_total||0,ratio_pro:last?.ratio_pro,odometer_start:data[0]?.odometer_start||0,odometer_current:last?.odometer_current||0,deduction_km_cra:kmDed,autres_deductions:otherDed,total_deductions:totDed,revenu_net_imposable:net,depenses_detail:[],methode_deduction:last?.methode_deduction||'cra',taux_km_cra:tt.kmR1,sauvegarde_auto:true};
     const{error:e2}=await sb.from('fiscal_snapshots').upsert(row);
     if(e2)throw e2;
     return true;
@@ -744,6 +1009,29 @@ async function loadFiscalSnapshots(){
     if(error)throw error;
     S.fiscal.snapshots=data||[];
   }catch(e){console.error('[LT] load snaps',e.message);}
+}
+async function recalcAllSnapshots(){
+  const sb=sbClient();if(!sb){toast('Supabase non configuré');return;}
+  if(S.fiscal.snapshots.length===0){toast('Aucun snapshot à recalculer');return;}
+  toast('Recalcul en cours…',10000);
+  try{
+    const annees=new Set();
+    // Recalcule chaque snapshot mensuel avec le ratio pro/perso courant (S.proRatio)
+    for(const s of S.fiscal.snapshots){
+      await buildFiscalSnapshot(s.annee,s.mois,true);
+      annees.add(s.annee);
+    }
+    // Reconstruit les snapshots annuels affectés à partir des mensuels mis à jour
+    for(const annee of annees){
+      await buildAnnualSnapshot(annee);
+    }
+    await loadFiscalSnapshots();
+    if(S.fiscal.histMode&&S.fiscal.histSnap){
+      await loadHistSnap(S.fiscal.histSnap.annee,S.fiscal.histSnap.mois);
+    }
+    render();
+    toast(`${S.fiscal.snapshots.length} snapshot(s) mis à jour`);
+  }catch(e){console.error('[LT] recalc all snaps',e.message);toast('Erreur lors du recalcul');}
 }
 async function loadHistSnap(annee,mois){
   const sb=sbClient();if(!sb){toast('Supabase non configuré');return;}
@@ -763,9 +1051,9 @@ function exportFiscalPrint(){
   const printEl=document.getElementById('print-fiscal');if(!printEl)return;
   const rows1=`<tr><td>Revenus bruts</td><td>${$f(f.gross)}</td></tr><tr><td>Livraisons</td><td>${typeof f.divs.length!=='undefined'?f.divs.length:0}</td></tr><tr><td>Km pro</td><td>${(f.kmPro||0).toFixed(0)} km</td></tr>`;
   const rows2=`<tr><td>Déduction km CRA</td><td>${$f(f.kmDed)}</td></tr><tr><td>Autres déductions</td><td>${$f(f.otherDed)}</td></tr><tr><td><strong>Total déductions</strong></td><td><strong>${$f(f.totDed)}</strong></td></tr>`;
-  const rows3=`<tr><td><strong>Revenu net imposable</strong></td><td><strong>${$f(f.net)}</strong></td></tr>${!f._isSnap?`<tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr><tr><td>Impôt provincial (QC)</td><td>${$f(f.qcOwed)}</td></tr><tr><td>Cotisation RRQ</td><td>${$f(f.rrq)}</td></tr><tr><td><strong>Total impôt estimé</strong></td><td><strong style="color:#FF3B30">${$f(f.total)}</strong></td></tr>`:''}`;
-  const depRows=(f.exps||[]).length>0?`<h2 style="margin:18px 0 8px;color:#333">Dépenses</h2><table class="print-fiscal-tbl"><thead><tr><th style="text-align:left;padding:6px 4px;border-bottom:2px solid #007AFF">Catégorie</th><th style="text-align:left;padding:6px 4px;border-bottom:2px solid #007AFF">Description</th><th style="text-align:right;padding:6px 4px;border-bottom:2px solid #007AFF">Total</th><th style="text-align:right;padding:6px 4px;border-bottom:2px solid #007AFF">Déductible</th></tr></thead><tbody>${(f.exps||[]).map(e=>`<tr><td style="padding:6px 4px;border-bottom:1px solid #eee">${esc(e.cat||'')}</td><td style="padding:6px 4px;border-bottom:1px solid #eee;font-size:12px;color:#666">${esc(e.desc||e.description||'')}</td><td style="text-align:right;padding:6px 4px;border-bottom:1px solid #eee">${$f(e.annual!=null?e.annual:expAnnual(e))}</td><td style="text-align:right;padding:6px 4px;border-bottom:1px solid #eee;color:#34C759">${$f(e.ded!=null?e.ded:expDed(e,f.proRatio))}</td></tr>`).join('')}</tbody></table>`:'';
-  printEl.innerHTML=`<h1 style="color:#007AFF;margin:0 0 4px">Livraisons Tracker</h1><p style="color:#666;margin:0 0 20px;font-size:13px">Rapport fiscal · ${esc(period)} · Généré le ${new Date().toLocaleDateString('fr-CA')}</p><h2 style="margin:0 0 8px;color:#333">Revenus</h2><table class="print-fiscal-tbl"><tbody>${rows1}</tbody></table><h2 style="margin:0 0 8px;color:#333">Déductions</h2><table class="print-fiscal-tbl"><tbody>${rows2}</tbody></table><h2 style="margin:0 0 8px;color:#333">Résumé fiscal</h2><table class="print-fiscal-tbl"><tbody>${rows3}</tbody></table>${depRows}`;
+  const rows3=`<tr><td><strong>Revenu net imposable</strong></td><td><strong>${$f(f.net)}</strong></td></tr>${!f._isSnap?`<tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr><tr><td>Impôt provincial (QC)</td><td>${$f(f.qcOwed)}</td></tr><tr><td>Cotisation RRQ</td><td>${$f(f.rrq)}</td></tr><tr><td><strong>Total impôt estimé</strong></td><td><strong style="color:#B5452B">${$f(f.total)}</strong></td></tr>`:''}`;
+  const depRows=(f.exps||[]).length>0?`<h2 style="margin:18px 0 8px;color:#333">Dépenses</h2><table class="print-fiscal-tbl"><thead><tr><th style="text-align:left;padding:6px 4px;border-bottom:2px solid #B5762B">Catégorie</th><th style="text-align:left;padding:6px 4px;border-bottom:2px solid #B5762B">Description</th><th style="text-align:right;padding:6px 4px;border-bottom:2px solid #B5762B">Total</th><th style="text-align:right;padding:6px 4px;border-bottom:2px solid #B5762B">Déductible</th></tr></thead><tbody>${(f.exps||[]).map(e=>`<tr><td style="padding:6px 4px;border-bottom:1px solid #eee">${esc(e.cat||'')}</td><td style="padding:6px 4px;border-bottom:1px solid #eee;font-size:12px;color:#666">${esc(e.desc||e.description||'')}</td><td style="text-align:right;padding:6px 4px;border-bottom:1px solid #eee">${$f(e.annual!=null?e.annual:expAnnual(e))}</td><td style="text-align:right;padding:6px 4px;border-bottom:1px solid #eee;color:#2D6A4F">${$f(e.ded!=null?e.ded:expDed(e,f.proRatio))}</td></tr>`).join('')}</tbody></table>`:'';
+  printEl.innerHTML=`<h1 style="color:#B5762B;margin:0 0 4px">Livraisons Tracker</h1><p style="color:#666;margin:0 0 20px;font-size:13px">Rapport fiscal · ${esc(period)} · Généré le ${new Date().toLocaleDateString('fr-CA')}</p><h2 style="margin:0 0 8px;color:#333">Revenus</h2><table class="print-fiscal-tbl"><tbody>${rows1}</tbody></table><h2 style="margin:0 0 8px;color:#333">Déductions</h2><table class="print-fiscal-tbl"><tbody>${rows2}</tbody></table><h2 style="margin:0 0 8px;color:#333">Résumé fiscal</h2><table class="print-fiscal-tbl"><tbody>${rows3}</tbody></table>${depRows}`;
   window.print();
 }
 
@@ -823,9 +1111,35 @@ function setSyncSpin(on){
 async function doSync(){
   if(!S.cfg.supabaseUrl||!S.cfg.supabaseKey){toast('Configure Supabase dans Paramètres');return;}
   setSyncSpin(true);
-  try{const ok=await sbLoad();if(ok){render();toast('Synchronisé');}else toast('Erreur de synchronisation');}
+  try{
+    await processSyncQueue(); // rejoue d'abord les opérations en attente (coupures réseau passées)
+    const ok=await sbLoad();
+    if(ok){
+      render();
+      toast('Synchronisé');
+      localStorage.setItem('lt_lastSync',new Date().toISOString());
+      updateLastSyncLabel();
+    }else toast('Erreur de synchronisation');
+  }
   catch(e){toast(e.message);}
   setSyncSpin(false);
+}
+function updateLastSyncLabel(){
+  const iso=localStorage.getItem('lt_lastSync');
+  let text;
+  if(!iso){text='Jamais synchronisé';}
+  else{
+    const d=new Date(iso);
+    const diffMin=Math.round((Date.now()-d.getTime())/60000);
+    let rel;
+    if(diffMin<1)rel="à l'instant";
+    else if(diffMin<60)rel=`il y a ${diffMin} min`;
+    else if(diffMin<1440)rel=`il y a ${Math.round(diffMin/60)} h`;
+    else rel=d.toLocaleDateString('fr-CA')+' à '+d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
+    text=`Dernière synchro : ${rel}`;
+  }
+  const el1=document.getElementById('last-sync-label'); if(el1)el1.textContent=text;
+  const el2=document.getElementById('last-sync-label-settings'); if(el2)el2.textContent=text;
 }
 
 // ── DASHBOARD ──────────────────────────────────────────────────────────────────
@@ -848,48 +1162,86 @@ function rDash(){
   const totalRevCumul=S.deliveries.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
   const totalSecCumul=livAvecDuree.reduce((s,d)=>s+normSec(d.dureeMin||0),0);
   const salaireHoraire=totalSecCumul>0?r2(totalRevCumul/(totalSecCumul/3600)):null;
+  // Recharge VE ce mois-ci
+  const rechargesMois=S.expenses.filter(e=>e.cat==='Recharge VE'&&parseDate(e.date)>=moStart);
+  const rechargeMoisTotal=r2(rechargesMois.reduce((s,e)=>r2(s+(e.amt||0)),0));
+  // Jauge de rentabilité du jour (net aujourd'hui vs objectif, ou taux de rentabilité global si pas d'objectif)
+  const objJour=S.cfg.objectifJour||0;
+  const netTod=sum(tod);
+  const gaugePct=objJour>0?Math.max(0,Math.min(100,Math.round(netTod/objJour*100))):(tauxRentabilite!==null?tauxRentabilite:0);
   const alerts=[];
   const _iWarn='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
   const _iInfo='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
-  if(f.needsTPS) alerts.push({t:'w',i:_iWarn,m:`Tu dépasses ${$f(30000)} — inscription TPS/TVQ obligatoire !`});
-  else if(f.gross>24000) alerts.push({t:'w',i:_iWarn,m:`À ${$f(30000-f.gross)} du seuil TPS/TVQ`});
+  if(f.needsTPS){
+    const raison=f.tps.trimestreDepasse?`${f.tps.trimestreDepasse.label} a dépassé ${$f(30000)} à lui seul`:`tes 4 derniers trimestres cumulent ${$f(f.tps.glissantDepasse.total)} (seuil ${$f(30000)})`;
+    alerts.push({t:'w',i:_iWarn,m:`Inscription TPS/TVQ obligatoire — ${raison}`});
+  }else if(f.tps.trimestreActuel&&f.tps.trimestreActuel.total>24000){
+    alerts.push({t:'w',i:_iWarn,m:`À ${$f(30000-f.tps.trimestreActuel.total)} du seuil TPS/TVQ pour ${f.tps.trimestreActuel.label}`});
+  }
   if(f.rate>0) alerts.push({t:'i',i:_iInfo,m:`Mets ~${Math.ceil(Math.max(f.rate,.25)*100)}% de côté (~${$f(f.gross*Math.max(f.rate,.25))})`});
+  const dateStr=now.toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();
   document.getElementById('panel-dashboard').innerHTML=`
-    <div class="grid2">
-      <div class="scard"><div class="slabel">Aujourd'hui</div><div class="sval g">${$f(sum(tod))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${tod.length} livraison${tod.length!==1?'s':''}</div></div>
-      <div class="scard"><div class="slabel">Cette semaine</div><div class="sval b">${$f(sum(wk))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${wk.length} livraison${wk.length!==1?'s':''}</div></div>
+    <div class="dash-head">
+      <div class="eyebrow">${dateStr}</div>
+      <h1>Ton carnet<span>.</span></h1>
     </div>
-    <div class="grid2">
-      <div class="scard"><div class="slabel">Revenus ce mois</div><div class="sval">${$f(sum(mo))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${mo.length} livraison${mo.length!==1?'s':''}</div></div>
-      <div class="scard"><div class="slabel">Dépenses ce mois</div><div class="sval r">${$f(r2(S.expenses.filter(e=>parseDate(e.date)>=moStart).reduce((s,e)=>r2(s+(e.amt||0)),0)))}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${S.expenses.filter(e=>parseDate(e.date)>=moStart).length} dépense${S.expenses.filter(e=>parseDate(e.date)>=moStart).length!==1?'s':''}</div></div>
+    <div class="odo card">
+      <div class="odo-top">
+        <div class="odo-label">Net aujourd'hui</div>
+        <div class="odo-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 12l2-2 4 4 8-8 2 2-10 10z"/></svg></div>
+      </div>
+      <div class="odo-value">${Math.trunc(netTod)}<span class="unit">.${String(Math.round((netTod%1)*100)).padStart(2,'0')} $</span></div>
+      <div class="gauge-row">
+        <div class="gauge-track"><div class="gauge-fill" style="width:${gaugePct}%"></div></div>
+        <div class="gauge-pct">${gaugePct}%</div>
+      </div>
+      <div class="odo-sub">
+        <div class="odo-mini"><div class="odo-mini-label">Livraisons</div><div class="odo-mini-val">${tod.length}</div></div>
+        <div class="odo-mini"><div class="odo-mini-label">Roulant</div><div class="odo-mini-val">${fmtD(durTodMin)}</div></div>
+        <div class="odo-mini"><div class="odo-mini-label">$ / heure</div><div class="odo-mini-val">${salaireHoraire!==null?salaireHoraire.toFixed(2):'—'}</div></div>
+      </div>
     </div>
-    <div class="grid2">
-      <div class="scard"><div class="slabel">Km pro ${S.cfg.year}</div><div class="sval y">${f.km.toFixed(0)}<span style="font-size:13px"> km</span></div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.divs.length} livraisons</div></div>
-      <div class="scard"><div class="slabel">Ratio pro</div><div class="sval b">${f.proRatio!=null?Math.round(f.proRatio*100)+'%':'—'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.proRatio!=null?'km pro / km total':'Configurer les km'}</div></div>
-    </div>
-    <div class="grid2">
-      <div class="scard"><div class="slabel">Temps aujourd'hui</div><div class="sval" style="font-size:18px">${fmtD(durTodMin)}</div></div>
-      <div class="scard"><div class="slabel">Temps cumulé</div><div class="sval" style="font-size:18px">${fmtD(durAllMin)}</div></div>
+    <div class="stat-grid">
+      <div class="stat scard">
+        <div class="stat-label">Cette semaine</div>
+        <div class="stat-val">${$f(sum(wk))}</div>
+        <div class="stat-sub">${wk.length} livraison${wk.length!==1?'s':''}</div>
+      </div>
+      <div class="stat scard">
+        <div class="stat-label">Km pro ${S.cfg.year}</div>
+        <div class="stat-val">${f.km.toFixed(0)}<span style="font-size:12px;font-weight:600"> km</span></div>
+        <div class="stat-sub">${f.proRatio!=null?'Ratio pro '+Math.round(f.proRatio*100)+'%':'Configurer les km'}</div>
+      </div>
+      <div class="stat scard">
+        <div class="stat-label">Rentabilité</div>
+        <div class="stat-val ${tauxRentabilite===null?'':tauxRentabilite>=70?'ok':tauxRentabilite>=50?'':'bad'}" style="${tauxRentabilite===null?'color:var(--text2)':tauxRentabilite>=70?'':tauxRentabilite>=50?'color:var(--warn)':''}">${tauxRentabilite!==null?tauxRentabilite+'%':'—'}</div>
+        <div class="stat-sub">${tauxRentabilite!==null?livRentables.length+' / '+S.deliveries.length+' livraisons':'Aucune donnée'}</div>
+      </div>
+      <div class="stat scard">
+        <div class="stat-label">Recharge (mois)</div>
+        <div class="stat-val bad">${$f(rechargeMoisTotal)}</div>
+        <div class="stat-sub">${rechargesMois.length} recharge${rechargesMois.length!==1?'s':''} publique${rechargesMois.length!==1?'s':''}</div>
+      </div>
     </div>
     <div class="stitle stitle-toggle" id="dash-tog-liv" onclick="dashToggle('liv')"><span>Livraisons</span><span class="arr">▾</span></div>
     <div id="dash-sec-liv">
     <div class="grid2">
       <div class="scard"><div class="slabel">Aujourd'hui</div><div class="sval g">${tod.length}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">livraison${tod.length!==1?'s':''}</div></div>
-      <div class="scard"><div class="slabel">Cette semaine</div><div class="sval b">${wk.length}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">livraison${wk.length!==1?'s':''}</div></div>
-    </div>
-    <div class="grid2">
-      <div class="scard"><div class="slabel">Ce mois</div><div class="sval">${mo.length}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">livraison${mo.length!==1?'s':''}</div></div>
-      <div class="scard"><div class="slabel">Cumulé ${S.cfg.year}</div><div class="sval">${S.deliveries.length}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">livraison${S.deliveries.length!==1?'s':''}</div></div>
+      <div class="scard" id="liv-periode-card" onclick="livCyclePeriode()" style="cursor:pointer">
+        <div class="slabel">${_livPeriode==='semaine'?'Cette semaine':_livPeriode==='mois'?'Ce mois':'Cumulé '+S.cfg.year}</div>
+        <div class="sval b">${_livPeriode==='semaine'?wk.length:_livPeriode==='mois'?mo.length:S.deliveries.length}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">livraison${(_livPeriode==='semaine'?wk.length:_livPeriode==='mois'?mo.length:S.deliveries.length)!==1?'s':''} · toucher pour changer</div>
+      </div>
     </div>
     <div class="grid2">
       <div class="scard">
         <div class="slabel">Livraisons rentables</div>
-        <div class="sval" style="color:${tauxRentabilite===null?'var(--text2)':tauxRentabilite>=70?'#34C759':tauxRentabilite>=50?'#FF9500':'#FF3B30'}">${tauxRentabilite!==null?tauxRentabilite+'%':'—'}</div>
+        <div class="sval" style="color:${tauxRentabilite===null?'var(--text2)':tauxRentabilite>=70?'#2D6A4F':tauxRentabilite>=50?'#B5762B':'#B5452B'}">${tauxRentabilite!==null?tauxRentabilite+'%':'—'}</div>
         <div style="font-size:11px;color:var(--text2);margin-top:2px">${tauxRentabilite!==null?livRentables.length+' / '+S.deliveries.length+' livraisons':'Aucune donnée'}</div>
       </div>
       <div class="scard">
         <div class="slabel">Salaire horaire moyen</div>
-        <div class="sval" style="color:${salaireHoraire===null?'var(--text2)':salaireHoraire>=(S.cfg.seuilVert||15)?'#34C759':salaireHoraire>=(S.cfg.seuilOrange||10)?'#FF9500':'#FF3B30'}">${salaireHoraire!==null?$f(salaireHoraire)+'/h':'—'}</div>
+        <div class="sval" style="color:${salaireHoraire===null?'var(--text2)':salaireHoraire>=(S.cfg.seuilVert||15)?'#2D6A4F':salaireHoraire>=(S.cfg.seuilOrange||10)?'#B5762B':'#B5452B'}">${salaireHoraire!==null?$f(salaireHoraire)+'/h':'—'}</div>
         <div style="font-size:11px;color:var(--text2);margin-top:2px">${livAvecDuree.length} liv. avec durée</div>
       </div>
     </div>
@@ -959,10 +1311,10 @@ function renderDashChart(){
   const lineData=barData.map(v=>{cum+=v;return r2(cum);});
   if(canvas._ltChart)canvas._ltChart.destroy();
   const isDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
-  const textClr=isDark?'#A0A0A0':'#6e6e73';
-  const gridClr=isDark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)';
-  const barClr=isDark?'rgba(96,165,250,0.75)':'rgba(0,122,255,0.75)';
-  const lineClr=isDark?'#4ADE80':'#34C759';
+  const textClr=isDark?'#9B978E':'#686560';
+  const gridClr=isDark?'rgba(255,255,255,0.08)':'rgba(28,30,34,0.06)';
+  const barClr=isDark?'rgba(244,180,0,0.75)':'rgba(244,180,0,0.75)';
+  const lineClr=isDark?'#63B491':'#2D6A4F';
   canvas._ltChart=new Chart(canvas,{
     type:'bar',
     data:{labels,datasets:[
@@ -986,13 +1338,16 @@ function rLiv(){
   if(S.dFilt.plat&&S.dFilt.plat!=='Toutes') filt=filt.filter(d=>d.plat===S.dFilt.plat);
   if(S.dFilt.dateFrom) filt=filt.filter(d=>d.date>=S.dFilt.dateFrom);
   if(S.dFilt.dateTo) filt=filt.filter(d=>d.date<=S.dFilt.dateTo);
+  const total=filt.length;
+  const limit=S.dFilt.showLimit||60;
+  const shown=filt.slice(0,limit);
   document.getElementById('panel-livraisons').innerHTML=`
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:flex-end"><div style="flex:1;min-width:130px"><label class="fl">Du</label><input type="date" id="filt-date-from" value="${S.dFilt.dateFrom}" class="fi" style="font-size:16px;min-width:130px;padding:10px 8px;-webkit-appearance:none;appearance:none"></div><div style="flex:1;min-width:130px"><label class="fl">Au</label><input type="date" id="filt-date-to" value="${S.dFilt.dateTo}" class="fi" style="font-size:16px;min-width:130px;padding:10px 8px;-webkit-appearance:none;appearance:none"></div><button class="btn btn-s btn-sm" data-action="filt-date-reset" style="flex-shrink:0;align-self:flex-end;white-space:nowrap">Réinitialiser</button></div>
     ${(()=>{
       if(filt.length===0) return '<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><p>Aucune livraison.<br>Appuie sur + pour en ajouter une.</p></div>';
       const MOIS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
       let html='', lastYM='';
-      filt.forEach(d=>{
+      shown.forEach(d=>{
         const dt=parseDate(d.date), ym=dt.getFullYear()+'-'+dt.getMonth();
         if(ym!==lastYM){
           lastYM=ym;
@@ -1000,6 +1355,9 @@ function rLiv(){
         }
         html+=livCard(d,true);
       });
+      if(total>limit){
+        html+=`<button class="btn btn-s btn-w" style="margin-top:12px" data-action="liv-show-more">Afficher plus (${limit} / ${total})</button>`;
+      }
       return html;
     })()}
     <button class="fab" data-action="new-liv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
@@ -1014,10 +1372,12 @@ function livCard(d,acts=false){
   const thisSec=normSec(d.dureeMin||0);
   const durPct=avgSec>0?Math.min(100,Math.round(thisSec/avgSec*100)):0;
   const durBar=d.dureeMin>0?`<div style="margin-top:5px;display:flex;align-items:center;gap:6px"><div style="flex:1;height:3px;background:var(--card2);border-radius:2px;overflow:hidden"><div style="width:${durPct}%;height:100%;background:var(--accent);border-radius:2px;transition:width .3s"></div></div><span style="font-size:9px;color:var(--text2);min-width:28px">${durPct}%</span></div>`:'';
+  const durSuspecte=d.dureeMin>0&&(d.dureeMin<30||d.dureeMin>18000);
+  const suspectBadge=durSuspecte?`<span style="font-size:10px;color:var(--warn);margin-left:4px" title="Durée inhabituelle — vérifier la saisie">⚠ durée?</span>`:'';
   return`<div class="li" data-action="detail-liv" data-id="${d.id}" style="cursor:pointer;border-left:3px solid ${rb.couleur}">
     <div class="li-ico" style="background:none;border-radius:0">${platIco(d.plat)}</div>
     <div class="li-body">
-      <div class="li-title">${esc(d.plat)}${tauxBadge}</div>
+      <div class="li-title">${esc(d.plat)}${tauxBadge}${suspectBadge}</div>
       <div class="li-sub">${fdate(d.date)}${dur?' · '+dur:''}${d.km?' · '+d.km+' km':''}${hr>0?' · '+$f(hr)+'/h':''}</div>
       ${d.notes?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(d.notes)}</div>`:''}
       ${durBar}
@@ -1094,9 +1454,10 @@ function saveLiv(){
   refreshProRatio(); saveLS(); sbUpsert('livraisons',dToDB(d)); closeM('m-liv'); render(); toast('Livraison enregistrée');
 }
 function delLiv(id){
-  if(!confirm('Supprimer cette livraison ?'))return;
-  S.deliveries=S.deliveries.filter(d=>d.id!==id);
-  refreshProRatio(); saveLS(); sbDelete('livraisons',id); render(); toast('Supprimé');
+  askConfirm('Supprimer cette livraison ?','Cette action est définitive et supprimera aussi la donnée sur Supabase.',()=>{
+    S.deliveries=S.deliveries.filter(d=>d.id!==id);
+    refreshProRatio(); saveLS(); sbDelete('livraisons',id); render(); toast('Supprimé');
+  },'Supprimer');
 }
 
 // ── DÉPENSES ───────────────────────────────────────────────────────────────────
@@ -1145,7 +1506,7 @@ function rDep(){
       </div>
       <div class="card-value">${$f(moTotal)}</div>
       <div class="card-sub">Total cumulatif (toutes dates) : ${$f(grand)}</div>
-      ${proRatio===null&&RATIO_CATS.some(c=>totals[c]>0)?`<div style="font-size:11px;color:var(--warn);margin-top:6px;padding:6px 10px;background:rgba(255,149,0,.08);border-radius:8px;border:1px solid rgba(255,149,0,.2)">⚠ Odomètre non configuré — ratio pro/perso indisponible</div>`:''}
+      ${proRatio===null&&RATIO_CATS.some(c=>totals[c]>0)?`<div style="font-size:11px;color:var(--warn);margin-top:6px;padding:6px 10px;background:rgba(181,118,43,.08);border-radius:10px;border:1px solid rgba(181,118,43,.2)">⚠ Odomètre non configuré — dépenses mixtes déduites à 100% par défaut</div>`:''}
       ${barChart}
     </div>`;
 
@@ -1169,17 +1530,23 @@ function rDep(){
     return fdate(d);
   }
   let listHtml='';
+  const totalDep=filt.length;
+  const limitDep=S.eShowLimit||60;
+  const shownDep=filt.slice(0,limitDep);
   if(filt.length===0){
     listHtml=`<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><p>Aucune dépense enregistrée.</p></div>`;
   } else {
     let lastDate='';
-    filt.forEach(e=>{
+    shownDep.forEach(e=>{
       if(e.date!==lastDate){
         listHtml+=`<div class="dep-date-hdr">${dateLabel(e.date)}</div>`;
         lastDate=e.date;
       }
       listHtml+=depCard(e,proRatio);
     });
+    if(totalDep>limitDep){
+      listHtml+=`<button class="btn btn-s btn-w" style="margin-top:12px" data-action="dep-show-more">Afficher plus (${limitDep} / ${totalDep})</button>`;
+    }
   }
 
   document.getElementById('panel-depenses').innerHTML=`
@@ -1197,8 +1564,8 @@ function depCard(e,proRatio){
   const ratio=isRatio?(e.proRatioOverride!=null?e.proRatioOverride/100:(proRatio!=null?proRatio:null)):null;
   const pct=ratio!=null?Math.round(ratio*100):null;
   const ratioLabel=isRatio?(proRatio===null&&e.proRatioOverride==null?
-    `<div style="font-size:11px;color:var(--warn);margin-top:2px">⚠ Odomètre non configuré</div>`:
-    `<div style="font-size:11px;color:var(--text2);margin-top:2px">Ratio pro : <strong>${pct??0}%</strong></div>`
+    `<div style="font-size:11px;color:var(--warn);margin-top:2px">⚠ Odomètre non configuré — déduit à 100%</div>`:
+    `<div style="font-size:11px;color:var(--text2);margin-top:2px">Ratio pro : <strong>${pct??100}%</strong></div>`
   ):'';
   return`<div class="li">
     <div class="li-ico" style="color:var(--text2)">${CAT_SVG[e.cat]||_SVG_BOX}</div>
@@ -1229,27 +1596,31 @@ function openDepModal(id=null){
     document.getElementById('dep-recu').value=e.recu||'';
     document.getElementById('dep-kwh').value=e.kwh||'';
     document.getElementById('dep-ratio').value=e.proRatioOverride!=null?e.proRatioOverride:'';
+    document.getElementById('dep-freq').value=e.freq||'biweekly';
   }else{
     document.getElementById('dep-title').textContent='Nouvelle dépense';
     document.getElementById('dep-id').value='';
     document.getElementById('dep-cat').value='Recharge VE';
     ['dep-amt','dep-desc','dep-recu','dep-kwh','dep-ratio'].forEach(i=>document.getElementById(i).value='');
     document.getElementById('dep-date').value=today;
+    document.getElementById('dep-freq').value='biweekly';
   }
   updateDepCat(); openM('m-dep');
 }
 
 function updateDepCat(){
   const cat=document.getElementById('dep-cat').value;
-  const isEV=cat==='Recharge VE', isMixed=MIXED.includes(cat);
+  const isEV=cat==='Recharge VE', isMixed=MIXED.includes(cat), isLeasing=cat==='Leasing';
   document.getElementById('ev-fields').style.display=isEV?'block':'none';
   document.getElementById('ratio-fields').style.display=isMixed?'block':'none';
+  document.getElementById('freq-fields').style.display=isLeasing?'block':'none';
   const lbl=document.getElementById('dep-amt-label');
   const dlbl=document.getElementById('dep-date-label');
+  const freq=document.getElementById('dep-freq')?.value||'biweekly';
   if(cat==='Téléphone'){lbl.textContent='Montant mensuel ($)';}
   else if(cat==='Assurance auto'){lbl.textContent='Montant annuel ($)';}
   else if(cat==='Immatriculation'){lbl.textContent='Montant annuel ($)';}
-  else if(cat==='Leasing'){lbl.textContent='Paiement aux 2 semaines ($)';}
+  else if(cat==='Leasing'){lbl.textContent=freq==='monthly'?'Paiement mensuel ($)':'Paiement aux 2 semaines ($)';}
   else{lbl.textContent='Montant ($)';}
   dlbl.textContent=DATE_LABEL_CATS.includes(cat)?'Date de début de paiement':'Date';
   const proRatio=calcProRatio();
@@ -1274,25 +1645,29 @@ function saveDep(){
   const kwh=parseFloat(document.getElementById('dep-kwh').value)||0;
   const amt=parseFloat(document.getElementById('dep-amt').value)||0;
   const ratioVal=document.getElementById('dep-ratio').value;
-  const e={id,cat,amt,date:dateVal,desc:document.getElementById('dep-desc').value,recu:document.getElementById('dep-recu').value,kwh,proRatioOverride:MIXED.includes(cat)&&ratioVal!==''?parseFloat(ratioVal):null};
+  const freq=cat==='Leasing'?(document.getElementById('dep-freq')?.value||'biweekly'):null;
+  const e={id,cat,amt,date:dateVal,desc:document.getElementById('dep-desc').value,recu:document.getElementById('dep-recu').value,kwh,proRatioOverride:MIXED.includes(cat)&&ratioVal!==''?parseFloat(ratioVal):null,freq};
   const i=S.expenses.findIndex(x=>x.id===id);
   if(i>=0)S.expenses[i]=e;else S.expenses.unshift(e);
   saveLS(); sbUpsert('depenses',eToDB(e)); closeM('m-dep'); render(); toast('Dépense enregistrée');
 }
 function delDep(id){
-  if(!confirm('Supprimer cette dépense ?'))return;
-  S.expenses=S.expenses.filter(e=>e.id!==id);
-  saveLS(); sbDelete('depenses',id); render(); toast('Supprimé');
+  askConfirm('Supprimer cette dépense ?','Cette action est définitive et supprimera aussi la donnée sur Supabase.',()=>{
+    S.expenses=S.expenses.filter(e=>e.id!==id);
+    saveLS(); sbDelete('depenses',id); render(); toast('Supprimé');
+  },'Supprimer');
 }
 
 // ── FISCAL ─────────────────────────────────────────────────────────────────────
 function rFisc(){
   const histBanner=S.fiscal.histMode&&S.fiscal.histSnap?`<div class="alert alert-i" style="margin-bottom:12px;display:flex;align-items:center;gap:10px"><em style="flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></em><p style="flex:1;margin:0">Mode historique — ${MONTH_NAMES[(S.fiscal.histSnap.mois||1)-1]} ${S.fiscal.histSnap.annee}</p><button class="btn btn-xs btn-s" id="hist-back">Retour</button></div>`:'';
+  const{isFallback,fallbackYear}=getTaxTable(S.cfg.year);
+  const fallbackBanner=!S.fiscal.histMode&&isFallback?`<div class="alert alert-w" style="margin-bottom:12px"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></em><p>Aucune table fiscale pour ${S.cfg.year} — les calculs utilisent les paramètres ${fallbackYear} (à mettre à jour dans le code).</p></div>`:'';
   const snapSel=S.fiscal.snapshots.length>0?`<select class="fs" id="snap-nav-sel" style="flex:1;min-width:0;font-size:13px;padding:8px 14px"><option value="">📅 Historique</option>${S.fiscal.snapshots.map(s=>`<option value="${s.annee}-${s.mois}"${S.fiscal.histMode&&S.fiscal.histSnap&&S.fiscal.histSnap.annee===s.annee&&S.fiscal.histSnap.mois===s.mois?' selected':''}>${MONTH_NAMES[(s.mois||1)-1]} ${s.annee}</option>`).join('')}</select>`:'';
   const saveBtn=!S.fiscal.histMode?`<button class="btn btn-s btn-sm" id="save-snap-btn">Sauvegarder ce mois</button>`:'';
   const topBar=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">${snapSel}${saveBtn}<button class="btn btn-s btn-sm" id="fiscal-excel-btn">📊 Excel</button><button class="btn btn-s btn-sm" id="fiscal-print-btn">🖨 PDF</button></div>`;
   const subtabs=!S.fiscal.histMode?`<div class="subtabs"><button class="stab${S.fsub==='revenus'?' active':''}" data-fsub="revenus">Revenus</button><button class="stab${S.fsub==='deductions'?' active':''}" data-fsub="deductions">Déductions</button><button class="stab${S.fsub==='vehicule'?' active':''}" data-fsub="vehicule">Véhicule</button></div>`:'';
-  document.getElementById('panel-fiscal').innerHTML=`${histBanner}${topBar}${subtabs}<div id="fsub-content"></div>`;
+  document.getElementById('panel-fiscal').innerHTML=`${histBanner}${fallbackBanner}${topBar}${subtabs}<div id="fsub-content"></div>`;
   rFsub();
 }
 
@@ -1302,8 +1677,15 @@ function rFsub(){
   if(S.fiscal.histMode&&S.fiscal.histSnap){
     const snap=S.fiscal.histSnap; const f=fiscalFromSnap(snap);
     const pct=snap.ratio_pro!=null?Math.round(snap.ratio_pro*100):null;
+    // Détecte si les données du mois ont changé depuis la sauvegarde du snapshot
+    // (livraison/dépense ajoutée, modifiée ou supprimée après coup dans ce mois déjà "clôturé")
+    const pfx=`${snap.annee}-${String(snap.mois).padStart(2,'0')}`;
+    const divsNow=S.deliveries.filter(d=>d.date&&d.date.startsWith(pfx));
+    const grossNow=r2(divsNow.reduce((s,d)=>s+r2((d.rev||0)+(d.tip||0)),0));
+    const diverge=r2(Math.abs(grossNow-(snap.revenu_brut||0)))>0.01||divsNow.length!==(snap.nombre_livraisons||0);
+    const divergeBanner=diverge?`<div class="alert alert-w" style="margin-bottom:12px"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></em><p>Les données de ce mois ont changé depuis cette sauvegarde (${divsNow.length} livraisons actuellement pour ${$f(grossNow)}, contre ${snap.nombre_livraisons||0} pour ${$f(snap.revenu_brut||0)} au moment du snapshot). <button class="btn btn-xs btn-s" id="resave-snap-btn" data-annee="${snap.annee}" data-mois="${snap.mois}" style="margin-left:4px">Mettre à jour ce snapshot</button></p></div>`:'';
     const detRows=(snap.depenses_detail||[]).length>0?`<div class="stitle">Dépenses du mois</div><div class="card"><table class="dtable"><thead><tr><th>Catégorie</th><th style="text-align:right">Total</th><th style="text-align:right">Déductible</th></tr></thead><tbody>${(snap.depenses_detail||[]).map(e=>`<tr><td>${esc(e.cat||'')}${e.desc?`<br><span style="font-size:11px;color:var(--text2)">${esc(e.desc)}</span>`:''}</td><td style="text-align:right">${$f(e.annual!=null?e.annual:e.amt||0)}</td><td style="text-align:right;color:var(--ok)">${$f(e.ded||0)}</td></tr>`).join('')}</tbody></table></div>`:'';
-    el.innerHTML=`<div class="card"><div class="card-title">${MONTH_NAMES[(snap.mois||1)-1]} ${snap.annee}</div><div class="card-value">${$f(f.gross)}</div><div class="card-sub">${snap.nombre_livraisons||0} livraisons · ${(f.kmPro||0).toFixed(0)} km</div></div><div class="card"><table class="dtable"><tr><td>Déduction km CRA</td><td>${$f(f.kmDed)}</td></tr><tr><td>Autres déductions</td><td>${$f(f.otherDed)}</td></tr><tr><td style="font-weight:700">Total déductions</td><td style="color:var(--ok);font-weight:700">${$f(f.totDed)}</td></tr><tr><td style="font-weight:700">Revenu net imposable</td><td style="color:var(--accent);font-weight:700">${$f(f.net)}</td></tr>${pct!=null?`<tr><td>Ratio pro</td><td>${pct}%</td></tr>`:''}</table></div>${detRows}<p style="font-size:11px;color:var(--text2);text-align:center;margin-top:8px">Sauvegardé le ${snap.created_at?new Date(snap.created_at).toLocaleDateString('fr-CA'):''}</p>`;
+    el.innerHTML=`${divergeBanner}<div class="card"><div class="card-title">${MONTH_NAMES[(snap.mois||1)-1]} ${snap.annee}</div><div class="card-value">${$f(f.gross)}</div><div class="card-sub">${snap.nombre_livraisons||0} livraisons · ${(f.kmPro||0).toFixed(0)} km</div></div><div class="card"><table class="dtable"><tr><td>Déduction km CRA</td><td>${$f(f.kmDed)}</td></tr><tr><td>Autres déductions</td><td>${$f(f.otherDed)}</td></tr><tr><td style="font-weight:700">Total déductions</td><td style="color:var(--ok);font-weight:700">${$f(f.totDed)}</td></tr><tr><td style="font-weight:700">Revenu net imposable</td><td style="color:var(--accent);font-weight:700">${$f(f.net)}</td></tr>${pct!=null?`<tr><td>Ratio pro</td><td>${pct}%</td></tr>`:''}</table></div>${detRows}<p style="font-size:11px;color:var(--text2);text-align:center;margin-top:8px">Sauvegardé le ${snap.created_at?new Date(snap.created_at).toLocaleDateString('fr-CA'):''}</p>`;
     return;
   }
   const f=calcFiscal(), yr=S.cfg.year;
@@ -1311,7 +1693,7 @@ function rFsub(){
     const setA=f.gross*Math.max(f.rate,.25);
     el.innerHTML=`
       <div class="card"><div class="card-title">Revenus bruts ${yr}</div><div class="card-value">${$f(f.gross)}</div><div class="card-sub">${f.divs.length} livraisons</div></div>
-      <div class="card" style="background:rgba(52,199,89,.05);border:1px solid rgba(52,199,89,.2);margin-bottom:12px">
+      <div class="card" style="background:rgba(45,106,79,.06);border:1px solid rgba(45,106,79,.2);margin-bottom:12px">
         <div class="card-title" style="margin-bottom:8px">Résumé fiscal</div>
         <table class="dtable">
           <tr><td>Revenus bruts</td><td style="text-align:right;font-weight:600">${$f(f.gross)}</td></tr>
@@ -1320,11 +1702,18 @@ function rFsub(){
         </table>
         ${f.totDed>f.gross&&f.gross>0?'<p style="font-size:11px;color:var(--text2);margin-top:6px">Déductions supérieures aux revenus</p>':''}
       </div>
-      ${f.needsTPS?`<div class="alert alert-w"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></em><p>Tu dois percevoir et remettre la TPS/TVQ.</p></div><div class="grid2"><div class="scard"><div class="slabel">TPS (5%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TPS)}</div></div><div class="scard"><div class="slabel">TVQ (9.975%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TVQ)}</div></div></div>`
-      :`<div class="alert alert-i"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></em><p>Seuil TPS/TVQ : ${$f(f.gross)} / ${$f(30000)} (${$f(Math.max(0,30000-f.gross))} restant)</p></div><div class="pbar"><div class="pfill" style="width:${Math.min(100,f.gross/300).toFixed(1)}%"></div></div>`}
-      ${f.total>0?`<div class="stitle">Estimation impôt</div><div class="card"><table class="dtable"><tr><td>Revenu net imposable <span class="tip" title="Votre revenu brut moins toutes vos déductions admissibles. C'est sur ce montant que l'impôt est calculé.">?</span></td><td>${$f(f.net)}</td></tr><tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr><tr><td>Impôt provincial (QC)</td><td>${$f(f.qcOwed)}</td></tr><tr><td>Cotisation RRQ</td><td>${$f(f.rrq)}</td></tr><tr><td style="font-weight:700">Total estimé</td><td style="color:var(--err);font-weight:700">${$f(f.total)}</td></tr></table></div><div class="card" style="background:rgba(0,122,255,.06);border:1px solid rgba(0,122,255,.15)"><div class="card-title">Mise de côté recommandée</div><div class="card-value" style="color:var(--accent)">${$f(setA)}</div><div class="card-sub">${Math.ceil(Math.max(f.rate,.25)*100)}% des revenus bruts</div></div>`:''}
+      ${f.needsTPS?(()=>{
+        const raison=f.tps.trimestreDepasse?`Le trimestre ${f.tps.trimestreDepasse.label} a dépassé ${$f(30000)} à lui seul.`:`Tes 4 derniers trimestres consécutifs (jusqu'à ${f.tps.glissantDepasse.jusqua}) cumulent ${$f(f.tps.glissantDepasse.total)}, au-delà du seuil de ${$f(30000)}.`;
+        return`<div class="alert alert-w"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></em><p>Tu dois t'inscrire et percevoir la TPS/TVQ. ${raison}</p></div><div class="grid2"><div class="scard"><div class="slabel">TPS (5%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TPS)}</div></div><div class="scard"><div class="slabel">TVQ (9.975%)</div><div class="sval b" style="font-size:17px">${$f(f.gross*TVQ)}</div></div></div><p class="note-sm" style="margin-top:8px">Ces montants TPS/TVQ sont calculés sur les revenus ${yr} affichés ici — la remise réelle se fait par trimestre auprès de Revenu Québec.</p>`;
+      })():(()=>{
+        const tActuel=f.tps.trimestreActuel;
+        const sub=tActuel?`${tActuel.label} : ${$f(tActuel.total)} / ${$f(30000)} (${$f(Math.max(0,30000-tActuel.total))} restant)`:`Aucune livraison enregistrée pour l'instant.`;
+        return`<div class="alert alert-i"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></em><p>Statut petit fournisseur — pas d'inscription TPS/TVQ requise. Seuil par trimestre civil : ${sub}</p></div><div class="pbar"><div class="pfill" style="width:${tActuel?Math.min(100,tActuel.total/300).toFixed(1):0}%"></div></div><p class="note-sm" style="margin-top:8px">Le seuil de 30 000$ s'évalue par trimestre civil ou sur 4 trimestres consécutifs glissants — pas sur l'année civile.</p>`;
+      })()}
+      ${f.total>0?`<div class="stitle">Estimation impôt</div><div class="card"><table class="dtable"><tr><td>Revenu net imposable <span class="tip" title="Votre revenu brut moins toutes vos déductions admissibles. C'est sur ce montant que l'impôt est calculé.">?</span></td><td>${$f(f.net)}</td></tr><tr><td>Impôt fédéral</td><td>${$f(f.fedOwed)}</td></tr><tr><td>Impôt provincial (QC)</td><td>${$f(f.qcOwed)}</td></tr><tr><td>Cotisation RRQ</td><td>${$f(f.rrq)}</td></tr><tr><td style="font-weight:700">Total estimé</td><td style="color:var(--err);font-weight:700">${$f(f.total)}</td></tr></table></div><div class="card" style="background:rgba(244,180,0,.08);border:1px solid rgba(244,180,0,.2)"><div class="card-title">Mise de côté recommandée</div><div class="card-value" style="color:var(--accent)">${$f(setA)}</div><div class="card-sub">${Math.ceil(Math.max(f.rate,.25)*100)}% des revenus bruts</div></div>`:''}
     `;
   }else if(S.fsub==='deductions'){
+    const{table:ttDed}=getTaxTable(yr);
     const many=f.exps.length>5;
     const detailBtn=many?`<button class="btn btn-s btn-xs" id="ded-toggle">${S.dedDetailOpen?'Masquer le détail':'Afficher le détail ('+f.exps.length+' dépenses)'}</button>`:'';
     const _ratioForExp=e=>{
@@ -1341,8 +1730,8 @@ function rFsub(){
         </div>
         ${S.cfg.deductionMethod==='detailed'?`<p class="note-sm">Si vos frais réels dépassent vos revenus, votre revenu net imposable est 0$ — vous ne payez pas d'impôt sur ces livraisons cette année.</p>`:''}
       </div>
-      <div class="card"><div class="card-title">Déduction km CRA</div><div style="font-size:22px;font-weight:700">${$f(f.kmDed)}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${f.km.toFixed(1)} km · 0,70$/km ≤5 000 / 0,64$ après</div></div>
-      ${f.proRatio===null&&f.exps.some(e=>RATIO_CATS.includes(e.cat))?`<div class="alert alert-w"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></em><p>Odomètre non configuré — le ratio pro/perso est à 0% pour les dépenses mixtes. Configurez les km dans l'onglet Véhicule.</p></div>`:''}
+      <div class="card"><div class="card-title">Déduction km CRA</div><div style="font-size:22px;font-weight:700">${$f(f.kmDed)}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${f.km.toFixed(1)} km · ${ttDed.kmR1.toFixed(2)}$/km ≤5 000 / ${ttDed.kmR2.toFixed(2)}$ après</div></div>
+      ${f.proRatio===null&&f.exps.some(e=>RATIO_CATS.includes(e.cat))?`<div class="alert alert-w"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></em><p>Odomètre non configuré — les dépenses mixtes sont déduites à 100% par défaut (aucun ratio pro/perso appliqué). Configurez les km dans l'onglet Véhicule pour un calcul précis.</p></div>`:''}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span class="stitle" style="margin:0">Dépenses</span>${detailBtn}</div>
       ${f.exps.length===0?`<div class="alert alert-i"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></em><p>Aucune dépense pour ${yr}.</p></div>`:detailRows}
       <div class="card"><table class="dtable"><tr><td>${S.cfg.deductionMethod==='cra'?'Déduction km CRA':'Frais véhicule réels'}</td><td>${$f(S.cfg.deductionMethod==='cra'?f.kmDed:f.vehDed)}</td></tr><tr><td>Autres dépenses</td><td>${$f(f.otherDed)}</td></tr><tr><td style="font-weight:700">Total déductions</td><td style="color:var(--ok);font-weight:700">${$f(f.totDed)}</td></tr><tr><td style="font-weight:700">Revenu net imposable <span class="tip" title="Revenu brut moins toutes les déductions. L'impôt est calculé sur ce montant.">?</span></td><td style="color:var(--accent);font-weight:700">${$f(f.net)}</td></tr></table></div>
@@ -1353,20 +1742,22 @@ function rFsub(){
     const kmCostStr=f.autoKmCost!=null?(f.autoKmCost*100).toFixed(1)+'¢/km':'Données insuffisantes';
     el.innerHTML=`
       <div class="card">
+        <p class="note-sm" style="margin-bottom:10px">Le ratio pro/perso est calculé entre ces deux relevés d'odomètre. Mets-le à jour à chaque fois que tu relèves ton compteur — le ratio ne se recalcule qu'à ce moment-là, pas automatiquement au fil des livraisons.</p>
         <div class="frow" style="margin-bottom:12px">
-          <div class="fg"><label class="fl">Km au 1er janv.</label><input type="number" inputmode="numeric" class="fi" id="v-km-jan" value="${S.cfg.vehicleKmJan||''}" placeholder="ex: 45000"></div>
+          <div class="fg"><label class="fl">Km au dernier relevé</label><input type="number" inputmode="numeric" class="fi" id="v-km-jan" value="${S.cfg.vehicleKmJan||''}" placeholder="ex: 45000"></div>
           <div class="fg"><label class="fl">Km maintenant</label><input type="number" inputmode="numeric" class="fi" id="v-km-now" value="${S.cfg.vehicleKmNow||''}" placeholder="ex: 62000"></div>
         </div>
+        <div class="fg" style="margin-bottom:12px"><label class="fl">Date de ce relevé</label><input type="date" class="fi" id="v-km-date" value="${S.cfg.vehicleKmDate||''}"></div>
         <button class="btn btn-s btn-sm btn-w" id="save-vkm">Enregistrer</button>
         <div class="grid2" style="margin-top:12px">
           <div class="scard"><div class="slabel">Km totaux</div><div class="sval">${f.kmTotal.toFixed(0)}</div></div>
           <div class="scard"><div class="slabel">Km pro</div><div class="sval b">${f.kmPro.toFixed(0)}</div></div>
         </div>
-        ${pct!=null?`<div style="font-size:14px;font-weight:600;margin:8px 0 4px">Ratio pro — ${pct}%</div><div class="ratio-row"><div class="ratio-pro" style="flex:${pct}"></div><div class="ratio-perso" style="flex:${100-pct}"></div></div>`:''}
+        ${pct!=null?`<div style="font-size:14px;font-weight:600;margin:8px 0 4px">Ratio pro — ${pct}%${S.cfg.vehicleKmDate?` <span style="font-size:11px;font-weight:400;color:var(--text2)">(valide depuis le relevé du ${fdateShort(S.cfg.vehicleKmDate)})</span>`:''}</div><div class="ratio-row"><div class="ratio-pro" style="flex:${pct}"></div><div class="ratio-perso" style="flex:${100-pct}"></div></div>`:''}
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
           <div class="card-title">Coût moyen / km (calculé)</div>
           <div style="font-size:22px;font-weight:700;color:var(--accent)">${kmCostStr}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">${$f(f.vehExpTotal)} dépenses véhicule ÷ ${f.kmPro.toFixed(0)} km pro</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${$f(f.vehExpReel)} dépensés réellement ÷ ${f.kmPro.toFixed(0)} km pro</div>
         </div>
       </div>
       <div class="grid2">
@@ -1386,13 +1777,18 @@ function dashToggle(sec){
   if(el){el.style.display=_dashCollapsed[sec]?'none':'block';}
   if(tog){tog.classList.toggle('collapsed',!!_dashCollapsed[sec]);}
 }
+function livCyclePeriode(){
+  _livPeriode=_livPeriode==='semaine'?'mois':_livPeriode==='mois'?'annee':'semaine';
+  rDash();
+}
 
 function rCalculette(){
   const seuil=S.cfg.seuilNetMin||5;
   const conso=S.cfg.veConsommation||20;
-  const recharges=S.expenses.filter(e=>e.cat==='Recharge VE'&&e.kwh>0&&e.amt>0);
-  const kwhMoyen=recharges.length>0?r2(recharges.reduce((s,e)=>s+e.amt,0)/recharges.reduce((s,e)=>s+e.kwh,0)):(S.cfg.kwhCost||0.085);
+  const{kwhMoyen,recharges}=calcKwhMoyen();
   const coutKmElec=calcCoutKmVE();
+  const veh=calcCoutKmVehicule();
+  const vehSourceLabel=veh.source==='reel'?`réel (${veh.kmProYr.toFixed(0)} km pro, ${veh.moisEcoules.toFixed(1)} mois)`:`estimation VE (${veh.kmProYr.toFixed(0)} km / ${veh.moisEcoules.toFixed(1)} mois — besoin d'au moins 50 km et 3 mois de données)`;
 
   document.getElementById('panel-calculette').innerHTML=`
     <div class="stitle">Évaluation de commande</div>
@@ -1421,7 +1817,9 @@ function rCalculette(){
       <table style="width:100%;font-size:13px">
         <tr><td style="color:var(--text2);padding:4px 0">Consommation VE</td><td style="text-align:right;font-weight:600">${conso} kWh/100km</td></tr>
         <tr><td style="color:var(--text2);padding:4px 0">Coût/kWh moyen réel</td><td style="text-align:right;font-weight:600">${kwhMoyen.toFixed(3)} $ <span style="font-size:10px;color:var(--text2)">(${recharges.length} recharges)</span></td></tr>
-        <tr><td style="color:var(--text2);padding:4px 0">Coût/km calculé</td><td style="text-align:right;font-weight:600">${coutKmElec.toFixed(4)} $/km</td></tr>
+        <tr><td style="color:var(--text2);padding:4px 0">Coût électricité/km</td><td style="text-align:right;font-weight:600">${coutKmElec.toFixed(4)} $/km</td></tr>
+        <tr><td style="color:var(--text2);padding:4px 0">Frais véhicule/km <span style="font-size:10px">(${vehSourceLabel})</span></td><td style="text-align:right;font-weight:600">${veh.coutKm.toFixed(4)} $/km</td></tr>
+        <tr><td style="color:var(--text2);padding:4px 0;font-weight:700">Coût réel total/km</td><td style="text-align:right;font-weight:700">${(coutKmElec+veh.coutKm).toFixed(4)} $/km</td></tr>
         <tr><td style="color:var(--text2);padding:4px 0">Seuil rentable</td><td style="text-align:right;font-weight:600">${$f(seuil)} net min.</td></tr>
       </table>
       <div style="font-size:11px;color:var(--text2);margin-top:10px">
@@ -1438,8 +1836,11 @@ function evalCommande(){
   const kmLiv=parseFloat(document.getElementById('calc-km-livraison')?.value)||0;
   const kmAller=parseFloat(document.getElementById('calc-km-aller')?.value)||0;
   const kmTotal=r2(kmLiv+kmAller);
-  const coutKmElec=calcCoutKmVE(); // coût réel depuis recharges enregistrées
-  const coutTotal=r2(kmTotal*coutKmElec);
+  const coutKmElec=calcCoutKmVE(); // coût électrique réel depuis recharges enregistrées
+  const veh=calcCoutKmVehicule(); // frais fixes véhicule réels ou taux CRA en fallback
+  const coutElecTotal=r2(kmTotal*coutKmElec);
+  const coutVehTotal=r2(kmTotal*veh.coutKm);
+  const coutTotal=r2(coutElecTotal+coutVehTotal);
   const net=r2(rev-coutTotal);
   const seuil=S.cfg.seuilNetMin||5;
 
@@ -1447,9 +1848,10 @@ function evalCommande(){
   if(!el)return;
   if(rev<=0&&kmLiv<=0){el.style.display='none';return;}
 
-  const couleur=net>=seuil?'#34C759':net>=0?'#FF9500':'#FF3B30';
+  const couleur=net>=seuil?'#2D6A4F':net>=0?'#B5762B':'#B5452B';
   const label=net>=seuil?'✓ Accepter':net>=0?'⚠ Limite':'✗ Refuser';
   const labelSub=net>=seuil?'Commande rentable':'net est en dessous du seuil de '+$f(seuil);
+  const vehSourceTag=veh.source==='ve_estime'?' <span style="font-size:10px;color:var(--text2)">(estimation VE)</span>':'';
 
   el.style.display='block';
   el.innerHTML=`
@@ -1477,7 +1879,15 @@ function evalCommande(){
         </tr>
         <tr style="border-bottom:1px solid var(--div)">
           <td style="padding:8px 4px;color:var(--text2)">Coût électricité</td>
-          <td style="padding:8px 4px;text-align:right;color:var(--err)">−${$f(coutTotal)}</td>
+          <td style="padding:8px 4px;text-align:right;color:var(--err)">−${$f(coutElecTotal)}</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--div)">
+          <td style="padding:8px 4px;color:var(--text2)">Frais véhicule${vehSourceTag}</td>
+          <td style="padding:8px 4px;text-align:right;color:var(--err)">−${$f(coutVehTotal)}</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--div)">
+          <td style="padding:8px 4px;color:var(--text2)">Coût total</td>
+          <td style="padding:8px 4px;text-align:right;color:var(--err);font-weight:600">−${$f(coutTotal)}</td>
         </tr>
         <tr>
           <td style="padding:8px 4px;font-weight:700">Revenu net</td>
@@ -1496,6 +1906,11 @@ function rOutils(){
       <div class="card-title">Synchronisation</div>
       <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Synchronise les données avec Supabase.</p>
       <button class="btn btn-s btn-w" id="outils-sync-btn">Synchroniser maintenant</button>
+    </div>`+`
+    <div class="card">
+      <div class="card-title">Snapshots fiscaux</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Recalcule tous les snapshots mensuels/annuels sauvegardés avec le ratio pro/perso actuel (${S.proRatio!=null?Math.round(S.proRatio*100)+'%':'non configuré'}).</p>
+      <button class="btn btn-s btn-w" id="outils-recalc-btn">Recalculer les snapshots (${S.fiscal.snapshots.length})</button>
     </div>`+`
     <div class="card">
       <div class="card-title">Période</div>
@@ -1737,6 +2152,17 @@ function closeM(id){
   setTimeout(()=>{if(!el.classList.contains('open'))el.style.display='none';},50);
 }
 
+// ── CONFIRMATION GÉNÉRIQUE ───────────────────────────────────────────────────────
+let _confirmCallback=null;
+function askConfirm(title,body,onConfirm,okLabel='Confirmer'){
+  document.getElementById('confirm-title').textContent=title;
+  document.getElementById('confirm-body').textContent=body;
+  const okBtn=document.getElementById('confirm-ok-btn');
+  okBtn.textContent=okLabel;
+  _confirmCallback=onConfirm;
+  openM('m-confirm');
+}
+
 // ── EVENT DELEGATION ───────────────────────────────────────────────────────────
 function initEvents(){
   document.getElementById('bnav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab);});
@@ -1750,6 +2176,11 @@ function initEvents(){
   document.getElementById('drawer-export').addEventListener('click',()=>{closeDrawer();goTab('outils');});
   document.getElementById('drawer-settings').addEventListener('click',()=>{closeDrawer();openSettings();});
   document.getElementById('drawer-fiscal').addEventListener('click',()=>{closeDrawer();goTab('fiscal');});
+  document.getElementById('confirm-ok-btn').addEventListener('click',()=>{
+    const cb=_confirmCallback; _confirmCallback=null;
+    closeM('m-confirm');
+    if(cb)cb();
+  });
 
   // Tooltip popup
   const _tipPop=document.getElementById('tip-popup');
@@ -1788,8 +2219,9 @@ function initEvents(){
       else if(a==='detail-liv')openLivDetail(lBtn.dataset.id);
       else if(a==='edit-liv')openLivModal(lBtn.dataset.id);
       else if(a==='del-liv')delLiv(lBtn.dataset.id);
-      else if(a==='filt-plat'){S.dFilt.plat=lBtn.dataset.val;rLiv();}
-      else if(a==='filt-date-reset'){S.dFilt.dateFrom='';S.dFilt.dateTo='';rLiv();}
+      else if(a==='filt-plat'){S.dFilt.plat=lBtn.dataset.val;S.dFilt.showLimit=60;rLiv();}
+      else if(a==='filt-date-reset'){S.dFilt.dateFrom='';S.dFilt.dateTo='';S.dFilt.showLimit=60;rLiv();}
+      else if(a==='liv-show-more'){S.dFilt.showLimit=(S.dFilt.showLimit||60)+60;rLiv();}
       return;}
 
     // Dépenses
@@ -1798,8 +2230,9 @@ function initEvents(){
       if(a==='new-dep')openDepModal();
       else if(a==='edit-dep')openDepModal(dBtn.dataset.id);
       else if(a==='del-dep')delDep(dBtn.dataset.id);
-      else if(a==='filt-dep'){S.eFilt=dBtn.dataset.val;rDep();}
+      else if(a==='filt-dep'){S.eFilt=dBtn.dataset.val;S.eShowLimit=60;rDep();}
       else if(a==='dep-toggle-filt'){S.eShowFilt=!S.eShowFilt;rDep();}
+      else if(a==='dep-show-more'){S.eShowLimit=(S.eShowLimit||60)+60;rDep();}
       return;}
 
     // Fiscal
@@ -1810,17 +2243,27 @@ function initEvents(){
     if(e.target.id==='save-vkm'){
       S.cfg.vehicleKmJan=parseFloat(document.getElementById('v-km-jan')?.value)||0;
       S.cfg.vehicleKmNow=parseFloat(document.getElementById('v-km-now')?.value)||0;
+      S.cfg.vehicleKmDate=document.getElementById('v-km-date')?.value||'';
       refreshProRatio();saveLS();rFsub();
       const sb=sbClient();
       if(sb){
         sb.from('parametres').upsert([
           {cle:'odometer_start',valeur:String(S.cfg.vehicleKmJan)},
-          {cle:'odometer_current',valeur:String(S.cfg.vehicleKmNow)}
+          {cle:'odometer_current',valeur:String(S.cfg.vehicleKmNow)},
+          {cle:'odometer_date',valeur:S.cfg.vehicleKmDate}
         ],{onConflict:'cle'}).then(({error})=>{
           if(error) console.error('[SB] save odometer error',error.message);
         });
       }
-      toast('Km enregistrés');return;}
+      toast('Km enregistrés');
+      if(S.fiscal.snapshots.length>0){
+        setTimeout(()=>{
+          askConfirm('Mettre à jour les snapshots ?','Le ratio pro/perso a changé. Recalculer les snapshots fiscaux déjà sauvegardés avec ce nouveau ratio ?',()=>{
+            recalcAllSnapshots();
+          },'Recalculer');
+        },300);
+      }
+      return;}
     if(e.target.id==='ded-toggle'){S.dedDetailOpen=!S.dedDetailOpen;rFsub();return;}
     if(e.target.id==='save-snap-btn'){
       const now=new Date(); const btn=e.target;
@@ -1832,12 +2275,28 @@ function initEvents(){
         setTimeout(()=>{const b2=document.getElementById('save-snap-btn');if(b2){b2.disabled=false;b2.textContent='Sauvegarder ce mois';}},2000);
       }).catch(()=>{const b=document.getElementById('save-snap-btn');if(b)b.textContent='⚠ Erreur sauvegarde';setTimeout(()=>{const b2=document.getElementById('save-snap-btn');if(b2){b2.disabled=false;b2.textContent='Sauvegarder ce mois';}},2000);});
       return;}
+    if(e.target.id==='resave-snap-btn'){
+      const annee=parseInt(e.target.dataset.annee,10), mois=parseInt(e.target.dataset.mois,10);
+      const btn=e.target; btn.disabled=true; btn.textContent='Mise à jour…';
+      buildFiscalSnapshot(annee,mois,false).then(async ok=>{
+        if(ok){
+          await loadFiscalSnapshots();
+          await loadHistSnap(annee,mois);
+          toast('Snapshot mis à jour');
+        }else toast('Erreur lors de la mise à jour');
+      }).catch(()=>toast('Erreur lors de la mise à jour'));
+      return;}
     if(e.target.id==='hist-back'){S.fiscal.histMode=false;S.fiscal.histSnap=null;rFisc();return;}
     if(e.target.id==='fiscal-excel-btn'){exportFiscalExcel();return;}
     if(e.target.id==='fiscal-print-btn'){exportFiscalPrint();return;}
 
     // Outils
     if(e.target.id==='outils-sync-btn'){doSync();return;}
+    if(e.target.id==='outils-recalc-btn'){
+      askConfirm('Recalculer les snapshots ?','Recalculer tous les snapshots fiscaux avec le ratio pro/perso actuel ? Cette action met à jour les données déjà sauvegardées.',()=>{
+        recalcAllSnapshots();
+      },'Recalculer');
+      return;}
     if(e.target.id==='export-excel-btn'){exportExcel();return;}
     if(e.target.id==='export-pdf-btn'){exportPDF();return;}
 
@@ -1853,17 +2312,20 @@ function initEvents(){
       if(S.cfg.platforms.includes(v)){toast('Plateforme déjà existante');return;}
       S.cfg.platforms.push(v);document.getElementById('new-plat').value='';renderPlatList();return;}
     if(e.target.id==='clear-all-btn'){
-      if(!confirm('⚠️ Supprimer TOUTES les données localement ?'))return;
-      S.deliveries=[];S.expenses=[];
-      saveLS();closeM('m-settings');render();toast('Données effacées');return;}
+      askConfirm('⚠️ Effacer toutes les données ?','Cette action supprime définitivement toutes les livraisons et dépenses stockées localement sur cet appareil (les données déjà synchronisées sur Supabase ne sont pas touchées). Cette action est irréversible.',()=>{
+        S.deliveries=[];S.expenses=[];
+        saveLS();closeM('m-settings');render();toast('Données effacées');
+      },'Effacer tout');
+      return;}
     const rmBtn=e.target.closest('#plat-list [data-action="rm-plat"]');
     if(rmBtn){S.cfg.platforms.splice(+rmBtn.dataset.idx,1);renderPlatList();return;}
   });
 
   document.addEventListener('change',e=>{
     if(e.target.id==='dep-cat'){updateDepCat();return;}
-    if(e.target.id==='filt-date-from'){S.dFilt.dateFrom=e.target.value;rLiv();return;}
-    if(e.target.id==='filt-date-to'){S.dFilt.dateTo=e.target.value;rLiv();return;}
+    if(e.target.id==='dep-freq'){updateDepCat();return;}
+    if(e.target.id==='filt-date-from'){S.dFilt.dateFrom=e.target.value;S.dFilt.showLimit=60;rLiv();return;}
+    if(e.target.id==='filt-date-to'){S.dFilt.dateTo=e.target.value;S.dFilt.showLimit=60;rLiv();return;}
     if(e.target.id==='snap-nav-sel'){
       const val=e.target.value;
       if(!val){S.fiscal.histMode=false;S.fiscal.histSnap=null;rFisc();return;}
@@ -1929,6 +2391,18 @@ function initEvents(){
 
 // ── PWA ICON ───────────────────────────────────────────────────────────────────
 function initPWAIcon(){
+  // Les fichiers statiques manifest.json / icon-192.png / icon-512.png sont la source
+  // principale (voir <link> dans le <head>). Cette fonction ne sert que de FALLBACK :
+  // si ces fichiers n'ont pas été déposés à côté de index.html sur l'hébergement (ex: GitHub Pages),
+  // on génère une icône/manifest en mémoire pour que l'app reste installable quand même.
+  fetch('icon-192.png',{method:'HEAD'}).then(r=>{
+    if(r.ok)return; // fichier statique présent, rien à faire
+    generateFallbackPWAAssets();
+  }).catch(()=>{
+    generateFallbackPWAAssets(); // fetch a échoué (ex: file://) → fallback JS
+  });
+}
+function generateFallbackPWAAssets(){
   function makeIcon(size){
     try{
       const c=document.createElement('canvas');c.width=size;c.height=size;
@@ -1940,7 +2414,7 @@ function initPWAIcon(){
       ctx.lineTo(rad,size);ctx.quadraticCurveTo(0,size,0,size-rad);
       ctx.lineTo(0,rad);ctx.quadraticCurveTo(0,0,rad,0);ctx.closePath();
       const g=ctx.createLinearGradient(0,0,0,size);
-      g.addColorStop(0,'#007AFF');g.addColorStop(1,'#0051D5');
+      g.addColorStop(0,'#F4B400');g.addColorStop(1,'#B5762B');
       ctx.fillStyle=g;ctx.fill();
       const pad=size*0.175;
       const s=(size-pad*2)/24;
@@ -1948,12 +2422,12 @@ function initPWAIcon(){
       ctx.fillStyle='rgba(255,255,255,0.95)';
       ctx.beginPath();ctx.moveTo(2,4);ctx.lineTo(14,4);ctx.quadraticCurveTo(15,4,15,5);ctx.lineTo(15,16);ctx.lineTo(2,16);ctx.quadraticCurveTo(1,16,1,15);ctx.lineTo(1,5);ctx.quadraticCurveTo(1,4,2,4);ctx.closePath();ctx.fill();
       ctx.beginPath();ctx.moveTo(16,9);ctx.lineTo(19.5,9);ctx.lineTo(23,12.5);ctx.lineTo(23,16);ctx.lineTo(16,16);ctx.closePath();ctx.fill();
-      ctx.fillStyle='rgba(0,81,213,0.8)';
+      ctx.fillStyle='rgba(74,54,0,0.8)';
       ctx.beginPath();ctx.rect(1,15.5,22,2);ctx.fill();
       ctx.fillStyle='rgba(255,255,255,0.95)';
       ctx.beginPath();ctx.arc(5.5,18.5,2.5,0,Math.PI*2);ctx.fill();
       ctx.beginPath();ctx.arc(18.5,18.5,2.5,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='rgba(0,81,213,0.9)';
+      ctx.fillStyle='rgba(74,54,0,0.9)';
       ctx.beginPath();ctx.arc(5.5,18.5,0.8,0,Math.PI*2);ctx.fill();
       ctx.beginPath();ctx.arc(18.5,18.5,0.8,0,Math.PI*2);ctx.fill();
       ctx.restore();
@@ -1968,7 +2442,7 @@ function initPWAIcon(){
   }
   if(url192&&url512){
     try{
-      const manifest={name:'Livraisons Tracker',short_name:'Livraisons',start_url:'.',display:'standalone',background_color:'#007AFF',theme_color:'#007AFF',icons:[{src:url192,sizes:'192x192',type:'image/png'},{src:url512,sizes:'512x512',type:'image/png'}]};
+      const manifest={name:'Livraisons Tracker',short_name:'Livraisons',start_url:'.',display:'standalone',background_color:'#EFEAE0',theme_color:'#F4B400',icons:[{src:url192,sizes:'192x192',type:'image/png'},{src:url512,sizes:'512x512',type:'image/png'}]};
       const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
       const ml=document.getElementById('pwa-manifest-link');
       if(ml)ml.href=URL.createObjectURL(blob);
@@ -1982,11 +2456,16 @@ function init(){
   initPWAIcon();
   initEvents();
   rDash();
+  updateLastSyncLabel();
+  updateSyncQueueBadge();
   if(S.cfg.supabaseUrl&&S.cfg.supabaseKey){
     setTimeout(async()=>{
+      await processSyncQueue(); // rejoue les opérations en attente d'une session précédente hors ligne
       const ok=await sbLoad();
       if(ok){
         render();sbSubscribe();
+        localStorage.setItem('lt_lastSync',new Date().toISOString());
+        updateLastSyncLabel();
         await loadFiscalSnapshots();
         // Auto-trigger: snapshot previous month if month changed since last visit
         const now=new Date();
@@ -2004,7 +2483,7 @@ function init(){
     },0);
   }
   if(!S.cfg.supabaseUrl){
-    console.log('%c[LT] SQL Supabase setup:','color:#007AFF;font-weight:bold');
+    console.log('%c[LT] SQL Supabase setup:','color:#B5762B;font-weight:bold');
     console.log(`create table livraisons (id uuid default gen_random_uuid() primary key, plateforme text, revenu numeric, pourboire numeric, distance numeric, duree integer, date text, notes text, created_at timestamptz default now());
 create table depenses (id uuid default gen_random_uuid() primary key, categorie text, montant numeric, montant_annuel numeric, description text, note_recu text, date text, ratio_pro numeric, kwh numeric, created_at timestamptz default now());
 create table parametres (cle text primary key, valeur text);
@@ -2029,6 +2508,18 @@ document.addEventListener('DOMContentLoaded',init);
       <button class="btn btn-s btn-w" style="flex:1" id="liv-detail-edit">✏️ Modifier</button>
       <button class="btn btn-d" style="flex:1" id="liv-detail-del">🗑 Supprimer</button>
       <button class="btn btn-s" data-close="m-liv-detail" style="flex:1">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMATION GÉNÉRIQUE -->
+<div class="moverlay" id="m-confirm" style="display:none">
+  <div class="modal" style="max-width:340px">
+    <div class="mtitle"><span id="confirm-title">Confirmer</span></div>
+    <p id="confirm-body" style="font-size:14px;color:var(--text2);margin:4px 0 18px"></p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-d" style="flex:1" id="confirm-ok-btn">Confirmer</button>
+      <button class="btn btn-s" style="flex:1" data-close="m-confirm">Annuler</button>
     </div>
   </div>
 </div>
