@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#F4B400">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Livraisons">
+<meta name="apple-mobile-web-app-title" content="Ton carnet">
 <link rel="apple-touch-icon" id="pwa-icon-link" href="icon-192.png">
 <link rel="manifest" id="pwa-manifest-link" href="manifest.json">
 <title>Livraisons Tracker</title>
@@ -23,6 +23,7 @@
   --r:20px;
   --glass-fill: rgba(255,255,255,0.55);
   --glass-fill-strong: rgba(255,255,255,0.74);
+  --glass-fill-nav: rgba(255,255,255,0.32);
   --glass-edge: rgba(255,255,255,0.9);
   --glass-edge-soft: rgba(255,255,255,0.5);
   --glass-shadow: 0 8px 28px rgba(28,30,34,0.08), 0 1px 0 rgba(255,255,255,0.6) inset;
@@ -41,6 +42,7 @@
     --border:rgba(255,255,255,0.10);
     --glass-fill: rgba(38,40,46,0.55);
     --glass-fill-strong: rgba(38,40,46,0.76);
+    --glass-fill-nav: rgba(28,30,34,0.34);
     --glass-edge: rgba(255,255,255,0.12);
     --glass-edge-soft: rgba(255,255,255,0.06);
     --glass-shadow: 0 8px 28px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.05) inset;
@@ -74,7 +76,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(96px + var(--s
 @keyframes fadeSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* ===== BOTTOM NAV — floating glass pill ===== */
-#bnav{position:fixed;bottom:calc(16px + var(--sb));left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:var(--glass-fill-strong);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);border:1px solid var(--glass-edge);border-radius:26px;display:flex;padding:8px;z-index:100;box-shadow:0 12px 40px rgba(0,0,0,0.14),0 1px 0 var(--glass-edge) inset;}
+#bnav{position:fixed;bottom:calc(16px + var(--sb));left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:var(--glass-fill-nav);-webkit-backdrop-filter:blur(38px) saturate(200%);backdrop-filter:blur(38px) saturate(200%);border:1px solid var(--glass-edge-soft);border-radius:26px;display:flex;padding:8px;z-index:100;box-shadow:0 12px 40px rgba(0,0,0,0.14),0 1px 0 var(--glass-edge) inset;}
 .nb{flex:1;border:none;background:none;color:var(--text3);padding:9px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-family:inherit;touch-action:manipulation;border-radius:18px;position:relative}
 .nb.active{color:var(--text)}
 .nb.active::before{content:'';position:absolute;inset:0;border-radius:18px;background:var(--glass-fill);border:1px solid var(--glass-edge-soft);box-shadow:0 2px 10px rgba(0,0,0,0.06),0 1px 0 var(--glass-edge) inset;z-index:-1}
@@ -204,7 +206,7 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(96px + var(--s
 .conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--text3);flex-shrink:0}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cursor:pointer}
+input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cursor:pointer;width:100%;max-width:100%;box-sizing:border-box}
 #m-liv input[type="date"].fi,#m-dep input[type="date"].fi{-webkit-appearance:none;appearance:none;min-height:unset;line-height:normal;box-sizing:border-box}
 #panel-livraisons input[type="date"]{position:relative;z-index:2}
 #print-fiscal{display:none}
@@ -282,7 +284,7 @@ input[type="date"].fi{-webkit-appearance:auto;appearance:auto;min-height:44px;cu
 <div id="app">
 
 <aside id="sidebar">
-  <div class="sb-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:8px"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Livraisons</div>
+  <div class="sb-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="vertical-align:middle;margin-right:8px"><path d="M4.5 17.5a8 8 0 1 1 15 0"/><line x1="12" y1="13.5" x2="8.8" y2="16" stroke-width="1.6"/><circle cx="12" cy="13.5" r="1.1" fill="currentColor" stroke="none"/></svg>Ton carnet</div>
   <nav class="sb-nav" id="sb-nav">
     <button class="sb-btn active" data-tab="dashboard"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg></span>Tableau de bord</button>
     <button class="sb-btn" data-tab="livraisons"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>Livraisons</button>
@@ -1336,13 +1338,17 @@ function renderDashChart(){
 function rLiv(){
   let filt=[...S.deliveries].sort((a,b)=>parseDate(b.date)-parseDate(a.date));
   if(S.dFilt.plat&&S.dFilt.plat!=='Toutes') filt=filt.filter(d=>d.plat===S.dFilt.plat);
-  if(S.dFilt.dateFrom) filt=filt.filter(d=>d.date>=S.dFilt.dateFrom);
-  if(S.dFilt.dateTo) filt=filt.filter(d=>d.date<=S.dFilt.dateTo);
   const total=filt.length;
   const limit=S.dFilt.showLimit||60;
   const shown=filt.slice(0,limit);
+  const totNet=filt.reduce((s,d)=>s+calcRentabilite(d).net,0);
+  const totBrut=filt.reduce((s,d)=>s+(d.rev||0)+(d.tip||0),0);
+  const moyLiv=total>0?r2(totBrut/total):0;
   document.getElementById('panel-livraisons').innerHTML=`
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:flex-end"><div style="flex:1;min-width:130px"><label class="fl">Du</label><input type="date" id="filt-date-from" value="${S.dFilt.dateFrom}" class="fi" style="font-size:16px;min-width:130px;padding:10px 8px;-webkit-appearance:none;appearance:none"></div><div style="flex:1;min-width:130px"><label class="fl">Au</label><input type="date" id="filt-date-to" value="${S.dFilt.dateTo}" class="fi" style="font-size:16px;min-width:130px;padding:10px 8px;-webkit-appearance:none;appearance:none"></div><button class="btn btn-s btn-sm" data-action="filt-date-reset" style="flex-shrink:0;align-self:flex-end;white-space:nowrap">Réinitialiser</button></div>
+    <div class="grid2" style="margin-bottom:14px">
+      <div class="scard"><div class="slabel">Total affiché</div><div class="sval b">${$f(totBrut)}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${total} livraison${total!==1?'s':''}</div></div>
+      <div class="scard"><div class="slabel">Moyenne / livraison</div><div class="sval">${$f(moyLiv)}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">net cumulé : ${$f(totNet)}</div></div>
+    </div>
     ${(()=>{
       if(filt.length===0) return '<div class="empty"><div class="empty-ico" style="font-size:0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><p>Aucune livraison.<br>Appuie sur + pour en ajouter une.</p></div>';
       const MOIS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -1663,9 +1669,12 @@ function rFisc(){
   const histBanner=S.fiscal.histMode&&S.fiscal.histSnap?`<div class="alert alert-i" style="margin-bottom:12px;display:flex;align-items:center;gap:10px"><em style="flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></em><p style="flex:1;margin:0">Mode historique — ${MONTH_NAMES[(S.fiscal.histSnap.mois||1)-1]} ${S.fiscal.histSnap.annee}</p><button class="btn btn-xs btn-s" id="hist-back">Retour</button></div>`:'';
   const{isFallback,fallbackYear}=getTaxTable(S.cfg.year);
   const fallbackBanner=!S.fiscal.histMode&&isFallback?`<div class="alert alert-w" style="margin-bottom:12px"><em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></em><p>Aucune table fiscale pour ${S.cfg.year} — les calculs utilisent les paramètres ${fallbackYear} (à mettre à jour dans le code).</p></div>`:'';
-  const snapSel=S.fiscal.snapshots.length>0?`<select class="fs" id="snap-nav-sel" style="flex:1;min-width:0;font-size:13px;padding:8px 14px"><option value="">📅 Historique</option>${S.fiscal.snapshots.map(s=>`<option value="${s.annee}-${s.mois}"${S.fiscal.histMode&&S.fiscal.histSnap&&S.fiscal.histSnap.annee===s.annee&&S.fiscal.histSnap.mois===s.mois?' selected':''}>${MONTH_NAMES[(s.mois||1)-1]} ${s.annee}</option>`).join('')}</select>`:'';
-  const saveBtn=!S.fiscal.histMode?`<button class="btn btn-s btn-sm" id="save-snap-btn">Sauvegarder ce mois</button>`:'';
-  const topBar=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">${snapSel}${saveBtn}<button class="btn btn-s btn-sm" id="fiscal-excel-btn">📊 Excel</button><button class="btn btn-s btn-sm" id="fiscal-print-btn">🖨 PDF</button></div>`;
+  const snapSel=S.fiscal.snapshots.length>0?`<select class="fs" id="snap-nav-sel" style="width:100%;font-size:13px;padding:10px 14px;margin-bottom:8px"><option value="">📅 Historique</option>${S.fiscal.snapshots.map(s=>`<option value="${s.annee}-${s.mois}"${S.fiscal.histMode&&S.fiscal.histSnap&&S.fiscal.histSnap.annee===s.annee&&S.fiscal.histSnap.mois===s.mois?' selected':''}>${MONTH_NAMES[(s.mois||1)-1]} ${s.annee}</option>`).join('')}</select>`:'';
+  const _iSave='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
+  const _iExcel='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8l8 8M16 8l-8 8"/></svg>';
+  const _iPdf='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>';
+  const saveBtn=!S.fiscal.histMode?`<button class="btn btn-s btn-sm" id="save-snap-btn" style="flex:1;min-width:0">${_iSave}<span>Sauvegarder</span></button>`:'';
+  const topBar=`<div style="margin-bottom:14px">${snapSel}<div style="display:flex;gap:8px">${saveBtn}<button class="btn btn-s btn-sm" id="fiscal-excel-btn" style="flex:1;min-width:0">${_iExcel}<span>Excel</span></button><button class="btn btn-s btn-sm" id="fiscal-print-btn" style="flex:1;min-width:0">${_iPdf}<span>PDF</span></button></div></div>`;
   const subtabs=!S.fiscal.histMode?`<div class="subtabs"><button class="stab${S.fsub==='revenus'?' active':''}" data-fsub="revenus">Revenus</button><button class="stab${S.fsub==='deductions'?' active':''}" data-fsub="deductions">Déductions</button><button class="stab${S.fsub==='vehicule'?' active':''}" data-fsub="vehicule">Véhicule</button></div>`:'';
   document.getElementById('panel-fiscal').innerHTML=`${histBanner}${fallbackBanner}${topBar}${subtabs}<div id="fsub-content"></div>`;
   rFsub();
@@ -1779,7 +1788,20 @@ function dashToggle(sec){
 }
 function livCyclePeriode(){
   _livPeriode=_livPeriode==='semaine'?'mois':_livPeriode==='mois'?'annee':'semaine';
-  rDash();
+  const card=document.getElementById('liv-periode-card');
+  if(!card)return;
+  const now=new Date();
+  const wkStart=new Date(now);wkStart.setDate(now.getDate()-now.getDay());wkStart.setHours(0,0,0,0);
+  const moStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const wk=S.deliveries.filter(d=>parseDate(d.date)>=wkStart);
+  const mo=S.deliveries.filter(d=>parseDate(d.date)>=moStart);
+  const count=_livPeriode==='semaine'?wk.length:_livPeriode==='mois'?mo.length:S.deliveries.length;
+  const label=_livPeriode==='semaine'?'Cette semaine':_livPeriode==='mois'?'Ce mois':'Cumulé '+S.cfg.year;
+  card.innerHTML=`
+    <div class="slabel">${label}</div>
+    <div class="sval b">${count}</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:2px">livraison${count!==1?'s':''} · toucher pour changer</div>
+  `;
 }
 
 function rCalculette(){
@@ -1788,7 +1810,8 @@ function rCalculette(){
   const{kwhMoyen,recharges}=calcKwhMoyen();
   const coutKmElec=calcCoutKmVE();
   const veh=calcCoutKmVehicule();
-  const vehSourceLabel=veh.source==='reel'?`réel (${veh.kmProYr.toFixed(0)} km pro, ${veh.moisEcoules.toFixed(1)} mois)`:`estimation VE (${veh.kmProYr.toFixed(0)} km / ${veh.moisEcoules.toFixed(1)} mois — besoin d'au moins 50 km et 3 mois de données)`;
+  const vehSourceLabel=veh.source==='reel'?`Réel — ${veh.kmProYr.toFixed(0)} km pro sur ${veh.moisEcoules.toFixed(1)} mois`:`Estimation VE — ${veh.kmProYr.toFixed(0)} km sur ${veh.moisEcoules.toFixed(1)} mois (besoin d'au moins 50 km et 3 mois de données)`;
+  const coutTotalKm=coutKmElec+veh.coutKm;
 
   document.getElementById('panel-calculette').innerHTML=`
     <div class="stitle">Évaluation de commande</div>
@@ -1804,7 +1827,7 @@ function rCalculette(){
           <input type="number" inputmode="decimal" class="fi" id="calc-km-livraison" step="0.1" min="0" placeholder="0.0" style="font-size:16px" oninput="evalCommande()">
         </div>
         <div class="fg" style="flex:1">
-          <label class="fl">Km aller pour rejoindre <span style="font-size:11px;color:var(--text2)">(optionnel)</span></label>
+          <label class="fl">Km aller <span style="font-size:11px;color:var(--text2)">(optionnel)</span></label>
           <input type="number" inputmode="decimal" class="fi" id="calc-km-aller" step="0.1" min="0" placeholder="0.0" style="font-size:16px" oninput="evalCommande()">
         </div>
       </div>
@@ -1813,17 +1836,38 @@ function rCalculette(){
     <div id="calc-result" style="display:none"></div>
 
     <div class="card" style="margin-top:12px;background:var(--card2)">
-      <div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;margin-bottom:8px">Paramètres de calcul</div>
-      <table style="width:100%;font-size:13px">
-        <tr><td style="color:var(--text2);padding:4px 0">Consommation VE</td><td style="text-align:right;font-weight:600">${conso} kWh/100km</td></tr>
-        <tr><td style="color:var(--text2);padding:4px 0">Coût/kWh moyen réel</td><td style="text-align:right;font-weight:600">${kwhMoyen.toFixed(3)} $ <span style="font-size:10px;color:var(--text2)">(${recharges.length} recharges)</span></td></tr>
-        <tr><td style="color:var(--text2);padding:4px 0">Coût électricité/km</td><td style="text-align:right;font-weight:600">${coutKmElec.toFixed(4)} $/km</td></tr>
-        <tr><td style="color:var(--text2);padding:4px 0">Frais véhicule/km <span style="font-size:10px">(${vehSourceLabel})</span></td><td style="text-align:right;font-weight:600">${veh.coutKm.toFixed(4)} $/km</td></tr>
-        <tr><td style="color:var(--text2);padding:4px 0;font-weight:700">Coût réel total/km</td><td style="text-align:right;font-weight:700">${(coutKmElec+veh.coutKm).toFixed(4)} $/km</td></tr>
-        <tr><td style="color:var(--text2);padding:4px 0">Seuil rentable</td><td style="text-align:right;font-weight:600">${$f(seuil)} net min.</td></tr>
-      </table>
-      <div style="font-size:11px;color:var(--text2);margin-top:10px">
-        ⚙️ Modifiables dans <a href="#" onclick="openM('m-settings');return false;" style="color:var(--accent)">Paramètres</a>
+      <div style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Paramètres de calcul</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+          <span style="font-size:13px;color:var(--text2)">Consommation VE</span>
+          <span style="font-family:var(--mono);font-size:13px;font-weight:700;white-space:nowrap">${conso} kWh/100km</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+          <span style="font-size:13px;color:var(--text2)">Coût/kWh moyen réel</span>
+          <span style="font-family:var(--mono);font-size:13px;font-weight:700;white-space:nowrap">${kwhMoyen.toFixed(3)} $</span>
+        </div>
+        <div style="font-size:10.5px;color:var(--text3);margin-top:-6px">${recharges.length} recharge${recharges.length!==1?'s':''} enregistrée${recharges.length!==1?'s':''}</div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+          <span style="font-size:13px;color:var(--text2)">Coût électricité / km</span>
+          <span style="font-family:var(--mono);font-size:13px;font-weight:700;white-space:nowrap">${coutKmElec.toFixed(4)} $/km</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+          <span style="font-size:13px;color:var(--text2)">Frais véhicule / km</span>
+          <span style="font-family:var(--mono);font-size:13px;font-weight:700;white-space:nowrap">${veh.coutKm.toFixed(4)} $/km</span>
+        </div>
+        <div style="font-size:10.5px;color:var(--text3);margin-top:-6px">${vehSourceLabel}</div>
+        <div class="div" style="margin:2px 0"></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+          <span style="font-size:13px;font-weight:700">Coût réel total / km</span>
+          <span style="font-family:var(--mono);font-size:14px;font-weight:800;white-space:nowrap">${coutTotalKm.toFixed(4)} $/km</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+          <span style="font-size:13px;color:var(--text2)">Seuil rentable</span>
+          <span style="font-family:var(--mono);font-size:13px;font-weight:700;white-space:nowrap">${$f(seuil)} net min.</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:14px">
+        Modifiables dans <a href="#" onclick="openM('m-settings');return false;" style="color:var(--accent-ink)">Paramètres</a>
       </div>
     </div>
 
@@ -1855,45 +1899,47 @@ function evalCommande(){
 
   el.style.display='block';
   el.innerHTML=`
-    <div style="border-radius:14px;border:2px solid ${couleur};padding:16px;background:${couleur}15;margin-bottom:12px;text-align:center">
-      <div style="font-size:28px;font-weight:800;color:${couleur};letter-spacing:-0.5px">${label}</div>
-      <div style="font-size:13px;color:var(--text2);margin-top:4px">${net>=seuil?'Revenu net de '+$f(net):net<0?'Perte de '+$f(Math.abs(net)):labelSub}</div>
+    <div style="border-radius:18px;border:2px solid ${couleur};padding:18px;background:${couleur}15;margin-bottom:12px;text-align:center">
+      <div style="font-size:26px;font-weight:800;color:${couleur};letter-spacing:-0.5px">${label}</div>
+      <div style="font-family:var(--mono);font-size:14px;color:var(--text2);margin-top:6px">${net>=seuil?'Revenu net de '+$f(net):net<0?'Perte de '+$f(Math.abs(net)):labelSub}</div>
     </div>
     <div class="card">
-      <table style="width:100%;border-collapse:collapse;font-size:14px">
-        <tr style="border-bottom:1px solid var(--div)">
-          <td style="padding:8px 4px;color:var(--text2)">Revenu proposé</td>
-          <td style="padding:8px 4px;text-align:right;font-weight:600">${$f(rev)}</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--div)">
-          <td style="padding:8px 4px;color:var(--text2)">Km livraison</td>
-          <td style="padding:8px 4px;text-align:right">${kmLiv} km</td>
-        </tr>
-        ${kmAller>0?`<tr style="border-bottom:1px solid var(--div)">
-          <td style="padding:8px 4px;color:var(--text2)">Km aller</td>
-          <td style="padding:8px 4px;text-align:right">${kmAller} km</td>
-        </tr>`:''}
-        <tr style="border-bottom:1px solid var(--div)">
-          <td style="padding:8px 4px;color:var(--text2)">Km totaux</td>
-          <td style="padding:8px 4px;text-align:right;font-weight:600">${kmTotal} km</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--div)">
-          <td style="padding:8px 4px;color:var(--text2)">Coût électricité</td>
-          <td style="padding:8px 4px;text-align:right;color:var(--err)">−${$f(coutElecTotal)}</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--div)">
-          <td style="padding:8px 4px;color:var(--text2)">Frais véhicule${vehSourceTag}</td>
-          <td style="padding:8px 4px;text-align:right;color:var(--err)">−${$f(coutVehTotal)}</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--div)">
-          <td style="padding:8px 4px;color:var(--text2)">Coût total</td>
-          <td style="padding:8px 4px;text-align:right;color:var(--err);font-weight:600">−${$f(coutTotal)}</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 4px;font-weight:700">Revenu net</td>
-          <td style="padding:8px 4px;text-align:right;font-weight:700;color:${net>=0?'var(--ok)':'var(--err)'}">${$f(net)}</td>
-        </tr>
-      </table>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="display:flex;justify-content:space-between;gap:12px">
+          <span style="font-size:13px;color:var(--text2)">Revenu proposé</span>
+          <span style="font-family:var(--mono);font-size:13px;font-weight:700">${$f(rev)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px">
+          <span style="font-size:13px;color:var(--text2)">Km livraison</span>
+          <span style="font-family:var(--mono);font-size:13px">${kmLiv} km</span>
+        </div>
+        ${kmAller>0?`<div style="display:flex;justify-content:space-between;gap:12px">
+          <span style="font-size:13px;color:var(--text2)">Km aller</span>
+          <span style="font-family:var(--mono);font-size:13px">${kmAller} km</span>
+        </div>`:''}
+        <div style="display:flex;justify-content:space-between;gap:12px">
+          <span style="font-size:13px;color:var(--text2)">Km totaux</span>
+          <span style="font-family:var(--mono);font-size:13px;font-weight:700">${kmTotal} km</span>
+        </div>
+        <div class="div" style="margin:2px 0"></div>
+        <div style="display:flex;justify-content:space-between;gap:12px">
+          <span style="font-size:13px;color:var(--text2)">Coût électricité</span>
+          <span style="font-family:var(--mono);font-size:13px;color:var(--err)">−${$f(coutElecTotal)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px">
+          <span style="font-size:13px;color:var(--text2)">Frais véhicule${vehSourceTag}</span>
+          <span style="font-family:var(--mono);font-size:13px;color:var(--err)">−${$f(coutVehTotal)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px">
+          <span style="font-size:13px;color:var(--text2);font-weight:700">Coût total</span>
+          <span style="font-family:var(--mono);font-size:13px;color:var(--err);font-weight:700">−${$f(coutTotal)}</span>
+        </div>
+        <div class="div" style="margin:2px 0"></div>
+        <div style="display:flex;justify-content:space-between;gap:12px">
+          <span style="font-size:14px;font-weight:700">Revenu net</span>
+          <span style="font-family:var(--mono);font-size:15px;font-weight:800;color:${net>=0?'var(--ok)':'var(--err)'}">${$f(net)}</span>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -2220,7 +2266,6 @@ function initEvents(){
       else if(a==='edit-liv')openLivModal(lBtn.dataset.id);
       else if(a==='del-liv')delLiv(lBtn.dataset.id);
       else if(a==='filt-plat'){S.dFilt.plat=lBtn.dataset.val;S.dFilt.showLimit=60;rLiv();}
-      else if(a==='filt-date-reset'){S.dFilt.dateFrom='';S.dFilt.dateTo='';S.dFilt.showLimit=60;rLiv();}
       else if(a==='liv-show-more'){S.dFilt.showLimit=(S.dFilt.showLimit||60)+60;rLiv();}
       return;}
 
@@ -2324,8 +2369,6 @@ function initEvents(){
   document.addEventListener('change',e=>{
     if(e.target.id==='dep-cat'){updateDepCat();return;}
     if(e.target.id==='dep-freq'){updateDepCat();return;}
-    if(e.target.id==='filt-date-from'){S.dFilt.dateFrom=e.target.value;S.dFilt.showLimit=60;rLiv();return;}
-    if(e.target.id==='filt-date-to'){S.dFilt.dateTo=e.target.value;S.dFilt.showLimit=60;rLiv();return;}
     if(e.target.id==='snap-nav-sel'){
       const val=e.target.value;
       if(!val){S.fiscal.histMode=false;S.fiscal.histSnap=null;rFisc();return;}
@@ -2416,20 +2459,36 @@ function generateFallbackPWAAssets(){
       const g=ctx.createLinearGradient(0,0,0,size);
       g.addColorStop(0,'#F4B400');g.addColorStop(1,'#B5762B');
       ctx.fillStyle=g;ctx.fill();
-      const pad=size*0.175;
+      // Odomètre stylisé : anneau de jauge + aiguille + moyeu, sur grille 24x24
+      const pad=size*0.19;
       const s=(size-pad*2)/24;
       ctx.save();ctx.translate(pad,pad);ctx.scale(s,s);
-      ctx.fillStyle='rgba(255,255,255,0.95)';
-      ctx.beginPath();ctx.moveTo(2,4);ctx.lineTo(14,4);ctx.quadraticCurveTo(15,4,15,5);ctx.lineTo(15,16);ctx.lineTo(2,16);ctx.quadraticCurveTo(1,16,1,15);ctx.lineTo(1,5);ctx.quadraticCurveTo(1,4,2,4);ctx.closePath();ctx.fill();
-      ctx.beginPath();ctx.moveTo(16,9);ctx.lineTo(19.5,9);ctx.lineTo(23,12.5);ctx.lineTo(23,16);ctx.lineTo(16,16);ctx.closePath();ctx.fill();
-      ctx.fillStyle='rgba(74,54,0,0.8)';
-      ctx.beginPath();ctx.rect(1,15.5,22,2);ctx.fill();
-      ctx.fillStyle='rgba(255,255,255,0.95)';
-      ctx.beginPath();ctx.arc(5.5,18.5,2.5,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.arc(18.5,18.5,2.5,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='rgba(74,54,0,0.9)';
-      ctx.beginPath();ctx.arc(5.5,18.5,0.8,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.arc(18.5,18.5,0.8,0,Math.PI*2);ctx.fill();
+      const cx=12, cy=12.5, rOuter=9.4, rInner=6.7;
+      // Piste de jauge (anneau translucide, ouvert en bas comme un cadran de compteur)
+      ctx.lineCap='round';
+      ctx.strokeStyle='rgba(255,255,255,0.30)';
+      ctx.lineWidth=rOuter-rInner;
+      ctx.beginPath();
+      ctx.arc(cx,cy,(rOuter+rInner)/2,Math.PI*0.78,Math.PI*2.22);
+      ctx.stroke();
+      // Portion remplie de la jauge (blanc plein, ~70%)
+      ctx.strokeStyle='rgba(255,255,255,0.96)';
+      ctx.beginPath();
+      ctx.arc(cx,cy,(rOuter+rInner)/2,Math.PI*0.78,Math.PI*1.78);
+      ctx.stroke();
+      // Aiguille
+      ctx.lineCap='round';
+      ctx.strokeStyle='rgba(74,54,0,0.92)';
+      ctx.lineWidth=1.6;
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      ctx.lineTo(cx+Math.cos(Math.PI*1.15)*rInner*0.82,cy+Math.sin(Math.PI*1.15)*rInner*0.82);
+      ctx.stroke();
+      // Moyeu central
+      ctx.fillStyle='rgba(255,255,255,0.96)';
+      ctx.beginPath();ctx.arc(cx,cy,1.7,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(74,54,0,0.92)';
+      ctx.beginPath();ctx.arc(cx,cy,0.7,0,Math.PI*2);ctx.fill();
       ctx.restore();
       return c.toDataURL('image/png');
     }catch(e){return null;}
@@ -2442,7 +2501,7 @@ function generateFallbackPWAAssets(){
   }
   if(url192&&url512){
     try{
-      const manifest={name:'Livraisons Tracker',short_name:'Livraisons',start_url:'.',display:'standalone',background_color:'#EFEAE0',theme_color:'#F4B400',icons:[{src:url192,sizes:'192x192',type:'image/png'},{src:url512,sizes:'512x512',type:'image/png'}]};
+      const manifest={name:'Livraisons Tracker',short_name:'Ton carnet',start_url:'.',display:'standalone',background_color:'#EFEAE0',theme_color:'#F4B400',icons:[{src:url192,sizes:'192x192',type:'image/png'},{src:url512,sizes:'512x512',type:'image/png'}]};
       const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
       const ml=document.getElementById('pwa-manifest-link');
       if(ml)ml.href=URL.createObjectURL(blob);
