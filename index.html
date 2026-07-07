@@ -7,7 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Ton carnet">
-<link rel="apple-touch-icon" id="pwa-icon-link" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" id="favicon-link" href="favicon.png">
+<link rel="apple-touch-icon" id="pwa-icon-link" href="apple-touch-icon.png">
 <link rel="manifest" id="pwa-manifest-link" href="manifest.json">
 <title>Livraisons Tracker</title>
 <style>
@@ -2434,11 +2435,11 @@ function initEvents(){
 
 // ── PWA ICON ───────────────────────────────────────────────────────────────────
 function initPWAIcon(){
-  // Les fichiers statiques manifest.json / icon-192.png / icon-512.png sont la source
-  // principale (voir <link> dans le <head>). Cette fonction ne sert que de FALLBACK :
+  // Les fichiers statiques manifest.json / apple-touch-icon.png / icon-512.png / favicon.png sont la
+  // source principale (voir <link> dans le <head>). Cette fonction ne sert que de FALLBACK :
   // si ces fichiers n'ont pas été déposés à côté de index.html sur l'hébergement (ex: GitHub Pages),
   // on génère une icône/manifest en mémoire pour que l'app reste installable quand même.
-  fetch('icon-192.png',{method:'HEAD'}).then(r=>{
+  fetch('apple-touch-icon.png',{method:'HEAD'}).then(r=>{
     if(r.ok)return; // fichier statique présent, rien à faire
     generateFallbackPWAAssets();
   }).catch(()=>{
@@ -2498,6 +2499,8 @@ function generateFallbackPWAAssets(){
   if(url192){
     const link=document.getElementById('pwa-icon-link');
     if(link){link.href=url192;link.setAttribute('sizes','192x192');}
+    const fav=document.getElementById('favicon-link');
+    if(fav)fav.href=url192;
   }
   if(url192&&url512){
     try{
