@@ -641,8 +641,24 @@ async function sbLoad(){
     ]);
     if(l.error)throw l.error;
     if(d.error)throw d.error;
-    S.deliveries=l.data.map(dFromDB);
-    S.expenses=d.data.map(eFromDB);
+    // Merge protecteur : ne jamais écraser silencieusement une entrée locale absente à
+    // distance (ex: pas encore synchronisée suite à une coupure). On part du distant comme
+    // base, puis on réinjecte toute entrée locale dont l'id n'existe pas côté serveur, et on
+    // la remet en file pour retenter l'envoi. Ça évite qu'un serveur temporairement vide ou
+    // incomplet efface des saisies faites hors-ligne ou pendant un incident réseau/hébergement.
+    const remoteDeliveries=l.data.map(dFromDB);
+    const remoteExpenses=d.data.map(eFromDB);
+    const remoteDIds=new Set(remoteDeliveries.map(x=>x.id));
+    const remoteEIds=new Set(remoteExpenses.map(x=>x.id));
+    const orphanDeliveries=(S.deliveries||[]).filter(x=>!remoteDIds.has(x.id));
+    const orphanExpenses=(S.expenses||[]).filter(x=>!remoteEIds.has(x.id));
+    if(orphanDeliveries.length>0||orphanExpenses.length>0){
+      orphanDeliveries.forEach(x=>queueSyncOp({type:'upsert',table:'livraisons',row:dToDB(x)}));
+      orphanExpenses.forEach(x=>queueSyncOp({type:'upsert',table:'depenses',row:eToDB(x)}));
+      console.warn('[SB load] entrées locales absentes du serveur, remises en file de synchro:',orphanDeliveries.length,'livraisons,',orphanExpenses.length,'dépenses');
+    }
+    S.deliveries=[...orphanDeliveries,...remoteDeliveries];
+    S.expenses=[...orphanExpenses,...remoteExpenses];
     if(p.data){
       p.data.forEach(row=>{
         if(row.cle==='odometer_start') S.cfg.vehicleKmJan=parseFloat(row.valeur)||0;
@@ -651,7 +667,9 @@ async function sbLoad(){
       });
     }
     refreshProRatio();
-    saveLS(); connDot(true); return true;
+    saveLS(); connDot(true);
+    if(orphanDeliveries.length>0||orphanExpenses.length>0) processSyncQueue();
+    return true;
   }catch(e){console.error('[SB load]',e.message); connDot(false); return false;}
 }
 
